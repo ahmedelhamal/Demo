@@ -1,0 +1,16 @@
+
+android {
+    signingConfigs {
+        akrelease {
+            storeFile file('ak.keystore')
+            storePassword 'akstudents'
+            keyAlias 'ak'
+            keyPassword 'akstudents'
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.akrelease
+        }
+    }
+}

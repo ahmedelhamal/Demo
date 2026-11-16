@@ -1,0 +1,8 @@
+{
+  "appId": "com.abdokhalifa.students",
+  "appName": "AK",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}
