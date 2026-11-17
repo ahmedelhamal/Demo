@@ -11349,6 +11349,109 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
   sched();
 })();
 </script>
+<style id="akc-css">
+/* ===== حركة الإيد اللي بتشد الصفحة زي القماش (انتقال بين التابات - معلم وطالب) ===== */
+#akCloth{position:fixed;inset:0;z-index:8;pointer-events:none;display:none;will-change:transform;filter:drop-shadow(0 18px 18px rgba(25,12,45,.24))}
+#akCloth .akc-sheet{position:absolute;inset:0;background-color:var(--bg);background-image:radial-gradient(120% 55% at 100% 0%,color-mix(in srgb,var(--pr) 11%,transparent),transparent 62%),radial-gradient(90% 40% at 0% 100%,color-mix(in srgb,var(--pr) 7%,transparent),transparent 70%);will-change:clip-path}
+#akCloth .akc-art{position:absolute;top:0;left:50%;width:min(100%,480px);aspect-ratio:400/600;height:auto;transform:translateX(-50%);overflow:visible}
+#akCloth .akc-h{transform-box:fill-box;transform-origin:50% 100%}
+#akCloth .akc-w{transform-box:view-box;transform-origin:200px 160px}
+html.akc-on #app.v5-go>*{animation:none!important}
+</style>
+<script id="akc-js">
+/* انتقال القماش: إيد بتنزل من فوق، تمسك الصفحة، والقماش بيتلم ويطلع لفوق ويكشف الصفحة الجديدة.
+   بصري فقط (pointer-events:none). بيتقفل لو الجهاز على reduce-motion، أو localStorage.cloth="0". */
+(function(){
+  var app=document.getElementById("app"),nav=document.getElementById("nav"),hd=document.getElementById("hd");
+  if(!app||!nav||!document.documentElement.animate)return;
+  var rm=window.matchMedia?matchMedia("(prefers-reduced-motion:reduce)"):{matches:false};
+  var el=null,anims=[],tmr=0,lastKey=null,raf=0,D=1150;
+  var P0="polygon(0% 0%,100% 0%,100% 100%,50% 100%,0% 100%)",
+      P1="polygon(0% 0%,100% 0%,96% 92%,50% 80%,4% 92%)",
+      P2="polygon(30% 0%,70% 0%,62% 52%,50% 38%,38% 52%)";
+  function disabled(){try{return localStorage.getItem("cloth")==="0"}catch(e){return false}}
+  function wrinkles(){
+    var dk="",lt="",n=20,cx=200,cy=160,i;
+    for(i=0;i<n;i++){
+      var a=i/n*Math.PI*2+(i%2?.07:-.05),L=70+((i*47)%120),r0=36+(i%3)*5,k=(i%2?1:-1)*(10+(i%4)*4);
+      var x0=cx+Math.cos(a)*r0,y0=cy+Math.sin(a)*r0*.85,x1=cx+Math.cos(a)*L,y1=cy+Math.sin(a)*L*1.05;
+      var mx=(x0+x1)/2-Math.sin(a)*k,my=(y0+y1)/2+Math.cos(a)*k;
+      var d="M"+x0.toFixed(1)+" "+y0.toFixed(1)+"Q"+mx.toFixed(1)+" "+my.toFixed(1)+" "+x1.toFixed(1)+" "+y1.toFixed(1);
+      dk+='<path d="'+d+'" stroke-width="'+(7+(i%3)*2)+'"/>';
+      lt+='<path d="'+d+'" transform="translate(2.5 -2)" stroke-width="2.4"/>';
+    }
+    return '<g filter="url(#akcB)" fill="none" stroke="rgba(70,45,100,.15)" stroke-linecap="round">'+dk+'</g>'+
+           '<g fill="none" stroke="rgba(255,255,255,.42)" stroke-linecap="round">'+lt+'</g>';
+  }
+  function build(){
+    if(el)return;
+    el=document.createElement("div");el.id="akCloth";el.setAttribute("aria-hidden","true");
+    el.innerHTML='<div class="akc-sheet"></div>'+
+    '<svg class="akc-art" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg"><defs>'+
+    '<linearGradient id="akcA" x1="0" x2="1"><stop offset="0" stop-color="#E67E9A"/><stop offset=".32" stop-color="#FFC9D5"/><stop offset=".7" stop-color="#F7A5B8"/><stop offset="1" stop-color="#DC708E"/></linearGradient>'+
+    '<radialGradient id="akcF" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="#FFD9E1"/><stop offset=".55" stop-color="#F7A7BA"/><stop offset="1" stop-color="#E07994"/></radialGradient>'+
+    '<filter id="akcB" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>'+
+    '<filter id="akcS" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter></defs>'+
+    '<g class="akc-w"><ellipse cx="200" cy="176" rx="78" ry="34" fill="rgba(60,30,70,.22)" filter="url(#akcS)"/>'+wrinkles()+'</g>'+
+    '<g class="akc-h">'+
+      '<path d="M170 -140H230L228 100Q200 120 172 100Z" fill="url(#akcA)"/>'+
+      '<rect x="181" y="-140" width="9" height="236" rx="4.5" fill="#fff" opacity=".32"/>'+
+      '<rect x="150" y="84" width="100" height="92" rx="38" fill="url(#akcF)"/>'+
+      '<g fill="url(#akcF)" stroke="rgba(150,55,90,.34)" stroke-width="1.2">'+
+        '<rect x="152" y="140" width="24" height="40" rx="12"/><rect x="174" y="144" width="26" height="42" rx="13"/><rect x="199" y="144" width="26" height="42" rx="13"/><rect x="224" y="140" width="24" height="40" rx="12"/>'+
+        '<ellipse cx="147" cy="122" rx="13" ry="24" transform="rotate(-16 147 122)"/></g>'+
+      '<path d="M162 128Q200 142 238 128" stroke="rgba(150,55,90,.26)" stroke-width="2" fill="none" stroke-linecap="round"/>'+
+'<ellipse cx="184" cy="112" rx="14" ry="9" fill="#fff" opacity=".28"/>'+
+    '</g></svg>';
+    document.body.appendChild(el);
+  }
+  function stop(){clearTimeout(tmr);anims.forEach(function(a){try{a.cancel()}catch(e){}});anims=[]}
+  function end(){stop();if(el)el.style.display="none";document.documentElement.classList.remove("akc-on")}
+  function play(){
+    if(rm.matches||disabled()||document.hidden)return;
+    build();stop();
+    var root=document.documentElement,sh=el.querySelector(".akc-sheet"),h=el.querySelector(".akc-h"),w=el.querySelector(".akc-w"),O={duration:D,fill:"both"};
+    root.classList.add("akc-on");el.style.display="block";
+    var main=el.animate([
+      {transform:"translateY(0)",offset:0},
+      {transform:"translateY(0)",offset:.36,easing:"cubic-bezier(.3,0,.4,1)"},
+      {transform:"translateY(16px)",offset:.46,easing:"cubic-bezier(.5,0,.3,1)"},
+      {transform:"translateY(-108%)",offset:1}],O);
+    anims=[main,
+      sh.animate([{clipPath:P0,offset:0},{clipPath:P0,offset:.46},{clipPath:P1,offset:.75},{clipPath:P2,offset:1}],O),
+      h.animate([
+        {transform:"translateY(-300px) scale(1)",offset:0,easing:"cubic-bezier(.2,.8,.3,1)"},
+        {transform:"translateY(0) scale(1)",offset:.26},
+        {transform:"translateY(0) scale(1.06,.94)",offset:.31},
+        {transform:"translateY(0) scale(.94,1.04)",offset:.38},
+        {transform:"translateY(0) scale(1)",offset:.46},
+        {transform:"translateY(0) scale(1)",offset:1}],O),
+      w.animate([
+        {opacity:0,transform:"scale(.6)",offset:0},
+        {opacity:0,transform:"scale(.6)",offset:.28},
+        {opacity:1,transform:"scale(1)",offset:.46},
+        {opacity:1,transform:"scale(1)",offset:.8},
+        {opacity:0,transform:"scale(1)",offset:1}],O)];
+    main.onfinish=end;
+    tmr=setTimeout(end,D+400);
+  }
+  function check(){
+    raf=0;
+    var b=nav.querySelector("button.on"),g=hd&&hd.querySelector(".gear.on");
+    var key=(b?b.getAttribute("data-k"):"-")+"|"+(g?1:0);
+    if(key!==lastKey){
+      if(lastKey!==null&&nav.children.length&&!document.getElementById("akSplash"))play();
+      lastKey=key;
+    }
+  }
+  function sched(){if(!raf)raf=requestAnimationFrame(check)}
+  new MutationObserver(sched).observe(nav,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
+  if(hd)new MutationObserver(sched).observe(hd,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
+  window.AKCloth={play:play};
+  sched();
+})();
+</script>
+
 
 <style id="navhide-css">
 nav#nav{transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .3s ease}
