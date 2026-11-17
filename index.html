@@ -11544,12 +11544,12 @@ window.goBack=function(){if(window.AU&&AU.user&&tab=="set"&&SP=="learn"&&LRN){if
 })();
 </script>
 <script id="home-icons-v1">
-/* ===== الرئيسية: أيقونات مقفولة، والقايمة تفتح بالضغط =====
-   بنقرأ كروت اللوحة اللي homeView بيطلّعها (جدول الضرب / أشطر كتكوت / الحساب الذهني / الحصة / الواجبات)
-   ونعرض مكانها صف أيقونات بنفس التصميم والحركة. الضغط على أيقونة بيفتح الكارت نفسه في نافذة ثابتة.
-   تقفل: ضغطة بره، ضغطة على نفس الأيقونة، Esc، أو الخروج من الرئيسية. أول ما تدخل كل حاجة مقفولة. */
+/* ===== الرئيسية: أيقونات مقفولة، والقايمة بتنفتح جوه الصفحة تحت الصف =====
+   مفيش نافذة فوق الشاشة: الكارت بيتحط في سياق الصفحة، فالصفحة بتتحرك عادي،
+   وعرض التفاصيل بيطوّل الصفحة، ومفيش تداخل مع الشريط السفلي.
+   تقفل: ضغطة بره الكارت، ضغطة على نفس الأيقونة، Esc، أو الخروج من الرئيسية. */
 (function(){
- var DP=window.DP={k:-1,cards:[]},M='<div class="gmd dsh run">';
+ var DP=window.DP={k:-1,cards:[],fresh:false},M='<div class="gmd dsh run">';
  var st=document.createElement("style");
  st.textContent=[
  ".dpw{display:flex;gap:10px;justify-content:space-between;margin:0 0 14px}",
@@ -11559,46 +11559,29 @@ window.goBack=function(){if(window.AU&&AU.user&&tab=="set"&&SP=="learn"&&LRN){if
  ".dpi .gmsym{width:38px;height:38px;border-radius:13px;font-size:calc(19px*var(--fs,1))}",
  ".dpi .gmsym .ckic{width:26px;height:26px}",
  ".dpi .gmsym svg.dsi{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}",
- "#dpo{position:fixed;inset:0;z-index:45}",
- "#dpo .dpb{position:absolute;inset:0;background:rgba(20,16,40,.34);touch-action:none}",
- "#dpo .dpp{position:fixed;left:12px;right:12px;margin:0 auto;max-width:440px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border-radius:30px;transform-origin:50% 0;animation:dppin .26s cubic-bezier(.2,1.1,.4,1) both}",
- "#dpo .dpp .gmd{animation:none;margin-bottom:0;max-width:none}",
- "@keyframes dppin{from{opacity:0;transform:translateY(-10px) scale(.94)}to{opacity:1;transform:none}}",
- "@media (prefers-reduced-motion:reduce){#dpo .dpp{animation:none}}"
+ ".dpc .gmd{animation:none}",
+ ".dpc.dpn{animation:dppin .26s cubic-bezier(.2,1.1,.4,1) both}",
+ "@keyframes dppin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}",
+ "@media (prefers-reduced-motion:reduce){.dpc.dpn{animation:none}}"
  ].join("\n");
  document.head.appendChild(st);
- function meta(h){var d=document.createElement("div");d.innerHTML=h;var s=d.querySelector(".gmsym"),b=d.querySelector(".gmt b");return{sym:s?s.innerHTML:"",t:b?b.textContent:""}}
- function strip(){return '<div class="dpw" id="dpw">'+DP.cards.map(function(h,i){var m=meta(h);return '<button type="button" class="dpi run'+(DP.k===i?' on':'')+'" data-k="'+i+'" onclick="dpTap('+i+')" aria-label="'+m.t.replace(/"/g,"")+'" title="'+m.t.replace(/"/g,"")+'"><span class="gmsym">'+m.sym+'</span></button>'}).join("")+'</div>'}
+ function meta(h){var d=document.createElement("div");d.innerHTML=h;var s=d.querySelector(".gmsym"),b=d.querySelector(".gmt b");return{sym:s?s.innerHTML:"",t:b?b.textContent.replace(/"/g,""):""}}
+ function strip(){return '<div class="dpw" id="dpw">'+DP.cards.map(function(h,i){var m=meta(h);return '<button type="button" class="dpi run'+(DP.k===i?' on':'')+'" data-k="'+i+'" onclick="dpTap('+i+')" aria-label="'+m.t+'" title="'+m.t+'"><span class="gmsym">'+m.sym+'</span></button>'}).join("")+'</div>'}
  var _h=window.homeView;
  window.homeView=function(){var s=_h.apply(this,arguments),i=s.indexOf(M);
   if(i<0){DP.cards=[];return s}
   DP.cards=s.slice(i).split(M).slice(1).map(function(p){return M+p});
-  return s.slice(0,i)+strip()};
- function mark(){[].forEach.call(document.querySelectorAll(".dpi"),function(b){b.classList.toggle("on",+b.getAttribute("data-k")===DP.k)})}
- function place(o){var p=o.querySelector(".dpp"),w=document.getElementById("dpw"),vh=window.innerHeight,top=12,r=w&&w.getBoundingClientRect();
-  if(r&&r.bottom>60&&r.bottom<vh-260)top=r.bottom+10;
-  p.style.top="calc(env(safe-area-inset-top,0px) + "+top+"px)";
-  p.style.maxHeight=Math.max(200,vh-top-24)+"px"}
- function sync(){var o=document.getElementById("dpo"),ok=DP.k>=0&&DP.cards[DP.k]&&window.tab=="home"&&!(window.T3&&T3.v);
-  if(!ok){if(o)o.remove();DP.k=-1;mark();return}
-  var fresh=false;
-  if(!o){fresh=true;o=document.createElement("div");o.id="dpo";o.innerHTML='<div class="dpb"></div><div class="dpp"></div>';
-   o.querySelector(".dpb").addEventListener("click",function(e){var x=e.clientX,y=e.clientY,hit=-1;
-    [].forEach.call(document.querySelectorAll(".dpi"),function(b){var r=b.getBoundingClientRect();if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)hit=+b.getAttribute("data-k")});
-    if(hit>=0)window.dpTap(hit);else dpClose()});
-   document.body.appendChild(o);place(o)}
-  var p=o.querySelector(".dpp"),sc=p.scrollTop;
-  if(!fresh)p.style.animation="none";
-  p.innerHTML=DP.cards[DP.k];if(sc)p.scrollTop=sc;mark()}
- function dpClose(){DP.k=-1;sync()}
- window.dpTap=function(i){
-  if(DP.k===i){dpClose();return}
-  var o=document.getElementById("dpo");if(o)o.remove();
-  DP.k=i;sync()};
+  if(!DP.cards[DP.k])DP.k=-1;
+  var fr=DP.fresh;DP.fresh=false;
+  return s.slice(0,i)+strip()+(DP.k>=0?'<div class="dpc'+(fr?' dpn':'')+'" id="dpc">'+DP.cards[DP.k]+'</div>':'')};
+ window.dpTap=function(i){DP.k=(DP.k===i)?-1:i;DP.fresh=DP.k>=0;draw()};
+ function dpClose(){if(DP.k>=0){DP.k=-1;draw()}}
  window.dpClose=dpClose;
- document.addEventListener("keydown",function(e){if(e.key=="Escape"&&DP.k>=0)dpClose()});
+ document.addEventListener("keydown",function(e){if(e.key=="Escape")dpClose()});
+ document.addEventListener("click",function(e){if(DP.k<0)return;var t=e.target;if(!t||!t.closest)return;
+  if(t.closest(".dpc")||t.closest(".dpi")||t.closest(".gmo")||t.closest(".mo"))return;dpClose()});
  var _d=window.draw;
- window.draw=function(){var r=_d.apply(this,arguments);try{sync()}catch(e){console.error(e)}return r};
+ window.draw=function(){if(DP.k>=0&&(window.tab!="home"||(window.T3&&T3.v)))DP.k=-1;return _d.apply(this,arguments)};
 })();
 </script>
 
