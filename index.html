@@ -11692,18 +11692,20 @@ html #gmx{right:auto;left:16px;top:calc(env(safe-area-inset-top,0px) + 10px);bor
 html .hav{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 8px);right:16px;border:2px solid rgba(255,255,255,.25);box-shadow:0 8px 18px -6px rgba(0,0,0,.6)}
 
 /* ---- الفاصل المضيء على حافة الـ S ---- */
-html main{position:relative;padding-bottom:150px}
+html main{position:relative}
 html main::before{content:"";position:absolute;left:0;right:0;top:calc(-62px - 8px);height:62px;pointer-events:none;z-index:1;opacity:var(--k-rimop);
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 62' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='b' x='-5%25' y='-30%25' width='110%25' height='160%25'%3E%3CfeGaussianBlur stdDeviation='2.2'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M100 60C88 52 72 50 52 40C32 30 16 8 0 6' fill='none' stroke='%23000' stroke-opacity='.38' stroke-width='5' vector-effect='non-scaling-stroke' filter='url(%23b)' transform='translate(0 2)'/%3E%3Cpath d='M100 60C88 52 72 50 52 40C32 30 16 8 0 6' fill='none' stroke='%23fff' stroke-opacity='.85' stroke-width='1.6' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
 
-/* ---- طبقة الخلفية السفلية (قاعدة الدوك) بحافة منحنية ---- */
-html body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom,0px) + 112px);z-index:8;pointer-events:none;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--k-hd1) 70%,var(--k-hd2)),var(--k-hd2));
-  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0 22C18 4 36 0 54 8C74 17 88 24 100 6V40H0Z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
-          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0 22C18 4 36 0 54 8C74 17 88 24 100 6V40H0Z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
-  transition:opacity .3s,transform .38s}
-html body:has(nav:empty)::after{display:none}
-html body.navhide::after,html body.a4open::after{opacity:0;transform:translateY(40%)}
+/* ---- طبقة الخلفية السفلية 3D: لوح غامق بحافة S مضيئة، والتابات جواه ---- */
+:root{--k-plate:calc(env(safe-area-inset-bottom,0px) + 132px)}
+html body::after,html::after{content:"";position:fixed;left:0;right:0;bottom:0;height:var(--k-plate);pointer-events:none;transition:opacity .3s,transform .38s}
+html body::after{z-index:8;background:linear-gradient(180deg,color-mix(in srgb,var(--k-hd1) 78%,var(--k-hd2)),var(--k-hd2) 70%);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0 20C16 4 36 0 54 8C74 17 88 22 100 6V40H0Z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0 20C16 4 36 0 54 8C74 17 88 22 100 6V40H0Z'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+html::after{z-index:8;opacity:var(--k-rimop);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0 20C16 4 36 0 54 8C74 17 88 22 100 6' fill='none' stroke='%23fff' stroke-opacity='.8' stroke-width='1.6' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+html body:has(nav:empty)::after,html:has(nav:empty)::after{display:none}
+html body.navhide::after,html body.a4open::after,html:has(body.navhide)::after,html:has(body.a4open)::after{opacity:0;transform:translateY(40%)}
 html nav:empty{display:none}
 
 /* ---- الكروت: أسطح بارزة (وجه التطبيق) ---- */
@@ -11744,23 +11746,23 @@ html .dpi{width:88px;height:88px;max-width:none;margin:0 auto;border-radius:32px
 html .dpi:active{box-shadow:var(--k-in)!important}
 html .dpi.on{box-shadow:var(--k-tile),0 0 0 2px var(--k-acc)!important}
 html .dpi::after{content:attr(aria-label);position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);width:112px;text-align:center;font-size:calc(12.5px*var(--fs,1));font-weight:700;line-height:1.3;color:var(--tx);pointer-events:none}
-html .dpi .gmsym{background:transparent!important;box-shadow:none!important;color:var(--k-acc)!important;width:52px;height:52px;font-size:calc(26px*var(--fs,1));animation:none;filter:drop-shadow(0 4px 6px color-mix(in srgb,var(--k-acc) 35%,transparent))}
+html .dpi .gmsym{background:radial-gradient(circle at 50% 55%,color-mix(in srgb,var(--tc,var(--k-acc)) 24%,transparent),transparent 70%)!important;box-shadow:none!important;color:var(--tc,var(--k-acc))!important;width:56px;height:56px;font-size:calc(26px*var(--fs,1));animation:none;filter:drop-shadow(0 6px 8px color-mix(in srgb,var(--tc,var(--k-acc)) 45%,transparent))}
+html .dpi[data-k="0"]{--tc:#F59E0B}html .dpi[data-k="1"]{--tc:#3B82F6}html .dpi[data-k="2"]{--tc:#EC4899}html .dpi[data-k="3"]{--tc:#14B8A6}html .dpi[data-k="4"]{--tc:#8B5CF6}
 html .dpi .gmsym::after{display:none!important}
 html .dpi .gmsym svg{width:38px;height:38px}
 
-/* ---- الدوك السفلي + الزر المركزي ---- */
-html nav{left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);border-radius:34px;padding:10px 10px 8px;overflow:visible;
-  background:linear-gradient(145deg,color-mix(in srgb,var(--k-s1) 88%,transparent),color-mix(in srgb,var(--k-s2) 84%,transparent));
-  -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);border:1px solid var(--k-rim);box-shadow:var(--k-out),0 22px 40px -18px rgba(0,0,0,.5)}
-html nav::before{top:6px;bottom:6px;border-radius:26px;background:linear-gradient(145deg,var(--k-s1),var(--k-s2));
-  box-shadow:var(--k-out-s),0 0 0 1px color-mix(in srgb,var(--k-acc) 28%,transparent),0 10px 22px -10px var(--k-glow)}
-html nav button{color:var(--mu)}
-html nav button.on,html nav button.hv{color:var(--k-acc)}
-html nav button.on i,html nav button.hv i{background:none!important;box-shadow:none!important}
-html nav:has(>button:nth-child(3):last-child) button:nth-child(2) i{width:68px;height:68px;max-width:none;padding:0;margin:-18px 0;position:relative;top:-28px;display:flex;align-items:center;justify-content:center;border-radius:50%;
-  background:linear-gradient(150deg,var(--k-s1),var(--k-s2))!important;color:var(--k-acc);transform:none!important;box-shadow:0 0 0 9px var(--k-bg),var(--k-ctr)!important}
-html nav:has(>button:nth-child(3):last-child) button:nth-child(2) i svg{width:30px;height:30px}
-html nav:has(>button:nth-child(3):last-child) button:nth-child(2) span{margin-top:24px}
+/* ---- التابات: جوّه اللوح الغامق، والتاب النشط زر دائري بارز (من غير ما يطلع بره) ---- */
+html nav{left:0;right:0;bottom:0;border-radius:0;border:0;box-shadow:none;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;overflow:visible;
+  padding:2px 26px calc(env(safe-area-inset-bottom,0px) + 10px)}
+html nav button{color:rgba(255,255,255,.52);padding-top:19px;gap:0}
+html nav button i{height:26px;padding:0;max-width:none;width:100%;display:flex;align-items:center;justify-content:center;background:none!important;box-shadow:none!important;transform:none!important;border-radius:0}
+html nav button span{margin-top:17px;transform:none!important;font-size:calc(12px*var(--fs,1));font-weight:600}
+html nav button.on,html nav button.hv{color:#fff}
+html nav button.on i,html nav button.hv i{color:var(--k-acc2);filter:drop-shadow(0 0 7px var(--k-glow))}
+html nav::before{top:2px;bottom:auto;height:62px;width:62px;margin-left:calc((var(--ni-w,62px) - 62px)/2);border-radius:50%;
+  background:linear-gradient(150deg,color-mix(in srgb,var(--k-hd1) 78%,#fff),var(--k-hd2));
+  box-shadow:0 0 0 1px rgba(255,255,255,.14),0 12px 22px -8px rgba(0,0,0,.65),inset 0 2px 0 rgba(255,255,255,.16),inset 0 -6px 10px rgba(0,0,0,.3),0 0 26px -6px var(--k-glow)}
+html main{padding-bottom:calc(var(--k-plate) + 24px)}
 
 /* ---- معاينة السمة في الإعدادات: طبقتين (خلفية + وجه) ---- */
 html .thsw,html .thsw.au span{background:linear-gradient(160deg,var(--k-hd1),var(--k-hd2)) top/100% 50% no-repeat,var(--k-bg);border:1px solid color-mix(in srgb,var(--tx) 14%,transparent)}
@@ -11770,6 +11772,8 @@ html .thsw u{background:linear-gradient(145deg,var(--k-acc2),var(--k-acc))}
 html .thsw s{background:var(--mu)}
 html .thsw.au span::after{background:var(--k-acc)}
 html .thsw.au span{border:0}
+html .hn{text-align:center;width:100%}
+
 html .hn{text-align:center;width:100%}
 </style>
 </body>
