@@ -11621,5 +11621,112 @@ window.goBack=function(){if(window.AU&&AU.user&&tab=="set"&&SP=="learn"&&LRN){if
 })();
 </script>
 
+<style id="skin-v6">
+/* ============ DESIGN v6 · NEO-GLASS (شكل بصري فقط · نفس منطق التطبيق) ============
+   مرجع التصميم: صورة الموبايل (هيدر كحلي بقوس متموّج + أسطح فاتحة ناعمة + أزرار بارزة + دوك سفلي).
+   كل الألوان في المتغيرات --k-* هنا فقط. */
+:root{
+  --k-bg:var(--bg);--k-acc:var(--pr);--k-acc2:color-mix(in srgb,var(--pr) 70%,#fff);
+  --k-hd1:var(--h1);--k-hd2:var(--h2);
+  --k-s1:color-mix(in srgb,var(--card) 100%,#fff 6%);--k-s2:color-mix(in srgb,var(--card) 88%,#000);
+  --k-rim:rgba(255,255,255,.07);--k-in-bg:color-mix(in srgb,var(--bg) 70%,#000);
+  --k-out:12px 16px 30px -10px rgba(0,0,0,.6),-6px -6px 18px rgba(255,255,255,.035);
+  --k-out-s:6px 8px 16px -6px rgba(0,0,0,.55),-4px -4px 12px rgba(255,255,255,.04);
+  --k-in:inset 3px 4px 10px rgba(0,0,0,.45),inset -2px -2px 8px rgba(255,255,255,.04);
+  --k-glow:color-mix(in srgb,var(--k-acc) 55%,transparent);
+}
+:root[data-pal="brand"],:root:not([data-pal]){
+  --k-bg:#E2E1F2;--k-acc:#544FD0;--k-acc2:#7E79F0;--k-hd1:#37356E;--k-hd2:#110F2A;
+  --k-s1:#F9F8FE;--k-s2:#ECEBF8;--k-rim:rgba(255,255,255,.95);--k-in-bg:#DAD9EC;
+  --k-out:10px 14px 28px -8px rgba(84,76,150,.30),-8px -8px 20px rgba(255,255,255,.95);
+  --k-out-s:6px 8px 16px -6px rgba(84,76,150,.28),-5px -5px 12px rgba(255,255,255,.95);
+  --k-in:inset 3px 4px 9px rgba(84,76,150,.20),inset -3px -3px 8px rgba(255,255,255,.85);
+}
+:root[data-pal="brandn"]{
+  --k-bg:#100E27;--k-acc:#8F89FF;--k-acc2:#B2AEFF;--k-hd1:#2A2858;--k-hd2:#0A091D;
+  --k-s1:#26235C;--k-s2:#171439;--k-rim:rgba(255,255,255,.07);--k-in-bg:#12102F;
+}
+@media (prefers-color-scheme:dark){:root:not([data-pal]){
+  --k-bg:#100E27;--k-acc:#8F89FF;--k-acc2:#B2AEFF;--k-hd1:#2A2858;--k-hd2:#0A091D;
+  --k-s1:#26235C;--k-s2:#171439;--k-rim:rgba(255,255,255,.07);--k-in-bg:#12102F;
+  --k-out:12px 16px 30px -10px rgba(0,0,0,.6),-6px -6px 18px rgba(255,255,255,.035);
+  --k-out-s:6px 8px 16px -6px rgba(0,0,0,.55),-4px -4px 12px rgba(255,255,255,.04);
+  --k-in:inset 3px 4px 10px rgba(0,0,0,.45),inset -2px -2px 8px rgba(255,255,255,.04)}}
+
+html body{background:var(--k-bg);background-image:radial-gradient(90% 38% at 100% 0%,color-mix(in srgb,var(--k-acc) 12%,transparent),transparent 70%),radial-gradient(80% 35% at 0% 100%,color-mix(in srgb,var(--k-acc) 9%,transparent),transparent 70%);background-attachment:fixed}
+
+/* ---------- الهيدر: كحلي + حافة سفلية متموّجة (S) ---------- */
+html header{
+  --k-wave:36px;
+  position:relative;isolation:isolate;margin-bottom:6px;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) 76px calc(var(--k-wave) + 22px) 20px;
+  background:linear-gradient(160deg,var(--k-hd1) 0%,color-mix(in srgb,var(--k-hd1) 40%,var(--k-hd2)) 55%,var(--k-hd2) 100%);
+  border-radius:0;box-shadow:none;
+  -webkit-mask:linear-gradient(#000,#000) top/100% calc(100% - var(--k-wave)) no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' preserveAspectRatio='none'%3E%3Cpath d='M0 0H100V6C84 30 64 36 46 24C30 13 14 10 0 24Z'/%3E%3C/svg%3E") bottom/100% var(--k-wave) no-repeat;
+          mask:linear-gradient(#000,#000) top/100% calc(100% - var(--k-wave)) no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' preserveAspectRatio='none'%3E%3Cpath d='M0 0H100V6C84 30 64 36 46 24C30 13 14 10 0 24Z'/%3E%3C/svg%3E") bottom/100% var(--k-wave) no-repeat;
+}
+html header::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:0;pointer-events:none;
+  background:radial-gradient(60% 90% at 88% 0%,rgba(150,146,255,.28),transparent 65%),radial-gradient(50% 70% at 0% 100%,rgba(120,116,230,.16),transparent 70%)}
+html .ht{font-size:calc(13px*var(--fs,1));letter-spacing:.3px;opacity:.78;margin-top:8px;font-weight:600}
+html .gear,html #gmx{
+  top:calc(env(safe-area-inset-top,0px) + 14px);bottom:auto;right:16px;width:46px;height:46px;border-radius:18px;
+  background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.04));color:#fff;
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 10px 20px -8px rgba(0,0,0,.55);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+html .gear.on{background:linear-gradient(145deg,var(--k-acc2),var(--k-acc));border-color:rgba(255,255,255,.3);box-shadow:0 0 18px -2px var(--k-glow),inset 0 1px 0 rgba(255,255,255,.35)}
+html #gmx{right:auto;left:16px}
+html .hav{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 14px);right:72px;border:2px solid rgba(255,255,255,.25);box-shadow:0 8px 18px -6px rgba(0,0,0,.6)}
+
+/* ---------- الكروت: أسطح ناعمة بارزة ---------- */
+html .card{background:linear-gradient(145deg,var(--k-s1),var(--k-s2));border:1px solid var(--k-rim);border-radius:30px;box-shadow:var(--k-out)}
+html .card.cp{border-radius:22px;box-shadow:var(--k-out-s)}
+html .card.st-p{border-inline-start:1px solid var(--k-rim);box-shadow:var(--k-out),inset 5px 0 0 -1px var(--k-acc)}
+html .card.st-a{border-inline-start:1px solid var(--k-rim);box-shadow:var(--k-out),inset 5px 0 0 -1px var(--no)}
+html .sm-t div,html .cnt span,html .cnt button,html .solL .si,html .code,html .dl span{background:var(--k-in-bg);box-shadow:var(--k-in);border:0}
+html .pill{background:var(--k-in-bg);box-shadow:var(--k-in)}
+html .pill.ok{background:color-mix(in srgb,var(--k-acc) 20%,var(--k-in-bg));color:var(--k-acc)}
+html .stat div{background:linear-gradient(145deg,var(--k-acc2),var(--k-acc));border-radius:20px;box-shadow:0 12px 22px -10px var(--k-glow)}
+html .no-n{background:linear-gradient(145deg,var(--k-acc2),var(--k-acc));color:#fff;box-shadow:0 6px 12px -4px var(--k-glow)}
+
+/* ---------- الحقول: غاطسة زي شريط البحث ---------- */
+html select,html input,html textarea{background:var(--k-in-bg);border:1px solid color-mix(in srgb,var(--tx) 7%,transparent);border-radius:20px;box-shadow:var(--k-in)}
+html select:focus,html input:focus,html textarea:focus{outline:0;border-color:color-mix(in srgb,var(--k-acc) 70%,transparent);box-shadow:var(--k-in),0 0 0 3px color-mix(in srgb,var(--k-acc) 22%,transparent)}
+html .ph span{background:var(--k-in-bg);box-shadow:var(--k-in);border:0;border-radius:18px}
+html .dys label{background:var(--k-in-bg);box-shadow:var(--k-in);border:0;border-radius:16px}
+
+/* ---------- الأزرار: مربعات بارزة (squircle) ---------- */
+html .btn{background:linear-gradient(145deg,var(--k-s1),var(--k-s2));border:1px solid var(--k-rim);border-radius:20px;box-shadow:var(--k-out-s);color:var(--tx);transition:transform .18s,box-shadow .18s}
+html .btn:active{transform:scale(.96);box-shadow:var(--k-in)}
+html .btn.ok,html .btn.pr{background:linear-gradient(145deg,var(--k-acc2),var(--k-acc));color:#fff;border-color:rgba(255,255,255,.22);box-shadow:0 12px 22px -10px var(--k-glow),inset 0 1px 0 rgba(255,255,255,.3)}
+html .btn.no{box-shadow:0 12px 22px -10px color-mix(in srgb,var(--no) 60%,transparent)}
+html .btn.pay{box-shadow:0 12px 22px -10px color-mix(in srgb,var(--am) 70%,transparent)}
+
+/* ---------- بلاطات الرئيسية + الأزرار الدائرية الصغيرة (زي أيقونات الصورة) ---------- */
+html .dpw{gap:12px}
+html .dpi{border-radius:26px;background:linear-gradient(145deg,var(--k-s1),var(--k-s2))!important;color:var(--k-acc);border:1px solid var(--k-rim);box-shadow:var(--k-out)!important}
+html .dpi:active{box-shadow:var(--k-in)!important}
+html .dpi.on{box-shadow:var(--k-out),0 0 0 2px var(--k-acc)!important}
+html .calcg,html .demob,html .aig{background:linear-gradient(145deg,var(--k-s1),var(--k-s2))!important;color:var(--k-acc)!important;box-shadow:var(--k-out-s)!important;border:1px solid var(--k-rim)!important;border-radius:16px!important}
+html .pmg{background:linear-gradient(145deg,var(--k-acc2),var(--k-acc))!important;color:#fff!important;box-shadow:0 12px 20px -8px var(--k-glow)!important;border-radius:18px!important}
+
+/* ---------- الدوك السفلي: زجاجي عائم + المؤشر زر بارز ---------- */
+html nav{left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);border-radius:34px;padding:8px;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--k-s1) 86%,transparent),color-mix(in srgb,var(--k-s2) 82%,transparent));
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
+  border:1px solid var(--k-rim);box-shadow:var(--k-out),0 22px 40px -18px rgba(20,12,60,.5)}
+html nav::before{top:6px;bottom:6px;border-radius:26px;
+  background:linear-gradient(145deg,var(--k-s1),var(--k-s2));
+  box-shadow:var(--k-out-s),0 0 0 1px color-mix(in srgb,var(--k-acc) 28%,transparent),0 10px 22px -10px var(--k-glow)}
+html nav button{color:var(--mu)}
+html nav button.on,html nav button.hv{color:var(--k-acc)}
+html nav button.on i,html nav button.hv i{background:none!important;box-shadow:none!important}
+html main{padding-bottom:132px}
+
+/* ---------- أيقونة البلاطة: من غير مربع داخلي ولا حلقة، بلون الأكسنت ---------- */
+html .dpi .gmsym{background:transparent!important;box-shadow:none!important;color:var(--k-acc)!important;width:40px;height:40px;animation:none}
+html .dpi .gmsym::after{display:none!important}
+html .dpi{overflow:hidden}
+</style>
 </body>
 </html>
