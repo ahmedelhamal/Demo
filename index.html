@@ -11349,106 +11349,152 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
   sched();
 })();
 </script>
-<style id="akc-css">
-/* ===== حركة الإيد اللي بتشد الصفحة زي القماش (انتقال بين التابات - معلم وطالب) ===== */
-#akCloth{position:fixed;inset:0;z-index:8;pointer-events:none;display:none;will-change:transform;filter:drop-shadow(0 18px 18px rgba(25,12,45,.24))}
-#akCloth .akc-sheet{position:absolute;inset:0;background-color:var(--bg);background-image:radial-gradient(120% 55% at 100% 0%,color-mix(in srgb,var(--pr) 11%,transparent),transparent 62%),radial-gradient(90% 40% at 0% 100%,color-mix(in srgb,var(--pr) 7%,transparent),transparent 70%);will-change:clip-path}
-#akCloth .akc-art{position:absolute;top:0;left:50%;width:min(100%,480px);aspect-ratio:400/600;height:auto;transform:translateX(-50%);overflow:visible}
-#akCloth .akc-h{transform-box:fill-box;transform-origin:50% 100%}
-#akCloth .akc-w{transform-box:view-box;transform-origin:200px 160px}
-html.akc-on #app.v5-go>*{animation:none!important}
+<style id="akp-css">
+/* ===== إيد بتشد الصفحة لفوق: مؤثر ترفيهي لما الطالب يسحب الشاشة لتحت وهو في أول الصفحة ===== */
+@media (prefers-reduced-motion:no-preference){html{overscroll-behavior-y:contain}}
+#akPull{position:fixed;inset:0;z-index:8;pointer-events:none;display:none}
+#akPull .akp-art{position:absolute;top:0;left:50%;width:min(100%,480px);aspect-ratio:400/600;height:auto;overflow:visible;will-change:transform}
+#akPull .akp-h{transform-box:fill-box;transform-origin:50% 100%}
+#akPull .akp-w{transform-box:view-box;transform-origin:200px 140px}
+#akPull .akp-top{position:absolute;left:0;right:0;top:0;height:calc(env(safe-area-inset-top,0px) + 90px);background:linear-gradient(var(--bg) 25%,transparent);opacity:0}
+#akPull{filter:drop-shadow(0 10px 12px rgba(25,12,45,.22))}
+html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
-<script id="akc-js">
-/* انتقال القماش: إيد بتنزل من فوق، تمسك الصفحة، والقماش بيتلم ويطلع لفوق ويكشف الصفحة الجديدة.
-   بصري فقط (pointer-events:none). بيتقفل لو الجهاز على reduce-motion، أو localStorage.cloth="0". */
+<script id="akp-js">
+/* لما الطالب يسحب الصفحة لتحت من فوق: الصفحة تنزل وتثبت، وإيد تنزل من فوق (تحت طبقة الأيقونات/الظل)
+   وتمسك حرف الصفحة وتشدها لفوق. بصري فقط. بيقفل مع reduce-motion أو localStorage.pullhand="0". */
 (function(){
-  var app=document.getElementById("app"),nav=document.getElementById("nav"),hd=document.getElementById("hd");
-  if(!app||!nav||!document.documentElement.animate)return;
+  var hd=document.getElementById("hd"),app=document.getElementById("app");
+  if(!app||!document.documentElement.animate)return;
   var rm=window.matchMedia?matchMedia("(prefers-reduced-motion:reduce)"):{matches:false};
-  var el=null,anims=[],tmr=0,lastKey=null,raf=0,D=1150;
-  var P0="polygon(0% 0%,100% 0%,100% 100%,50% 100%,0% 100%)",
-      P1="polygon(0% 0%,100% 0%,96% 92%,50% 80%,4% 92%)",
-      P2="polygon(30% 0%,70% 0%,62% 52%,50% 38%,38% 52%)";
-  function disabled(){try{return localStorage.getItem("cloth")==="0"}catch(e){return false}}
+  var root=document.documentElement,els=[hd,app].filter(Boolean);
+  var ov=null,anims=[],busy=false,st=null,H=130,TRIG=48,T=1750;
+  var REFRESH=true; // الطالب: تحديث بياناته بهدوء مع الحركة (بديل ريفرش المتصفح اللي اتقفل)
+  function disabled(){try{return localStorage.getItem("pullhand")==="0"}catch(e){return false}}
   function wrinkles(){
-    var dk="",lt="",n=20,cx=200,cy=160,i;
+    var dk="",lt="",n=18,cx=200,cy=146,i;
     for(i=0;i<n;i++){
-      var a=i/n*Math.PI*2+(i%2?.07:-.05),L=70+((i*47)%120),r0=36+(i%3)*5,k=(i%2?1:-1)*(10+(i%4)*4);
-      var x0=cx+Math.cos(a)*r0,y0=cy+Math.sin(a)*r0*.85,x1=cx+Math.cos(a)*L,y1=cy+Math.sin(a)*L*1.05;
+      var a=(i/(n-1))*Math.PI*0.96+0.1,L=70+((i*47)%120),r0=34+(i%3)*5,k=(i%2?1:-1)*(8+(i%4)*4);
+      var x0=cx+Math.cos(a)*r0*1.1,y0=cy+Math.sin(a)*r0,x1=cx+Math.cos(a)*L*1.25,y1=cy+Math.sin(a)*L*1.1;
       var mx=(x0+x1)/2-Math.sin(a)*k,my=(y0+y1)/2+Math.cos(a)*k;
       var d="M"+x0.toFixed(1)+" "+y0.toFixed(1)+"Q"+mx.toFixed(1)+" "+my.toFixed(1)+" "+x1.toFixed(1)+" "+y1.toFixed(1);
       dk+='<path d="'+d+'" stroke-width="'+(7+(i%3)*2)+'"/>';
       lt+='<path d="'+d+'" transform="translate(2.5 -2)" stroke-width="2.4"/>';
     }
-    return '<g filter="url(#akcB)" fill="none" stroke="rgba(70,45,100,.15)" stroke-linecap="round">'+dk+'</g>'+
-           '<g fill="none" stroke="rgba(255,255,255,.42)" stroke-linecap="round">'+lt+'</g>';
+    return '<g clip-path="url(#akpC)"><g filter="url(#akpB)" fill="none" stroke="rgba(20,10,45,.28)" stroke-linecap="round">'+dk+'</g>'+
+           '<g fill="none" stroke="rgba(255,255,255,.30)" stroke-linecap="round">'+lt+'</g></g>';
   }
   function build(){
-    if(el)return;
-    el=document.createElement("div");el.id="akCloth";el.setAttribute("aria-hidden","true");
-    el.innerHTML='<div class="akc-sheet"></div>'+
-    '<svg class="akc-art" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg"><defs>'+
-    '<linearGradient id="akcA" x1="0" x2="1"><stop offset="0" stop-color="#E67E9A"/><stop offset=".32" stop-color="#FFC9D5"/><stop offset=".7" stop-color="#F7A5B8"/><stop offset="1" stop-color="#DC708E"/></linearGradient>'+
-    '<radialGradient id="akcF" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="#FFD9E1"/><stop offset=".55" stop-color="#F7A7BA"/><stop offset="1" stop-color="#E07994"/></radialGradient>'+
-    '<filter id="akcB" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>'+
-    '<filter id="akcS" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter></defs>'+
-    '<g class="akc-w"><ellipse cx="200" cy="176" rx="78" ry="34" fill="rgba(60,30,70,.22)" filter="url(#akcS)"/>'+wrinkles()+'</g>'+
-    '<g class="akc-h">'+
-      '<path d="M170 -140H230L228 100Q200 120 172 100Z" fill="url(#akcA)"/>'+
+    if(ov)return;
+    ov=document.createElement("div");ov.id="akPull";ov.setAttribute("aria-hidden","true");
+    ov.innerHTML='<svg class="akp-art" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg"><defs>'+
+    '<linearGradient id="akpA" x1="0" x2="1"><stop offset="0" stop-color="#E67E9A"/><stop offset=".32" stop-color="#FFC9D5"/><stop offset=".7" stop-color="#F7A5B8"/><stop offset="1" stop-color="#DC708E"/></linearGradient>'+
+    '<radialGradient id="akpF" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="#FFD9E1"/><stop offset=".55" stop-color="#F7A7BA"/><stop offset="1" stop-color="#E07994"/></radialGradient>'+
+    '<filter id="akpB" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>'+
+    '<clipPath id="akpC"><rect x="-200" y="140" width="800" height="700"/></clipPath></defs>'+
+    '<g class="akp-w">'+wrinkles()+'</g>'+
+    '<g class="akp-h">'+
+      '<path d="M170 -140H230L228 100Q200 120 172 100Z" fill="url(#akpA)"/>'+
       '<rect x="181" y="-140" width="9" height="236" rx="4.5" fill="#fff" opacity=".32"/>'+
-      '<rect x="150" y="84" width="100" height="92" rx="38" fill="url(#akcF)"/>'+
-      '<g fill="url(#akcF)" stroke="rgba(150,55,90,.34)" stroke-width="1.2">'+
+      '<rect x="150" y="84" width="100" height="92" rx="38" fill="url(#akpF)"/>'+
+      '<g fill="url(#akpF)" stroke="rgba(150,55,90,.34)" stroke-width="1.2">'+
         '<rect x="152" y="140" width="24" height="40" rx="12"/><rect x="174" y="144" width="26" height="42" rx="13"/><rect x="199" y="144" width="26" height="42" rx="13"/><rect x="224" y="140" width="24" height="40" rx="12"/>'+
         '<ellipse cx="147" cy="122" rx="13" ry="24" transform="rotate(-16 147 122)"/></g>'+
       '<path d="M162 128Q200 142 238 128" stroke="rgba(150,55,90,.26)" stroke-width="2" fill="none" stroke-linecap="round"/>'+
-'<ellipse cx="184" cy="112" rx="14" ry="9" fill="#fff" opacity=".28"/>'+
-    '</g></svg>';
-    document.body.appendChild(el);
+      '<ellipse cx="184" cy="112" rx="14" ry="9" fill="#fff" opacity=".28"/>'+
+    '</g></svg><div class="akp-top"></div>';
+    document.body.appendChild(ov);
   }
-  function stop(){clearTimeout(tmr);anims.forEach(function(a){try{a.cancel()}catch(e){}});anims=[]}
-  function end(){stop();if(el)el.style.display="none";document.documentElement.classList.remove("akc-on")}
-  function play(){
-    if(rm.matches||disabled()||document.hidden)return;
-    build();stop();
-    var root=document.documentElement,sh=el.querySelector(".akc-sheet"),h=el.querySelector(".akc-h"),w=el.querySelector(".akc-w"),O={duration:D,fill:"both"};
-    root.classList.add("akc-on");el.style.display="block";
-    var main=el.animate([
-      {transform:"translateY(0)",offset:0},
-      {transform:"translateY(0)",offset:.36,easing:"cubic-bezier(.3,0,.4,1)"},
-      {transform:"translateY(16px)",offset:.46,easing:"cubic-bezier(.5,0,.3,1)"},
-      {transform:"translateY(-108%)",offset:1}],O);
-    anims=[main,
-      sh.animate([{clipPath:P0,offset:0},{clipPath:P0,offset:.46},{clipPath:P1,offset:.75},{clipPath:P2,offset:1}],O),
-      h.animate([
-        {transform:"translateY(-300px) scale(1)",offset:0,easing:"cubic-bezier(.2,.8,.3,1)"},
-        {transform:"translateY(0) scale(1)",offset:.26},
-        {transform:"translateY(0) scale(1.06,.94)",offset:.31},
-        {transform:"translateY(0) scale(.94,1.04)",offset:.38},
-        {transform:"translateY(0) scale(1)",offset:.46},
-        {transform:"translateY(0) scale(1)",offset:1}],O),
-      w.animate([
-        {opacity:0,transform:"scale(.6)",offset:0},
-        {opacity:0,transform:"scale(.6)",offset:.28},
-        {opacity:1,transform:"scale(1)",offset:.46},
-        {opacity:1,transform:"scale(1)",offset:.8},
-        {opacity:0,transform:"scale(1)",offset:1}],O)];
-    main.onfinish=end;
-    tmr=setTimeout(end,D+400);
+  function setY(y,sx){var v=y?"translate3d(0,"+y+"px,0)"+(sx&&sx!==1?" scaleX("+sx+")":""):"";els.forEach(function(e){e.style.transform=v})}
+  function clearInline(){els.forEach(function(e){e.style.transform="";e.style.transition=""})}
+  function cleanup(){
+    anims.forEach(function(a){try{a.cancel()}catch(e){}});anims=[];
+    clearInline();if(ov)ov.style.display="none";
+    root.classList.remove("akp-on");busy=false;
   }
-  function check(){
-    raf=0;
-    var b=nav.querySelector("button.on"),g=hd&&hd.querySelector(".gear.on");
-    var key=(b?b.getAttribute("data-k"):"-")+"|"+(g?1:0);
-    if(key!==lastKey){
-      if(lastKey!==null&&nav.children.length&&!document.getElementById("akSplash"))play();
-      lastKey=key;
+  /* الحركة: الصفحة نازلة بمقدار off → تثبت → الإيد تنزل وتمسك → تشد لفوق → الإيد تطلع */
+  function play(off){
+    if(busy||rm.matches||disabled())return;
+    busy=true;build();
+    var W=Math.min(window.innerWidth,480),s=W/400,G=140*s,sY=-(178*s)-30,h0=Math.max(H,off||0);
+    var art=ov.querySelector(".akp-art"),hand=ov.querySelector(".akp-h"),wr=ov.querySelector(".akp-w"),top=ov.querySelector(".akp-top");
+    ov.style.display="block";root.classList.add("akp-on");
+    var O={duration:T,fill:"both"},f=function(ms){return ms/T};
+    function tr(y){return "translate(-50%,"+y+"px)"}
+    function ct(y,sx){return "translate3d(0,"+y+"px,0) scaleX("+sx+")"}
+    var main=art.animate([
+      {transform:tr(sY),offset:0},
+      {transform:tr(sY),offset:f(240),easing:"cubic-bezier(.2,.8,.3,1)"},
+      {transform:tr(h0-G),offset:f(780)},
+      {transform:tr(-8-G),offset:f(1230),easing:"cubic-bezier(.2,.8,.3,1)"},
+      {transform:tr(0-G),offset:f(1380),easing:"cubic-bezier(.5,0,.8,.6)"},
+      {transform:tr(sY),offset:1}],O);
+    anims=[main];
+    var ck=[
+      {transform:ct(off||0,1),offset:0,easing:"cubic-bezier(.2,.9,.3,1)"},
+      {transform:ct(h0,1),offset:f(600)},
+      {transform:ct(h0,.97),offset:f(780),easing:"cubic-bezier(.45,0,.2,1)"},
+      {transform:ct(-8,1),offset:f(1230),easing:"cubic-bezier(.2,.8,.3,1)"},
+      {transform:ct(0,1),offset:f(1380)},
+      {transform:ct(0,1),offset:1}];
+    els.forEach(function(e){e.style.transition="";anims.push(e.animate(ck,O))});
+    anims.push(hand.animate([
+      {transform:"scale(1)",offset:0},{transform:"scale(1)",offset:f(560)},
+      {transform:"scale(1.06,.94)",offset:f(620)},{transform:"scale(.94,1.05)",offset:f(720)},
+      {transform:"scale(1)",offset:f(800)},{transform:"scale(1)",offset:1}],O));
+    anims.push(wr.animate([
+      {opacity:0,transform:"scale(.6)",offset:0},{opacity:0,transform:"scale(.6)",offset:f(600)},
+      {opacity:1,transform:"scale(1)",offset:f(780)},{opacity:1,transform:"scale(1)",offset:f(1000)},
+      {opacity:0,transform:"scale(1)",offset:f(1330)},{opacity:0,offset:1}],O));
+    anims.push(top.animate([{opacity:0,offset:0},{opacity:1,offset:f(240)},{opacity:1,offset:f(1500)},{opacity:0,offset:1}],O));
+    main.onfinish=cleanup;
+    setTimeout(function(){if(busy&&ov&&ov.style.display==="block"&&!anims.length)cleanup()},T+500);
+    if(REFRESH){try{if(typeof studentRefresh==="function"&&window.ST&&ST.data&&!(window.AU&&AU.user))studentRefresh()}catch(e){}}
+  }
+  /* ===== التقاط السحب لتحت من أول الصفحة ===== */
+  function scrollY(){return window.pageYOffset||document.documentElement.scrollTop||0}
+  function blocked(t){
+    if(!t||!t.closest)return true;
+    if(document.body.classList.contains("a4open"))return true;
+    var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a!==document.body)return true;
+    for(var e=t;e&&e!==document.body&&e!==root;e=e.parentElement){
+      var cs=getComputedStyle(e);
+      if(cs.position==="fixed"||cs.position==="sticky"&&e.id==="nav")return true;
+      if(/(auto|scroll)/.test(cs.overflowY)&&e.scrollHeight>e.clientHeight+1)return true;
     }
+    return false;
   }
-  function sched(){if(!raf)raf=requestAnimationFrame(check)}
-  new MutationObserver(sched).observe(nav,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
-  if(hd)new MutationObserver(sched).observe(hd,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
-  window.AKCloth={play:play};
-  sched();
+  function rub(dy){return Math.min(150,dy*.5)}
+  document.addEventListener("touchstart",function(e){
+    st=null;if(busy||rm.matches||disabled()||e.touches.length!==1)return;
+    if(scrollY()>0||blocked(e.target))return;
+    st={x:e.touches[0].clientX,y:e.touches[0].clientY,on:false,dy:0};
+  },{passive:true,capture:true});
+  document.addEventListener("touchmove",function(e){
+    if(busy){if(e.cancelable)e.preventDefault();return}
+    if(!st)return;
+    var t=e.touches[0],dx=t.clientX-st.x,dy=t.clientY-st.y;
+    if(!st.on){
+      if(dy<-6||Math.abs(dx)>Math.abs(dy)*1.2&&Math.abs(dx)>8){st=null;return}
+      if(dy<8)return;
+      if(scrollY()>0){st=null;return}
+      st.on=true;root.classList.add("akp-on");els.forEach(function(x){x.style.transition=""});
+    }
+    st.dy=Math.max(0,dy);
+    if(e.cancelable)e.preventDefault();
+    setY(rub(st.dy),1);
+  },{passive:false,capture:true});
+  function end(){
+    if(!st||!st.on){st=null;return}
+    var dy=st.dy;st=null;
+    if(dy>=TRIG){play(rub(dy));return}
+    els.forEach(function(x){x.style.transition="transform .3s cubic-bezier(.2,.8,.3,1)"});
+    setY(0,1);
+    setTimeout(function(){if(!busy){clearInline();root.classList.remove("akp-on")}},340);
+  }
+  document.addEventListener("touchend",end,{passive:true,capture:true});
+  document.addEventListener("touchcancel",end,{passive:true,capture:true});
+  window.AKPull={play:play,_a:function(){return anims},T:T};
 })();
 </script>
 
