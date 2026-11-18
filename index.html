@@ -11350,27 +11350,36 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 })();
 </script>
 <style id="akp-css">
-/* ===== إيد بتشد الصفحة لفوق: مؤثر ترفيهي لما الطالب يسحب الشاشة لتحت وهو في أول الصفحة ===== */
-@media (prefers-reduced-motion:no-preference){html{overscroll-behavior-y:contain}}
+/* ===== إيد بتشد الصفحة لفوق: مؤثر ترفيهي في الشاشة الرئيسية (طالب/معلم) بس، بألوان ثيم التطبيق ===== */
+@media (prefers-reduced-motion:no-preference){html.akp-h{overscroll-behavior-y:contain}}
 #akPull{position:fixed;inset:0;z-index:8;pointer-events:none;display:none}
 #akPull .akp-art{position:absolute;top:0;left:50%;width:min(100%,480px);aspect-ratio:400/600;height:auto;overflow:visible;will-change:transform}
 #akPull .akp-h{transform-box:fill-box;transform-origin:50% 100%}
 #akPull .akp-w{transform-box:view-box;transform-origin:200px 140px}
 #akPull .akp-top{position:absolute;left:0;right:0;top:0;height:calc(env(safe-area-inset-top,0px) + 90px);background:linear-gradient(var(--bg) 25%,transparent);opacity:0}
-#akPull{filter:drop-shadow(0 10px 12px rgba(25,12,45,.22))}
+#akPull{filter:drop-shadow(0 12px 14px color-mix(in srgb,var(--h2) 38%,transparent))}
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
 /* لما الطالب يسحب الصفحة لتحت من فوق: الصفحة تنزل وتثبت، وإيد تنزل من فوق (تحت طبقة الأيقونات/الظل)
-   وتمسك حرف الصفحة وتشدها لفوق. بصري فقط. بيقفل مع reduce-motion أو localStorage.pullhand="0". */
+   وتمسك حرف الصفحة وتشدها لفوق. بصري فقط. بيشتغل في الرئيسية بتاعت الطالب والمعلم بس. بيقفل مع reduce-motion أو localStorage.pullhand="0". */
 (function(){
   var hd=document.getElementById("hd"),app=document.getElementById("app");
   if(!app||!document.documentElement.animate)return;
   var rm=window.matchMedia?matchMedia("(prefers-reduced-motion:reduce)"):{matches:false};
   var root=document.documentElement,els=[hd,app].filter(Boolean);
-  var ov=null,anims=[],busy=false,st=null,H=130,TRIG=48,T=1750;
+  var ov=null,anims=[],busy=false,st=null,H=130,TRIG=48,T=1650;
   var REFRESH=true; // الطالب: تحديث بياناته بهدوء مع الحركة (بديل ريفرش المتصفح اللي اتقفل)
   function disabled(){try{return localStorage.getItem("pullhand")==="0"}catch(e){return false}}
+  /* الشاشة الرئيسية بس: رئيسية المعلم (tab=home) أو رئيسية الطالب (ST.tab=home وفتح الإعدادات مقفول) */
+  function isHome(){
+    try{
+      if(typeof GM!=="undefined"&&GM&&GM.open)return false;
+      var on=window.AU&&AU.ready&&AU.user&&!(window.ST&&ST.demo);
+      if(on)return tab==="home"&&!edit&&!(typeof dt!=="undefined"&&dt)&&!(typeof cd!=="undefined"&&cd);
+      return !!(window.AU&&AU.ready&&window.ST&&ST.data&&ST.tab==="home"&&!ST.set);
+    }catch(e){return false}
+  }
   function wrinkles(){
     var dk="",lt="",n=18,cx=200,cy=146,i;
     for(i=0;i<n;i++){
@@ -11381,27 +11390,29 @@ html.akp-on #hd,html.akp-on #app{will-change:transform}
       dk+='<path d="'+d+'" stroke-width="'+(7+(i%3)*2)+'"/>';
       lt+='<path d="'+d+'" transform="translate(2.5 -2)" stroke-width="2.4"/>';
     }
-    return '<g clip-path="url(#akpC)"><g filter="url(#akpB)" fill="none" stroke="rgba(20,10,45,.28)" stroke-linecap="round">'+dk+'</g>'+
-           '<g fill="none" stroke="rgba(255,255,255,.30)" stroke-linecap="round">'+lt+'</g></g>';
+    return '<g clip-path="url(#akpC)"><g filter="url(#akpB)" fill="none" style="stroke:color-mix(in srgb,var(--tx) 34%,transparent)" stroke-linecap="round">'+dk+'</g>'+
+           '<g fill="none" style="stroke:rgba(255,255,255,.30)" stroke-linecap="round">'+lt+'</g></g>';
   }
   function build(){
     if(ov)return;
     ov=document.createElement("div");ov.id="akPull";ov.setAttribute("aria-hidden","true");
     ov.innerHTML='<svg class="akp-art" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg"><defs>'+
-    '<linearGradient id="akpA" x1="0" x2="1"><stop offset="0" stop-color="#E67E9A"/><stop offset=".32" stop-color="#FFC9D5"/><stop offset=".7" stop-color="#F7A5B8"/><stop offset="1" stop-color="#DC708E"/></linearGradient>'+
-    '<radialGradient id="akpF" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="#FFD9E1"/><stop offset=".55" stop-color="#F7A7BA"/><stop offset="1" stop-color="#E07994"/></radialGradient>'+
+    '<linearGradient id="akpA" x1="0" x2="1"><stop offset="0" stop-color="#8e7cc4" style="stop-color:color-mix(in srgb,var(--pr) 60%,#fff)"/><stop offset=".35" stop-color="#d9d1f0" style="stop-color:color-mix(in srgb,var(--pr) 30%,#fff)"/><stop offset=".72" stop-color="#a493d4" style="stop-color:color-mix(in srgb,var(--pr) 52%,#fff)"/><stop offset="1" stop-color="#7c68b8" style="stop-color:color-mix(in srgb,var(--pr) 78%,#fff)"/></linearGradient>'+
+    '<radialGradient id="akpF" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="#e6e0f6" style="stop-color:color-mix(in srgb,var(--pr) 22%,#fff)"/><stop offset=".55" stop-color="#a999d6" style="stop-color:color-mix(in srgb,var(--pr) 55%,#fff)"/><stop offset="1" stop-color="#7a66b6" style="stop-color:color-mix(in srgb,var(--pr) 82%,#fff)"/></radialGradient>'+
     '<filter id="akpB" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>'+
     '<clipPath id="akpC"><rect x="-200" y="140" width="800" height="700"/></clipPath></defs>'+
     '<g class="akp-w">'+wrinkles()+'</g>'+
     '<g class="akp-h">'+
       '<path d="M170 -140H230L228 100Q200 120 172 100Z" fill="url(#akpA)"/>'+
-      '<rect x="181" y="-140" width="9" height="236" rx="4.5" fill="#fff" opacity=".32"/>'+
-      '<rect x="150" y="84" width="100" height="92" rx="38" fill="url(#akpF)"/>'+
-      '<g fill="url(#akpF)" stroke="rgba(150,55,90,.34)" stroke-width="1.2">'+
-        '<rect x="152" y="140" width="24" height="40" rx="12"/><rect x="174" y="144" width="26" height="42" rx="13"/><rect x="199" y="144" width="26" height="42" rx="13"/><rect x="224" y="140" width="24" height="40" rx="12"/>'+
-        '<ellipse cx="147" cy="122" rx="13" ry="24" transform="rotate(-16 147 122)"/></g>'+
-      '<path d="M162 128Q200 142 238 128" stroke="rgba(150,55,90,.26)" stroke-width="2" fill="none" stroke-linecap="round"/>'+
-      '<ellipse cx="184" cy="112" rx="14" ry="9" fill="#fff" opacity=".28"/>'+
+      '<rect x="181" y="-140" width="9" height="236" rx="4.5" fill="#fff" opacity=".30"/>'+
+      '<rect x="162" y="50" width="76" height="28" rx="12" style="fill:var(--card);stroke:var(--bd);stroke-width:1.5"/>'+
+      '<rect x="172" y="58" width="56" height="4" rx="2" style="fill:var(--pr)" opacity=".35"/>'+
+      '<g style="stroke:var(--card);stroke-width:2.2;stroke-linejoin:round">'+
+        '<rect x="150" y="84" width="100" height="92" rx="38" fill="url(#akpF)"/>'+
+        '<rect x="152" y="140" width="24" height="40" rx="12" fill="url(#akpF)"/><rect x="174" y="144" width="26" height="42" rx="13" fill="url(#akpF)"/><rect x="199" y="144" width="26" height="42" rx="13" fill="url(#akpF)"/><rect x="224" y="140" width="24" height="40" rx="12" fill="url(#akpF)"/>'+
+        '<ellipse cx="147" cy="122" rx="13" ry="24" transform="rotate(-16 147 122)" fill="url(#akpF)"/></g>'+
+      '<path d="M162 128Q200 142 238 128" fill="none" stroke-linecap="round" stroke-width="2" style="stroke:var(--card)" opacity=".55"/>'+
+      '<ellipse cx="184" cy="110" rx="14" ry="8" fill="#fff" opacity=".30"/>'+
     '</g></svg><div class="akp-top"></div>';
     document.body.appendChild(ov);
   }
@@ -11414,37 +11425,37 @@ html.akp-on #hd,html.akp-on #app{will-change:transform}
   }
   /* الحركة: الصفحة نازلة بمقدار off → تثبت → الإيد تنزل وتمسك → تشد لفوق → الإيد تطلع */
   function play(off){
-    if(busy||rm.matches||disabled())return;
+    if(busy||rm.matches||disabled()||!isHome())return;
     busy=true;build();
     var W=Math.min(window.innerWidth,480),s=W/400,G=140*s,sY=-(178*s)-30,h0=Math.max(H,off||0);
     var art=ov.querySelector(".akp-art"),hand=ov.querySelector(".akp-h"),wr=ov.querySelector(".akp-w"),top=ov.querySelector(".akp-top");
     ov.style.display="block";root.classList.add("akp-on");
     var O={duration:T,fill:"both"},f=function(ms){return ms/T};
+    var cs=getComputedStyle(root),EA=(cs.getPropertyValue("--v5-ease")||"").trim()||"cubic-bezier(.22,1,.36,1)",SP=(cs.getPropertyValue("--v5-spring")||"").trim()||"cubic-bezier(.3,1.45,.5,1)";
     function tr(y){return "translate(-50%,"+y+"px)"}
     function ct(y,sx){return "translate3d(0,"+y+"px,0) scaleX("+sx+")"}
     var main=art.animate([
       {transform:tr(sY),offset:0},
-      {transform:tr(sY),offset:f(240),easing:"cubic-bezier(.2,.8,.3,1)"},
-      {transform:tr(h0-G),offset:f(780)},
-      {transform:tr(-8-G),offset:f(1230),easing:"cubic-bezier(.2,.8,.3,1)"},
-      {transform:tr(0-G),offset:f(1380),easing:"cubic-bezier(.5,0,.8,.6)"},
+      {transform:tr(sY),offset:f(240),easing:EA},
+      {transform:tr(h0-G),offset:f(600)},
+      {transform:tr(h0-G),offset:f(780),easing:SP},
+      {transform:tr(0-G),offset:f(1330),easing:"cubic-bezier(.64,0,.78,0)"},
       {transform:tr(sY),offset:1}],O);
     anims=[main];
     var ck=[
-      {transform:ct(off||0,1),offset:0,easing:"cubic-bezier(.2,.9,.3,1)"},
+      {transform:ct(off||0,1),offset:0,easing:EA},
       {transform:ct(h0,1),offset:f(600)},
-      {transform:ct(h0,.97),offset:f(780),easing:"cubic-bezier(.45,0,.2,1)"},
-      {transform:ct(-8,1),offset:f(1230),easing:"cubic-bezier(.2,.8,.3,1)"},
-      {transform:ct(0,1),offset:f(1380)},
+      {transform:ct(h0,.97),offset:f(780),easing:SP},
+      {transform:ct(0,1),offset:f(1330)},
       {transform:ct(0,1),offset:1}];
     els.forEach(function(e){e.style.transition="";anims.push(e.animate(ck,O))});
     anims.push(hand.animate([
       {transform:"scale(1)",offset:0},{transform:"scale(1)",offset:f(560)},
-      {transform:"scale(1.06,.94)",offset:f(620)},{transform:"scale(.94,1.05)",offset:f(720)},
+      {transform:"scale(1.06,.94)",offset:f(620),easing:SP},{transform:"scale(.94,1.05)",offset:f(720),easing:EA},
       {transform:"scale(1)",offset:f(800)},{transform:"scale(1)",offset:1}],O));
     anims.push(wr.animate([
       {opacity:0,transform:"scale(.6)",offset:0},{opacity:0,transform:"scale(.6)",offset:f(600)},
-      {opacity:1,transform:"scale(1)",offset:f(780)},{opacity:1,transform:"scale(1)",offset:f(1000)},
+      {opacity:1,transform:"scale(1)",offset:f(780),easing:EA},{opacity:1,transform:"scale(1)",offset:f(1050)},
       {opacity:0,transform:"scale(1)",offset:f(1330)},{opacity:0,offset:1}],O));
     anims.push(top.animate([{opacity:0,offset:0},{opacity:1,offset:f(240)},{opacity:1,offset:f(1500)},{opacity:0,offset:1}],O));
     main.onfinish=cleanup;
@@ -11467,6 +11478,7 @@ html.akp-on #hd,html.akp-on #app{will-change:transform}
   function rub(dy){return Math.min(150,dy*.5)}
   document.addEventListener("touchstart",function(e){
     st=null;if(busy||rm.matches||disabled()||e.touches.length!==1)return;
+    var hm=isHome();root.classList.toggle("akp-h",hm);if(!hm)return;
     if(scrollY()>0||blocked(e.target))return;
     st={x:e.touches[0].clientX,y:e.touches[0].clientY,on:false,dy:0};
   },{passive:true,capture:true});
