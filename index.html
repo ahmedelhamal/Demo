@@ -11354,17 +11354,21 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 @media (prefers-reduced-motion:no-preference){html.akp-h{overscroll-behavior-y:contain}}
 #akExt{position:absolute;z-index:0;height:0;pointer-events:none}
 #akExt .akp-ext-in{position:absolute;left:0;right:0;bottom:0;transform:scaleY(-1);background-repeat:repeat-y}
-#akFold,#akShd,#akHand{position:fixed;top:0;pointer-events:none;display:none;z-index:8}
+#akFold,#akShd,#akHs,#akHand{position:fixed;top:0;pointer-events:none;display:none;z-index:8}
 #akFold{left:50%;mix-blend-mode:overlay;will-change:transform,opacity}
 #akFold .akp-fgw{transform-origin:50% 50%;will-change:transform}
 #akFold svg{display:block}
 #akShd{left:50%;width:220px;height:220px;margin-left:-110px;margin-top:-110px;border-radius:50%;background:radial-gradient(closest-side,rgba(10,4,32,.55),rgba(10,4,32,.22) 60%,rgba(10,4,32,0));will-change:transform,opacity}
-#akHand{left:50%;width:0;height:0;will-change:transform,filter}
+#akHand,#akHs{left:50%;width:0;height:0;will-change:transform}
+#akHs{will-change:transform,opacity}
+#akHs .akp-hsvg{filter:blur(4px)}
+#akHs .akp-rt{position:absolute;left:0;top:0;width:0;height:0;will-change:transform}
+#akHs .akp-hsvg{position:absolute;overflow:visible}
+#akHs .akp-hsvg svg[class^=akp-s]:not(.akp-sarm):not(.akp-s0){opacity:0}
 #akHand .akp-rt{position:absolute;left:0;top:0;width:0;height:0;will-change:transform}
 #akHand .akp-hsvg{position:absolute;overflow:visible}
 #akHand .akp-gl{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:50% 66%;will-change:transform}
-#akHand .akp-p0,#akHand .akp-p1,#akHand .akp-p2,#akHand .akp-p3,#akHand .akp-p4{will-change:opacity}
-#akHand .akp-p1,#akHand .akp-p2,#akHand .akp-p3,#akHand .akp-p4{opacity:0}
+#akHand .akp-p1,#akHand .akp-p2,#akHand .akp-p3,#akHand .akp-p4,#akHand .akp-p5{opacity:0}
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
@@ -11457,7 +11461,16 @@ function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   var SI=SB+'<circle cx="-40" cy="282" r="16"/><circle cx="-14" cy="296" r="16"/><circle cx="14" cy="296" r="16"/><circle cx="40" cy="282" r="16"/>';
   var I=layer(SI,line('M-37 265L-31 271')+line('M-12 272L-10 280')+line('M12 272L10 280')+line('M37 265L31 271'));
 
-  var cl="";[A,B,C,G,I].forEach(function(s,i){cl+=wrap("akp-p"+i,u+"p"+i,s)});
+  /* 5: صوابع مثنية نص ثنية (بتتبدّل مع المفتوحة فتبان الصوابع بتتحرك: تلويح / نفض) */
+  var SJ=PA;FA.forEach(function(f){SJ+=fing(f[0],f[1]+12,f[2],f[3],f[4]*.52,f[5]*.5)});SJ+=fing(48,176,27,25,44,-46,184);
+  var J=layer(SJ,line('M-27 222Q-14 230 -1 222')+line('M3 222Q16 230 29 222'));
+  /* ظل اليد على القماش: نفس الأشكال بلون غامق وبلور ثابت (بيتحرك بالـtransform والـopacity بس، من غير فلتر متحرك) */
+  var sd="#0a0420",SC=SB+'<rect x="40" y="198" width="58" height="32" rx="16"/>';
+  function shw(cls,shapes){return '<svg class="'+cls+'" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><g fill="'+sd+'" stroke="'+sd+'" stroke-width="10" stroke-linejoin="round">'+shapes+'<rect x="-50" y="104" width="100" height="48" rx="22"/></g></svg>'}
+  var sh2='<svg class="akp-sarm" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><path d="'+ARM+'" fill="'+sd+'"/></svg>';
+  [SA,SB,SC,SG,SI,SJ].forEach(function(s,i){sh2+=shw("akp-s"+i,s)});
+  akHandSVG.shadow='<div class="akp-rt"><div class="akp-hsvg" style="left:'+(-120*ux)+'px;top:'+(-540*uy)+'px;width:'+W+'px;height:'+H+'px">'+sh2+'</div></div>';
+  var cl="";[A,B,C,G,I,J].forEach(function(s,i){cl+=wrap("akp-p"+i,u+"p"+i,s)});
   return '<div class="akp-rt"><div class="akp-hsvg" style="left:'+(-120*ux)+'px;top:'+(-540*uy)+'px;width:'+W+'px;height:'+H+'px">'+wrap("akp-arm",u+"arm",base)+'<div class="akp-gl">'+cl+'</div></div></div>'}
 
 /* ===== تجاعيد القماش: شوية طيّات بس، كل طية خط رفيع مدبّب (ظل من ناحية وإضاءة من الناحية التانية) بيطلع من نقطة المسك ويخفت مع المسافة.
@@ -11503,7 +11516,7 @@ function akFoldSVG(seed,size,P){
   var hd=document.getElementById("hd"),app=document.getElementById("app");
   if(!hd||!app||!document.documentElement.animate)return;
   var rm=window.matchMedia?matchMedia("(prefers-reduced-motion:reduce)"):{matches:false};
-  var root=document.documentElement,ext=null,extIn=null,fold=null,shd=null,hand=null,rt=null,gl=null;
+  var root=document.documentElement,ext=null,extIn=null,fold=null,shd=null,hand=null,rt=null,gl=null,hs=null,hrt=null;
   var anims=[],busy=false,lastEnd=0,streak=0,st=null,TRIG=48,H=130,T=0,seed=7,REFRESH=true; // الطالب: تحديث بياناته بهدوء مع الحركة
   function disabled(){try{return localStorage.getItem("pullhand")==="0"}catch(e){return false}}
   function cnt(){try{return +sessionStorage.getItem("akpn")||0}catch(e){return window._akpn||0}}
@@ -11543,8 +11556,9 @@ function akFoldSVG(seed,size,P){
     if(fold)return;
     fold=document.createElement("div");fold.id="akFold";fold.setAttribute("aria-hidden","true");
     shd=document.createElement("div");shd.id="akShd";shd.setAttribute("aria-hidden","true");
+    hs=document.createElement("div");hs.id="akHs";hs.setAttribute("aria-hidden","true");
     hand=document.createElement("div");hand.id="akHand";hand.setAttribute("aria-hidden","true");
-    document.body.appendChild(fold);document.body.appendChild(shd);document.body.appendChild(hand);
+    document.body.appendChild(fold);document.body.appendChild(shd);document.body.appendChild(hs);document.body.appendChild(hand);
   }
   function fill(sh,K,fs){ // نبني الرسم من جديد مع كل سحبة عشان شكل التجاعيد يتغير
     fold.style.width=fold.style.height=fs+"px";fold.style.marginLeft=(-fs/2)+"px";
@@ -11552,10 +11566,11 @@ function akFoldSVG(seed,size,P){
     fold.innerHTML='<div class="akp-fgw">'+akFoldSVG(seed,fs,pal)+'</div>';
     hand.innerHTML=akHandSVG(sh,"k"+seed,K,K,pal);
     rt=hand.firstChild;gl=hand.querySelector(".akp-gl");
+    hs.innerHTML=akHandSVG.shadow;hrt=hs.firstChild;
   }
   function cleanup(){
     anims.forEach(function(a){try{a.cancel()}catch(e){}});anims=[];
-    clearInline();[fold,shd,hand].forEach(function(e){if(e)e.style.display="none"});
+    clearInline();[fold,shd,hs,hand].forEach(function(e){if(e)e.style.display="none"});
     root.classList.remove("akp-on");busy=false;lastEnd=Date.now();
   }
   /* ===== الحركة =====
@@ -11593,15 +11608,15 @@ function akFoldSVG(seed,size,P){
     var S=[],cur=null,th0=side*4,t=220,tg,tp,pe,j;
     function st(tm,p,e){cur=Object.assign({},cur||{gx:gxS,gy:.35*h0,th:side*38,rx:-22,ry:side*58,pose:0,z:1,fo:0,fx:1,fy2:1,cy:off||0,cs:1},p||{});cur.t=tm;cur.e=e||EA;S.push(cur);return cur}
     function enter(dur,gy){t+=dur;st(t,{gx:0,gy:gy,th:th0,rx:0,ry:0,z:.9},EA)}
-    function osc(arr,step,gy){arr.forEach(function(a,i){t+=step;st(t,{gy:gy+(i%2?3:-3),th:th0+a,ry:a*2.6,rx:(i%2?-6:6)},ES)})}
+    function osc(arr,step,gy,wg){arr.forEach(function(a,i){t+=step;var o={gy:gy+(i%2?3:-3),th:th0+a,ry:a*2.6,rx:(i%2?-6:6)};if(wg)o.pose=(i%2&&i<arr.length-1)?5:0;st(t,o,ES)})}
     st(0,{},EA);
     st(220,{cy:h0},EA);
 
     /* ---- قبل المسك ---- */
     if(scen==="wave"){
-      enter(620,.45*h0);osc([10,-10,10,-10,8,-8,0],120,.45*h0);t+=100;tg=t+260;
+      enter(620,.45*h0);osc([14,-14,14,-14,12,-12,9,-9,0],130,.45*h0,1);t+=140;tg=t+280;
     }else if(scen==="blow"){
-      enter(620,.5*h0);osc([14,-14,13,-13,10,-10,6,0],65,.5*h0);tg=t+300;
+      enter(620,.5*h0);osc([14,-14,13,-13,10,-10,6,0],75,.5*h0,1);t+=60;st(t,{pose:0,rx:0,ry:0},ES);tg=t+300;
     }else if(scen==="shy"){     // بتطلّ من الحافة وتستخبّى وترجع
       t+=440;st(t,{gx:side*(vw/2-26*u),gy:.55*h0,th:side*34,rx:-10,ry:side*40,pose:3,z:.8},EA);
       t+=380;st(t,{},ES);
@@ -11625,10 +11640,11 @@ function akFoldSVG(seed,size,P){
 
     /* ---- المسك: الكف بينزل على القماش (z لـ 0) ويقفل ---- */
     st(tg,{gx:0,gy:.78*h0,th:th0,rx:16,ry:0,z:.5},EA);
-    st(tg+90,{pose:1,z:.15,rx:6,fo:.35,fx:.35,fy2:.35},EA);
-    st(tg+180,{z:0,fo:.8,fx:.75,fy2:.75},EA);
+    st(tg+90,{pose:1,z:.12,rx:6,fo:.35,fx:.35,fy2:.35},EA);     // بتقفل صوابعها وهي لسه فوق القماش
+    st(tg+180,{z:0,fo:.8,fx:.75,fy2:.75},EA);                      // بتلمس القماش: الظل بيلزق والتجاعيد بتتكوّن
     st(tg+270,{fo:1,fx:1,fy2:1,rx:-6},EA);
-    tp=tg+420;
+    st(tg+370,{},ES);                                              // ثبات لحظة قبل الشد
+    tp=tg+470;
 
     if(scen==="twoTugs"){
       for(j=0;j<2;j++){
@@ -11639,46 +11655,51 @@ function akFoldSVG(seed,size,P){
     /* ---- الشدّة + بعدها (الكف بيترفع) ---- */
     var keep=(scen==="thumbs"||scen==="shakeOff");
     pe=tp+720;st(tp,{},EP);
-    st(pe,{cy:0,gx:0,gy:keep?.14*h0:-.22*h0,th:th0,rx:-18,fy2:1.4,z:.6},EA);
+    st(pe,{cy:0,gx:0,gy:keep?.14*h0:-.22*h0,th:th0,rx:-18,fy2:1.4,z:.04},EA);   // الكف لازق في القماش طول الشدّة
+    st(pe+90,{fo:.35,fx:.8,fy2:1.15,cy:-5,z:.25,rx:-10},ES);          // بتسيب القماش: الصفحة ترتد والكف يبدأ يترفع
+    st(pe+200,{fo:0,cy:0,z:.55,pose:0},ES);                        // الصوابع بتتفتح والقماش يستقر
+    pe+=200;
     if(scen==="shakeOff"){
-      t=pe+110;st(t,{pose:0,fo:0,z:.7},EX);
+      t=pe+60;st(t,{pose:5,z:.7},EX);
       [16,-16,14,-14,10,-10,0].forEach(function(a,i){t+=85;st(t,{th:th0+a,ry:a*2.4,rx:(i%2?-8:8),gy:.14*h0+(i%2?2:-2)},ES)});
       t+=140;st(t,{rx:0,ry:0},EA);
       t+=420;st(t,{gy:fyH,th:0,z:1},EX);
     }else if(scen==="thumbs"){
-      t=pe+110;st(t,{pose:2,fo:0,z:.6},EX);
+      t=pe+60;st(t,{pose:2,z:.6},EX);
       t+=330;st(t,{th:-90,gy:.95*h0,rx:0,ry:-38,z:.45},ES);
       t+=170;st(t,{gy:.95*h0-9,ry:-24},ES);t+=130;st(t,{gy:.95*h0,ry:-38},ES);
       t+=170;st(t,{gy:.95*h0-6,ry:-24},ES);t+=120;st(t,{gy:.95*h0,ry:-38},ES);
       t+=260;st(t,{ry:-10},EA);
       t+=420;st(t,{gx:-(vw/2+110*u+30),z:1},EX);
     }else{
-      st(pe+110,{pose:0,z:.8},EX);
-      st(pe+510,{gx:0,gy:fyH,th:0,fo:0,z:1},EA);
+      st(pe+120,{z:.85},EX);
+      st(pe+560,{gx:0,gy:fyH,th:0,z:1},EA);
     }
     T=S[S.length-1].t;
 
     /* ===== الأنيميشن: كل حاجة على نفس الخط الزمني ===== */
     var O={duration:T,fill:"both"},ks=function(f){return S.map(function(s){var o=f(s);o.offset=s.t/T;o.easing=s.e;return o})};
-    function sdw(s){var d=(2+26*s.z)*k48,b=(1.5+10*s.z)*k48,a=.46-.24*s.z;
-      return "drop-shadow("+(d*.55).toFixed(1)+"px "+d.toFixed(1)+"px "+b.toFixed(1)+"px rgba(10,4,32,"+a.toFixed(2)+"))"}
+
     /* الموضع + ظل الرفع (الظل في اتجاه ثابت على الشاشة) */
-    var main=hand.animate(ks(function(s){return {transform:"translate("+s.gx.toFixed(1)+"px,"+s.gy.toFixed(1)+"px)",filter:sdw(s)}}),O);anims=[main];
+    var main=hand.animate(ks(function(s){return {transform:"translate("+s.gx.toFixed(1)+"px,"+s.gy.toFixed(1)+"px)"}}),O);anims=[main];
+    /* ظل اليد على القماش: بيبعد ويفتح كل ما الكف يترفع (z)، ويلزق ويغمق وهو لامس */
+    anims.push(hs.animate(ks(function(s){var d=(3+30*s.z)*k48;return {transform:"translate("+(s.gx+d*.6).toFixed(1)+"px,"+(s.gy+d).toFixed(1)+"px)",opacity:(.46-.26*s.z).toFixed(2)}}),O));
+    anims.push(hrt.animate(ks(function(s){return {transform:"rotate("+s.th+"deg) scale("+(1+.3*s.z).toFixed(3)+")"}}),O));
     /* دوران الذراع + التكبير بالرفع: حوالين نقطة المسك، الساعد والكف سوا */
     anims.push(rt.animate(ks(function(s){return {transform:"rotate("+s.th+"deg) scale("+(1+.3*s.z).toFixed(3)+")"}}),O));
     /* ميلان 3D للكف حوالين الرسغ (الساعد ثابت متصل) */
     anims.push(gl.animate(ks(function(s){return {transform:"perspective(800px) rotateX("+s.rx+"deg) rotateY("+s.ry+"deg)"}}),O));
-    /* تبديل الأوضاع: كل طبقة بتتبدّل في نفس اللحظة بالظبط (steps end) فمفيش لحظة بيبان فيها وضعين فوق بعض */
-    [0,1,2,3,4].forEach(function(k){
-      gl.querySelectorAll(".akp-p"+k).forEach(function(L){
-        anims.push(L.animate(S.map(function(s){return {offset:s.t/T,opacity:s.pose===k?1:0,easing:"steps(1,end)"}}),O))})});
+    /* تبديل كل طبقة بتتبدّل في نفس اللحظة بالظبط (steps end) فمفيش لحظة بيبان فيها وضعين فوق بعض */
+    [0,1,2,3,4,5].forEach(function(k){
+      [gl,hs].forEach(function(box){box.querySelectorAll(k>=0&&box===gl?".akp-p"+k:".akp-s"+k).forEach(function(L){
+        anims.push(L.animate(S.map(function(s){return {offset:s.t/T,opacity:s.pose===k?1:0,easing:"steps(1,end)"}}),O))})})});
     anims.push(fold.animate(ks(function(s){return {transform:"translate("+s.gx+"px,"+(s.gy-fh)+"px)",opacity:s.fo}}),O));
     anims.push(fold.querySelector(".akp-fgw").animate(ks(function(s){return {transform:"scale("+s.fx+","+s.fy2+")"}}),O));
     /* ظل التلامس على القماش: بيغمق لما الكف ينزل ويختفي لما يترفع */
     anims.push(shd.animate(ks(function(s){return {transform:"translate("+s.gx.toFixed(1)+"px,"+(s.gy+10*k48).toFixed(1)+"px) scale("+(1.1*k48*(1+.6*s.z)).toFixed(3)+")",opacity:Math.max(0,.5-.6*s.z).toFixed(2)}}),O));
     var cont=ks(function(s){return {transform:"translate3d(0,"+s.cy+"px,0) scaleX("+s.cs+")"}});
     els().forEach(function(e){e.style.transition="";anims.push(e.animate(cont,O))});
-    [fold,shd,hand].forEach(function(e){e.style.display="block"});root.classList.add("akp-on");
+    [fold,shd,hs,hand].forEach(function(e){e.style.display="block"});root.classList.add("akp-on");
     main.onfinish=cleanup;
     setTimeout(function(){if(busy)cleanup()},T+900);
     if(REFRESH){try{if(typeof studentRefresh==="function"&&window.ST&&ST.data&&!(window.AU&&AU.user))studentRefresh()}catch(e){}}
