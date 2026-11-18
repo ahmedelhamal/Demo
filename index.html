@@ -11366,118 +11366,152 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
-/* الإيد + القماش: الصفحة بتنزل مع السحب (والهيدر يكمّل لفوق بنفس اللون)، وإيد تنزل وتمسك القماش وتشده لفوق.
+/* الإيد + القماش: الصفحة بتنزل مع السحب (والهيدر يكمّل لفوق بنفس اللون)، وإيد clay ناعمة تنزل وتمسك القماش وتشده لفوق (تجاعيد قليلة ونظيفة).
    السحبة 1 و2 مباشرة، والتالتة بتدور ثانية/اتنين وبعدين تشد. بيشتغل في الرئيسية بس. تقفله: localStorage.pullhand="0" */
 /* ---- art: hand + folds generators (shared by test harness and app) ---- */
 function akRnd(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
-/* ===== اليد: رسم 3D ناعم، 3 طبقات SVG: قاعدة (ذراع + كفّ) + أصابع مرتخية (A) + قبضة (B).
-   A و B بيتبدلوا بالشفافية بس (من غير إعادة رسم) فالحركة خفيفة على الموبايل. نقطة المسك (مركز القبضة) عند y=206 ===== */
+/* ===== اليد: شكل clay ناعم (زي إيد طفل 3D)، كل الإيد (ذراع + كفّ + أصابع + إبهام) شكل واحد متصل بتظليل واحد.
+   3 طبقات SVG: قاعدة (الذراع) + A (إيد مرتخية) + B (قبضة). A و B بيتبدلوا بالشفافية بس (من غير إعادة رسم) فالحركة خفيفة.
+   في كل طبقة: لون الجلد واحد ممتد على الشكل كله، وبعدين ظل حوافّ داخلي ناعم (filter) + خطوط فصل رفيعة بين الأصابع، فمفيش حاجة "برّه الديزاين".
+   نقطة المسك (مركز القبضة) عند y=206 ===== */
 function akHandSVG(sh,uid,kx,ky){kx=kx||1;ky=ky||1;
   var u=uid||"h",W=240*sh*kx,H=700*sh*ky;
   function wrap(cls,id,body,defs){
     return ('<svg class="'+cls+'" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><defs>'+defs+'</defs>'+body+'</svg>').replace(/@/g,id)}
-  var D='<linearGradient id="@arm" x1="-31" x2="31" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F1A8A1"/><stop offset=".13" stop-color="#F9C5BA"/><stop offset=".33" stop-color="#FFE0D7"/><stop offset=".6" stop-color="#F8BEB3"/><stop offset=".86" stop-color="#EBA09E"/><stop offset="1" stop-color="#E5969A"/></linearGradient>'+
-   '<linearGradient id="@fg" x1="0" x2="1"><stop offset="0" stop-color="#EFA6A2"/><stop offset=".28" stop-color="#FFDDD3"/><stop offset=".6" stop-color="#F7BAB0"/><stop offset="1" stop-color="#E3939A"/></linearGradient>'+
-   '<linearGradient id="@fv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9566C" stop-opacity=".28"/><stop offset=".28" stop-color="#B9566C" stop-opacity="0"/><stop offset=".78" stop-color="#B9566C" stop-opacity="0"/><stop offset="1" stop-color="#B9566C" stop-opacity=".22"/></linearGradient>'+
-   '<radialGradient id="@pm" cx=".32" cy=".2" r="1"><stop offset="0" stop-color="#FFE8E0"/><stop offset=".42" stop-color="#F9C0B5"/><stop offset="1" stop-color="#E3929A"/></radialGradient>'+
-   '<linearGradient id="@mg" gradientUnits="userSpaceOnUse" x1="0" y1="140" x2="0" y2="170"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient><mask id="@mk" maskUnits="userSpaceOnUse" x="-120" y="-340" width="240" height="700"><rect x="-120" y="-340" width="240" height="700" fill="#fff"/><rect x="-29" y="128" width="58" height="46" fill="url(#@mg)"/></mask>'+
-   '<filter id="@b1" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.3"/></filter>'+
-   '<filter id="@b2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>'+
-   '<filter id="@b4" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5.5"/></filter>';
-  var ARM='M-31 -340H31V178H-31Z';
-  /* كفّ القاعدة (واسع وممتلئ) */
-  var PALM='M-28 138C-30 160 -46 170 -46 196C-46 218 -34 232 0 233C34 232 46 218 46 196C46 170 30 160 28 138Z';
-  var cpA='<clipPath id="@cp"><path d="'+PALM+'"/></clipPath>';
-  /* ---- A: أصابع مرتخية + إبهام ---- */
-  function fing(cx,top,w,len,rot){
-    var x=cx-w/2,t='rotate('+rot+' '+cx+' '+top+')';
-    return '<g transform="'+t+'"><rect x="'+x+'" y="'+top+'" width="'+w+'" height="'+len+'" rx="'+(w/2)+'" fill="url(#@fg)"/>'+
-      '<rect x="'+x+'" y="'+top+'" width="'+w+'" height="'+len+'" rx="'+(w/2)+'" fill="url(#@fv)"/>'+
-      '<ellipse cx="'+(cx-w*.2)+'" cy="'+(top+len-w*.62)+'" rx="'+(w*.15)+'" ry="'+(w*.3)+'" fill="#fff" opacity=".55" filter="url(#@b1)"/>'+
-      '<path d="M'+(cx-w*.5+1)+' '+(top+8)+'V'+(top+len-10)+'" stroke="#B9566C" stroke-width="1.6" opacity=".22" fill="none" filter="url(#@b1)"/></g>'}
-  var A='<g mask="url(#@mk)"><g>'+fing(-34,206,24,64,-7)+fing(-12,210,24,78,-2.5)+fing(11,210,24,74,2)+fing(33,206,24,60,7)+'</g>'+
-    '<g transform="rotate(-26 46 166)"><rect x="34" y="160" width="27" height="64" rx="13.5" fill="url(#@fg)"/><rect x="34" y="160" width="27" height="64" rx="13.5" fill="url(#@fv)"/><ellipse cx="41" cy="208" rx="3.6" ry="8" fill="#fff" opacity=".55" filter="url(#@b1)"/></g>'+
-    '<path d="'+PALM+'" fill="url(#@pm)"/>'+
-    '<g clip-path="url(#@cp)"><ellipse cx="-16" cy="166" rx="24" ry="16" fill="#fff" opacity=".3" filter="url(#@b4)"/><ellipse cx="36" cy="214" rx="26" ry="20" fill="#B24E66" opacity=".2" filter="url(#@b4)"/><path d="M-50 232Q0 246 50 232" stroke="#B24E66" stroke-width="7" fill="none" opacity=".26" filter="url(#@b2)"/></g></g>';
-  /* ---- B: قبضة ممتلئة (4 مفاصل بارزة من تحت + إبهام ملفوف) ---- */
-  var FB='M-28 138C-30 160 -48 170 -48 202C-48 234 -44 254 -32 264L32 264C44 254 48 234 48 202C48 170 30 160 28 138Z';
-  var cpB='<clipPath id="@cq"><path d="'+FB+'"/></clipPath>';
-  function bump(x,top,len,w){var rx=w/2,y=top;return '<g><rect x="'+(x-rx)+'" y="'+(top+3)+'" width="'+w+'" height="'+len+'" rx="'+rx+'" fill="#7E2F4A" opacity=".24" filter="url(#@b2)"/>'+
-    '<rect x="'+(x-rx)+'" y="'+top+'" width="'+w+'" height="'+len+'" rx="'+rx+'" fill="url(#@fg)"/>'+
-    '<rect x="'+(x-rx)+'" y="'+top+'" width="'+w+'" height="'+len+'" rx="'+rx+'" fill="url(#@fv)"/>'+
-    '<ellipse cx="'+(x-rx*.38)+'" cy="'+(top+len-rx*1.2)+'" rx="'+(rx*.28)+'" ry="'+(rx*.55)+'" fill="#fff" opacity=".5" filter="url(#@b1)"/></g>'}
-  var B='<g mask="url(#@mk)"><path d="'+FB+'" fill="url(#@pm)"/>'+
-   '<g clip-path="url(#@cq)">'+
-    '<ellipse cx="-17" cy="170" rx="25" ry="18" fill="#fff" opacity=".32" filter="url(#@b4)"/>'+
-    '<ellipse cx="40" cy="226" rx="24" ry="50" fill="#B24E66" opacity=".2" filter="url(#@b4)"/>'+
-    '<path d="M-46 240C-20 248 20 248 46 240" stroke="#A9465E" stroke-width="7" fill="none" opacity=".3" filter="url(#@b2)"/>'+
-   '</g>'+
-   bump(-33,236,44,25)+bump(-11,238,46,25)+bump(11,238,46,25)+bump(33,236,43,25)+
-   '<g transform="rotate(24 40 218)"><ellipse cx="36" cy="246" rx="17" ry="28" fill="#7E2F4A" opacity=".26" filter="url(#@b2)" transform="translate(-6 4)"/>'+
-   '<rect x="24" y="212" width="28" height="54" rx="14" fill="url(#@fg)"/><rect x="24" y="212" width="28" height="54" rx="14" fill="url(#@fv)"/><ellipse cx="32" cy="228" rx="3.6" ry="8.5" fill="#fff" opacity=".55" filter="url(#@b1)"/></g></g>';
-  var base='<path d="'+ARM+'" fill="url(#@arm)"/>'+
-   '<path d="M-10 -340H4C4 -140 3 40 0 170H-12C-10 40 -11 -140 -10 -340Z" fill="#fff" opacity=".2" filter="url(#@b2)"/>'+
-   '<path d="M22 -340H31C31 -170 30 60 28 170H18C21 40 22 -170 22 -340Z" fill="#B85A6C" opacity=".2" filter="url(#@b2)"/>'+
-   '';
+  function DEFS(fx,fy,fw,fh){return '<linearGradient id="@sk" gradientUnits="userSpaceOnUse" x1="-54" y1="0" x2="54" y2="0"><stop offset="0" stop-color="#E48A92"/><stop offset=".12" stop-color="#F2A8A2"/><stop offset=".3" stop-color="#FDCFC3"/><stop offset=".52" stop-color="#F8B6AA"/><stop offset=".78" stop-color="#EFA09E"/><stop offset="1" stop-color="#DD8796"/></linearGradient>'+
+   '<linearGradient id="@mg" gradientUnits="userSpaceOnUse" x1="0" y1="128" x2="0" y2="162"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient>'+
+   '<mask id="@mk" maskUnits="userSpaceOnUse" x="-120" y="-340" width="240" height="700"><rect x="-120" y="-340" width="240" height="700" fill="url(#@mg)"/></mask>'+
+   '<filter id="@b1" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.1"/></filter>'+
+   '<filter id="@b2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.6"/></filter>'+
+   '<filter id="@b4" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5.5"/></filter>'+
+   /* ظل حواف داخلي (تحت-يمين) + لمعة حواف (فوق-شمال): بيدّي حجم "طين" للشكل المتصل كله */
+   '<filter id="@in" filterUnits="userSpaceOnUse" x="'+fx+'" y="'+fy+'" width="'+fw+'" height="'+fh+'" color-interpolation-filters="sRGB">'+
+    '<feGaussianBlur in="SourceAlpha" stdDeviation="4.6" result="bl"/>'+
+    '<feOffset in="bl" dx="-3.5" dy="-4" result="bs"/><feComposite in="SourceAlpha" in2="bs" operator="out" result="rs"/>'+
+    '<feFlood flood-color="#B04866" flood-opacity=".42"/><feComposite in2="rs" operator="in" result="shade"/>'+
+    '<feOffset in="bl" dx="3" dy="3.5" result="bh"/><feComposite in="SourceAlpha" in2="bh" operator="out" result="rh"/>'+
+    '<feFlood flood-color="#fff" flood-opacity=".5"/><feComposite in2="rh" operator="in" result="glow"/>'+
+    '<feMerge><feMergeNode in="shade"/><feMergeNode in="glow"/></feMerge></filter>'}
+  var DARM=DEFS(-64,-340,128,560),DHAND=DEFS(-76,92,160,210);
+  /* ---- أدوات رسم (ملحوظة: جوّا clipPath مفيش <g>، الـ transform لازم يبقى على الشكل نفسه) ---- */
+  function tr(rot,px,py){return rot?' transform="rotate('+rot+' '+px+' '+py+')"':''}
+  /* صباع/إبهام مدبّب ناعم: عرضه wb عند القاعدة و wt عند الطرف، وطرفه مدوّر */
+  function fing(cx,top,wb,wt,len,rot,py){
+    var yb=top+len-wt/2;
+    return '<path d="M'+(cx-wb/2)+' '+top+'L'+(cx-wt/2)+' '+yb+'A'+(wt/2)+' '+(wt/2)+' 0 0 0 '+(cx+wt/2)+' '+yb+'L'+(cx+wb/2)+' '+top+'Z"'+tr(rot,cx,py==null?top:py)+'/>'}
+  /* موضع نقطة على محور صباع مايل (لخطوط الفصل) */
+  function axisX(cx,top,rot,y){var a=rot*Math.PI/180;return cx-(y-top)/Math.cos(a)*Math.sin(a)}
+  /* لمعة + احمرار طرف الصباع (جوّا نفس الشكل) */
+  function tip(cx,top,wt,len,rot,py){
+    var g='<ellipse cx="'+cx+'" cy="'+(top+len-wt*.45)+'" rx="'+(wt*.5)+'" ry="'+(wt*.45)+'" fill="#EE8590" opacity=".3" filter="url(#@b2)"/>'+
+          '<ellipse cx="'+(cx-wt*.2)+'" cy="'+(top+len-wt*.7)+'" rx="'+(wt*.13)+'" ry="'+(wt*.3)+'" fill="#fff" opacity=".6" filter="url(#@b1)"/>';
+    return '<g transform="rotate('+rot+' '+cx+' '+(py==null?top:py)+')">'+g+'</g>'}
+  /* خط فصل: ظل رفيع + إضاءة جنبه */
+  function crease(d,op,w){op=op==null?.5:op;w=w||2.4;
+    return '<path d="'+d+'" fill="none" stroke="#9A3A58" stroke-width="'+w+'" stroke-linecap="round" opacity="'+op+'" filter="url(#@b1)"/>'+
+           '<path d="'+d+'" transform="translate(2.6 .6)" fill="none" stroke="#fff" stroke-width="'+(w*.65)+'" stroke-linecap="round" opacity="'+(op*.55)+'" filter="url(#@b1)"/>'}
+  /* تجميعة الطبقة: لون واحد على الشكل كله + تفاصيل + ظل الحواف (+ over: حاجة بتبان قدّام الشكل زي إبهام القبضة). الأعلى بيدوب في الذراع بقناع */
+  function layer(shapes,detail,over){
+    return '<g mask="url(#@mk)"><clipPath id="@cp">'+shapes+'</clipPath>'+
+      '<g clip-path="url(#@cp)"><rect x="-120" y="96" width="240" height="240" fill="url(#@sk)"/>'+detail+'</g>'+
+      '<g filter="url(#@in)" fill="#000">'+shapes+'</g>'+(over||'')+'</g>'}
+
+  /* ---- الذراع: مخروط ناعم، وعند الرسغ بيتوسع بنفس منحنى كتف الكف بالظبط (فمفيش خط وصل) ---- */
+  var SH='C39 148 52 164 52 196';              // كتف الكف الأيمن (مشترك بين الذراع وA وB)
+  var ARM='M-31 -340H31C31 -170 36 40 37 118'+SH+'V206H-52V196C-52 164 -39 148 -37 118C-36 40 -31 -170 -31 -340Z';
+  var base='<clipPath id="@ac"><path d="'+ARM+'"/></clipPath>'+
+    '<g clip-path="url(#@ac)"><rect x="-120" y="-340" width="240" height="560" fill="url(#@sk)"/>'+
+    '<path d="M-17 -340H-3C-3 -140 -4 60 -7 206H-20C-17 60 -17 -140 -17 -340Z" fill="#fff" opacity=".3" filter="url(#@b2)"/>'+
+    '<path d="M23 -340H35C35 -170 37 60 37 206H24C26 60 23 -170 23 -340Z" fill="#B85A6C" opacity=".22" filter="url(#@b2)"/></g>'+
+    '<g filter="url(#@in)" fill="#000"><path d="'+ARM+'"/></g>';
+
+  /* ---- A: إيد مرتخية: كفّ ممتلئ + 4 أصابع قصيرة تخينة مختلفة الطول (مدببة شوية) + إبهام صغير طالع من الكف نفسه ---- */
+  var PA='<path d="M-37 100V118C-39 148 -52 164 -52 196C-52 212 -49 224 -43 229H43C49 224 52 212 52 196'+'C52 164 39 148 37 118V100Z"/>';
+  var FA=[[-35,206,26.5,23,46,9],[-12,206,27,23.5,60,3.5],[11,206,27,23.5,62,-2],[33.5,206,26.5,23,52,-8.5]];
+  var SA=PA,DA='',i;
+  FA.forEach(function(f){SA+=fing(f[0],f[1],f[2],f[3],f[4],f[5])});
+  SA+=fing(46,172,27,23,48,-64,182);
+  DA+='<ellipse cx="-17" cy="164" rx="26" ry="20" fill="#fff" opacity=".36" filter="url(#@b4)"/>'+
+     '<ellipse cx="49" cy="212" rx="9" ry="14" fill="#A9465E" opacity=".16" filter="url(#@b2)"/>'+
+     '<ellipse cx="36" cy="204" rx="22" ry="34" fill="#B24E66" opacity=".16" filter="url(#@b4)"/>';
+  for(i=0;i<3;i++){var a=FA[i],b=FA[i+1];
+    DA+=crease('M'+((axisX(a[0],a[1],a[5],214)+axisX(b[0],b[1],b[5],214))/2).toFixed(1)+' 214Q'+((a[0]+b[0])/2).toFixed(1)+' 232 '+((axisX(a[0],a[1],a[5],252)+axisX(b[0],b[1],b[5],252))/2).toFixed(1)+' 250',.4,2.2)}
+  FA.forEach(function(f){DA+=tip(f[0],f[1],f[3],f[4],f[5])});
+  /* الإبهام: طرف أحمر + لمعة + خط التقاء ناعم مع الكف */
+  DA+='<g transform="rotate(-64 46 182)"><ellipse cx="46" cy="212" rx="11" ry="10" fill="#EE8590" opacity=".28" filter="url(#@b2)"/><ellipse cx="40.5" cy="205" rx="3.3" ry="7.5" fill="#fff" opacity=".55" filter="url(#@b1)"/></g>';
+  var A=layer(SA,DA);
+
+  /* ---- B: قبضة طفل: ضهر الكف مدوّر من تحت + 3 مفاصل أصابع بارزة بشويّة + إبهام ملفوف قدّامهم (بيبان بظل خفيف) ---- */
+  var PB='<path d="M-37 100V118C-39 148 -52 164 -52 196C-52 230 -49 252 -34 262C-20 270 20 270 34 262C49 252 52 230 52 196'+'C52 164 39 148 37 118V100Z"/>';
+  var FBs=[[-34,226,26,44,0],[-11,228,26,46,0],[12,229,26,45,0]];
+  var SB=PB;
+  FBs.forEach(function(f){SB+=fing(f[0],f[1],f[2],f[2],f[3]+f[4]*0)});
+  var THB=function(){return fing(34,206,31,25.5,78,15,214)};
+  SB+=THB();
+  var DB='<ellipse cx="-18" cy="168" rx="27" ry="20" fill="#fff" opacity=".38" filter="url(#@b4)"/>'+
+     '<ellipse cx="38" cy="216" rx="22" ry="46" fill="#B24E66" opacity=".17" filter="url(#@b4)"/>';
+  /* خطوط ناعمة قصيرة بين المفاصل (بتتحس بس) */
+  DB+=crease('M-22.5 252Q-23.5 259 -22 267',.42,2.2)+crease('M0.5 254Q-0.5 262 1 270',.42,2.2);
+  FBs.forEach(function(f){DB+='<ellipse cx="'+f[0]+'" cy="'+(f[1]+f[3]-12)+'" rx="12" ry="9" fill="#EE8590" opacity=".26" filter="url(#@b2)"/><ellipse cx="'+(f[0]-5)+'" cy="'+(f[1]+f[3]-15)+'" rx="3.2" ry="6.5" fill="#fff" opacity=".55" filter="url(#@b1)"/>'});
+  /* الإبهام قدّام: ظل واقع على الأصابع + جسمه بنفس لون الجلد وله ظل حواف خاص */
+  var over='<g clip-path="url(#@cp)"><path d="M17 232C9 246 9 262 15 276" fill="none" stroke="#7E2442" stroke-width="9" stroke-linecap="round" opacity=".3" filter="url(#@b2)"/></g>'+
+    '<g filter="url(#@in)" fill="#000">'+THB()+'</g>'+
+    '<g clip-path="url(#@tc)"><rect x="-120" y="96" width="240" height="240" fill="url(#@sk)"/>'+
+    '<g transform="rotate(15 34 214)"><ellipse cx="34" cy="266" rx="14" ry="12" fill="#EE8590" opacity=".28" filter="url(#@b2)"/><ellipse cx="28" cy="257" rx="3.4" ry="8" fill="#fff" opacity=".6" filter="url(#@b1)"/><ellipse cx="43" cy="238" rx="6" ry="24" fill="#fff" opacity=".2" filter="url(#@b2)"/></g></g>'+
+    '<g filter="url(#@in)" fill="#000">'+THB()+'</g>';
+  over='<clipPath id="@tc">'+THB()+'</clipPath>'+'<linearGradient id="@tg" gradientUnits="userSpaceOnUse" x1="0" y1="206" x2="0" y2="240"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient><mask id="@tm" maskUnits="userSpaceOnUse" x="-120" y="-340" width="240" height="700"><rect x="-120" y="-340" width="240" height="700" fill="url(#@tg)"/></mask><g mask="url(#@tm)">'+over+'</g>';
+  var B=layer(SB,DB,over);
+
   return '<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px">'+
-    wrap("akp-pbase",u+"c",base,D)+
-    wrap("akp-pa",u+"a",A,D+cpA)+
-    wrap("akp-pb",u+"b",B,D+cpB)+'</div>'}
+    wrap("akp-pbase",u+"c",base,DARM)+
+    wrap("akp-pa",u+"a",A,DHAND)+
+    wrap("akp-pb",u+"b",B,DHAND)+'</div>'}
 
 /* ===== ظل ناعم تحت الإيد (طبقة منفصلة بـ multiply عشان تتفاعل مع القماش). المركز = مركز القبضة ===== */
 function akShadowSVG(){
   return '<svg width="260" height="400" viewBox="-130 -200 260 400" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><defs>'+
    '<filter id="akSb1" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8"/></filter>'+
    '<filter id="akSb2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter></defs>'+
-   '<g filter="url(#akSb1)" fill="#0a0420" opacity=".36"><rect x="-27" y="-200" width="54" height="170" rx="24"/><rect x="-46" y="-62" width="92" height="132" rx="42"/></g>'+
-   '<g filter="url(#akSb2)" fill="#0a0420" opacity=".34"><rect x="-40" y="-46" width="80" height="100" rx="34"/></g></svg>'}
+   '<g filter="url(#akSb1)" fill="#0a0420" opacity=".3"><rect x="-31" y="-200" width="62" height="170" rx="26"/><rect x="-52" y="-62" width="104" height="134" rx="44"/></g>'+
+   '<g filter="url(#akSb2)" fill="#0a0420" opacity=".28"><rect x="-42" y="-46" width="84" height="100" rx="36"/></g></svg>'}
 
-/* ===== تجاعيد القماش: طيّات عريضة ناعمة (حجم) + طيّات رفيعة (تفاصيل) + تجمّع صغير عند نقطة المسك.
-   كل طية شريط مدبّب (يتسع في النص ويضيق في الآخر) بضلّ من ناحية وإضاءة من الناحية التانية، بإضاءة من فوق-شمال ===== */
+/* ===== تجاعيد القماش: شوية طيّات بس، كل طية خط رفيع مدبّب (ظل من ناحية وإضاءة من الناحية التانية) بيطلع من نقطة المسك ويخفت مع المسافة.
+   زي مرجع التصميم: حوالي 11 طية أساسية + 4 صغيرة، من غير بقع blur عريضة ولا تجمّع حوالين القبضة ===== */
 function akFoldSVG(seed,size){
-  var R=akRnd(seed),h=320,i,bD="",bL="",fD="",fL="",pD="",pL="";
-  function rib(a,L,r0,w1,w2,bend){
-    var nx=-Math.sin(a),ny=Math.cos(a),x0=Math.cos(a)*r0,y0=Math.sin(a)*r0*.94,x2=Math.cos(a)*(r0+L),y2=Math.sin(a)*(r0+L)*.98;
+  var R=akRnd(seed),h=320,i,hD="",hL="",bD="",bL="",fD="",fL="";
+  function rib(a,L,r0,wmax,bend){
+    var nx=-Math.sin(a),ny=Math.cos(a),x0=Math.cos(a)*r0,y0=Math.sin(a)*r0,x2=Math.cos(a)*(r0+L),y2=Math.sin(a)*(r0+L);
     var cx=(x0+x2)/2+nx*bend*L,cy=(y0+y2)/2+ny*bend*L,pts=[],k;
-    for(k=0;k<=16;k++){var t=k/16,mt=1-t,bx=mt*mt*x0+2*mt*t*cx+t*t*x2,by=mt*mt*y0+2*mt*t*cy+t*t*y2;
+    for(k=0;k<=18;k++){var t=k/18,mt=1-t,bx=mt*mt*x0+2*mt*t*cx+t*t*x2,by=mt*mt*y0+2*mt*t*cy+t*t*y2;
       var tx=2*mt*(cx-x0)+2*t*(x2-cx),ty=2*mt*(cy-y0)+2*t*(y2-cy),tl=Math.hypot(tx,ty)||1;
-      /* العرض: بيبدأ رفيع، يتسع، وبعدين يدبّب ناعم لحد الصفر */
-      var w=(w1+(w2-w1)*Math.sin(Math.min(1,t*1.15)*Math.PI/2))*Math.pow(1-t,.7)*(.55+.45*Math.sin(t*Math.PI*.9+.2));
-      pts.push([bx,by,-ty/tl,tx/tl,Math.max(.2,w)])}
+      /* العرض: صفر عند الأصل، يتسع بسرعة، وبعدين يدبّب لحد الصفر في الآخر */
+      var w=wmax*Math.sin(Math.PI*Math.pow(t,.78))*(.5+.5*(1-t));
+      pts.push([bx,by,-ty/tl,tx/tl,Math.max(.15,w)])}
     function poly(off,wm){var A1=[],B1=[];pts.forEach(function(p){var w=p[4]*wm/2,o=p[4]*off;
       A1.push((p[0]+p[2]*(o+w)).toFixed(1)+" "+(p[1]+p[3]*(o+w)).toFixed(1));B1.unshift((p[0]+p[2]*(o-w)).toFixed(1)+" "+(p[1]+p[3]*(o-w)).toFixed(1))});
       return "M"+A1.join("L")+"L"+B1.join("L")+"Z"}
     return poly}
-  var gb=function(a){var cs=Math.cos(a),sn=Math.sin(a);return (cs>0?1:-1)*(.05+R()*.13)*(sn>-.3?1:-.5)+(R()-.5)*.06};
-  /* طيّات عريضة ناعمة: بتدي الإحساس بالشدّ والحجم */
-  var NB=14;
-  for(i=0;i<NB;i++){
-    var a=i/NB*Math.PI*2+(R()-.5)*.3,L=150+R()*130+(Math.sin(a)+1)*50,w2=30+R()*26,d=R();
-    var poly=rib(a,L,30+R()*8,10,w2,gb(a)),op=(.45+d*.45).toFixed(2);
-    bD+='<path d="'+poly(.38,1)+'" opacity="'+op+'"/>';bL+='<path d="'+poly(-.42,.8)+'" opacity="'+op+'"/>'}
-  /* طيّات رفيعة */
-  var NF=34;
-  for(i=0;i<NF;i++){
-    var a2=i/NF*Math.PI*2+(R()-.5)*.3,sn=Math.sin(a2),L2=60+R()*110+(sn+1)*70,d2=R();
-    var p2=rib(a2,L2,26+R()*16,1.6+R()*1,4+R()*5.5,gb(a2)),o2=(.5+d2*.5).toFixed(2);
-    fD+='<path d="'+p2(.4,1)+'" opacity="'+o2+'"/>';fL+='<path d="'+p2(-.4,.75)+'" opacity="'+o2+'"/>';
-    if(R()<.35){var a3=a2+(R()<.5?-1:1)*(.14+R()*.14),p3=rib(a3,L2*.45,40+R()*25,1,3+R()*3,gb(a3)*.8);fD+='<path d="'+p3(.4,1)+'" opacity="'+(o2*.7).toFixed(2)+'"/>';fL+='<path d="'+p3(-.4,.75)+'" opacity="'+(o2*.7).toFixed(2)+'"/>'}}
-  /* تجمّع القماش حوالين القبضة */
-  for(i=0;i<14;i++){
-    var a4=i/14*Math.PI*2+(R()-.5)*.4,p4=rib(a4,22+R()*30,10+R()*6,2,5+R()*4,gb(a4)*1.4);
-    pD+='<path d="'+p4(.4,1)+'" opacity=".9"/>';pL+='<path d="'+p4(-.4,.7)+'" opacity=".8"/>'}
+  /* زوايا الطيّات الأساسية (0=يمين، 90=تحت): مفيش طيّات طالعة لفوق مباشرة عشان الذراع هناك */
+  var ang=[-24,-3,24,47,69,91,113,135,158,184,206];
+  for(i=0;i<ang.length;i++){
+    var a=(ang[i]+(R()-.5)*10)*Math.PI/180,sn=Math.sin(a);
+    var L=(sn>.35?175+R()*70:sn>-.1?140+R()*70:95+R()*55),wm=6.5+R()*3,bend=(R()<.5?-1:1)*(.03+R()*.07);
+    var p=rib(a,L,26+R()*10,wm,bend),op=(.7+R()*.3).toFixed(2);
+    hD+='<path d="'+p(.3,2.6)+'" opacity="'+op+'"/>';hL+='<path d="'+p(-.3,2.6)+'" opacity="'+op+'"/>';
+    bD+='<path d="'+p(.4,.62)+'" opacity="'+op+'"/>';bL+='<path d="'+p(-.45,.5)+'" opacity="'+op+'"/>'}
+  /* طيّات صغيرة بين الكبار */
+  for(i=0;i<4;i++){
+    var a2=(ang[1+i*3]+(ang[2+i*3]-ang[1+i*3])*(.35+R()*.3))*Math.PI/180,L2=70+R()*55,p2=rib(a2,L2,34+R()*8,3.4+R()*1.4,(R()<.5?-1:1)*.05);
+    fD+='<path d="'+p2(.4,.62)+'" opacity=".75"/>';fL+='<path d="'+p2(-.45,.5)+'" opacity=".7"/>'}
   return '<svg class="akp-fsvg" viewBox="'+(-h)+' '+(-h)+' 640 640" width="'+size+'" height="'+size+'" xmlns="http://www.w3.org/2000/svg"><defs>'+
-   '<radialGradient id="akpM" cx="0" cy="0" r="'+h+'" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#fff" stop-opacity=".92"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
+   '<radialGradient id="akpM" cx="0" cy="0" r="'+h+'" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
    '<mask id="akpMask" maskUnits="userSpaceOnUse" x="'+(-h)+'" y="'+(-h)+'" width="640" height="640"><rect x="'+(-h)+'" y="'+(-h)+'" width="640" height="640" fill="url(#akpM)"/></mask>'+
-   '<radialGradient id="akpV" cx="0" cy="0" r="200" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#000" stop-opacity=".62"/><stop offset=".25" stop-color="#000" stop-opacity=".3"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>'+
-   '<filter id="akpB0" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="9"/></filter>'+
-   '<filter id="akpB1" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.8"/></filter>'+
-   '<filter id="akpB2" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1"/></filter></defs>'+
-   '<g class="akp-fg" mask="url(#akpMask)"><circle r="200" fill="url(#akpV)"/>'+
-   '<g fill="#07041a" opacity=".6" filter="url(#akpB0)">'+bD+'</g><g fill="#fff" opacity=".42" filter="url(#akpB0)">'+bL+'</g>'+
-   '<g fill="#07041a" opacity=".85" filter="url(#akpB1)">'+fD+'</g><g fill="#fff" opacity=".9" filter="url(#akpB1)">'+fL+'</g>'+
-   '<g fill="#07041a" opacity=".9" filter="url(#akpB2)">'+pD+'</g><g fill="#fff" opacity=".7" filter="url(#akpB2)">'+pL+'</g></g></svg>'}
+   '<filter id="akpB0" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>'+
+   '<filter id="akpB1" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.5"/></filter></defs>'+
+   '<g class="akp-fg" mask="url(#akpMask)">'+
+   '<g fill="#07041a" opacity=".22" filter="url(#akpB0)">'+hD+'</g><g fill="#fff" opacity=".16" filter="url(#akpB0)">'+hL+'</g>'+
+   '<g fill="#07041a" opacity=".52" filter="url(#akpB1)">'+bD+fD+'</g><g fill="#fff" opacity=".58" filter="url(#akpB1)">'+bL+fL+'</g></g></svg>'}
 
 (function(){
   var hd=document.getElementById("hd"),app=document.getElementById("app");
