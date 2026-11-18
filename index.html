@@ -11361,8 +11361,8 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 #akShd{left:50%;margin-left:-130px;width:260px;height:400px;margin-top:-200px;mix-blend-mode:multiply;will-change:transform,opacity}
 #akHand{left:50%;width:0;height:0;will-change:transform}
 #akHand .akp-hsvg{position:absolute;top:0;overflow:visible;transform-origin:50% 0;will-change:transform;backface-visibility:visible}
-#akHand .akp-pa,#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd{will-change:opacity}
-#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd{opacity:0}
+#akHand .akp-pa,#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi{will-change:opacity}
+#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi{opacity:0}
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
@@ -11406,7 +11406,7 @@ function akTint(h,P){
    نقطة المسك (مركز القبضة) عند y=206. تغيير الألوان: WH لون القفاز، BL لون الظل، OL لون الإطار والذراع، SW سمك الإطار ===== */
 function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   var u=uid||"h",W=240*sh*kx,H=700*sh*ky;
-  var WH="#FFFFFF",BL="#D3EEFC",OL="#1F1B4D",SW=6,cn=0;
+  var WH="#FFFFFF",BL="#B4B9C4",OL="#14141A",SW=5,cn=0;
   function wrap(cls,id,body){
     return ('<svg class="'+cls+'" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><defs></defs>'+body+'</svg>').replace(/@/g,id)}
   function tr(rot,px,py){return rot?' transform="rotate('+rot+' '+px+' '+py+')"':''}
@@ -11456,12 +11456,30 @@ function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   SD+=fing(39,200,25,25,96);
   var D=layer(SD,line('M-24.7 262L-24.7 248')+line('M0 268L0 252')+line('M27 236Q39 242 51 236'));
 
+
+  /* ---- E: علامة النصر (V): صباعين مفتوحين + الباقي مقفول ---- */
+  var SE=PB+'<circle cx="-37" cy="250" r="18.5"/><circle cx="37" cy="250" r="18.5"/>'+fing(-14,196,23,22,132,12,200)+fing(14,196,23,22,132,-12,200)+'<rect x="-22" y="226" width="44" height="24" rx="12"/>';
+  var E=layer(SE,line('M-37 262L-37 248')+line('M37 262L37 248')+line('M-24 236Q0 246 24 236'));
+  /* ---- F: OK: دايرة من السبابة والإبهام + 3 صوابع مفتوحة ---- */
+  var SF=PA;[0,1,2].forEach(function(i){var f=FA[i];SF+=fing(f[0],f[1],f[2],f[3],f[4]+8,f[5]*1.4)});
+  SF+='<circle cx="46" cy="236" r="23"/>';
+  var F=layer(SF,'<ellipse cx="46" cy="238" rx="8.5" ry="10.5" fill="#fff" stroke="'+OL+'" stroke-width="3.4"/>'+DA);
+  /* ---- G: صوابع متقاطعة (حظ سعيد / بتتكسّف) ---- */
+  var SG=PB+'<circle cx="-37" cy="250" r="18.5"/><circle cx="37" cy="250" r="18.5"/>'+fing(-9,196,23,22,134,-17,200)+fing(9,196,23,22,134,17,200);
+  var G=layer(SG,line('M-37 262L-37 248')+line('M37 262L37 248')+line('M-10 244L10 258'));
+  /* ---- H: مسدس بالصوابع: سبابة طويلة + إبهام مرفوع ---- */
+  var SH=PB+'<circle cx="-37" cy="250" r="18.5"/><circle cx="-12.5" cy="256" r="18.5"/><circle cx="12.5" cy="256" r="18.5"/>'+fing(39,200,25,25,128)+'<rect x="40" y="184" width="58" height="28" rx="14" transform="rotate(-22 44 198)"/>';
+  var H=layer(SH,line('M-24.7 262L-24.7 248')+line('M0 268L0 252')+line('M27 238Q39 244 51 238'));
+  /* ---- I: مخلب (بتتعصب): صوابع مقوّسة ---- */
+  var SI=SB+'<circle cx="-40" cy="282" r="16"/><circle cx="-14" cy="296" r="16"/><circle cx="14" cy="296" r="16"/><circle cx="40" cy="282" r="16"/>';
+  var I=layer(SI,line('M-37 265L-31 271')+line('M-12 272L-10 280')+line('M12 272L10 280')+line('M37 265L31 271'));
   return '<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px">'+
     wrap("akp-pbase",u+"e",base)+
     wrap("akp-pa",u+"a",A)+
     wrap("akp-pb",u+"b",B)+
     wrap("akp-pc",u+"d",C)+
-    wrap("akp-pd",u+"f",D)+'</div>'}
+    wrap("akp-pd",u+"f",D)+
+    wrap("akp-pe",u+"g",E)+wrap("akp-pf",u+"h",F)+wrap("akp-pg",u+"i",G)+wrap("akp-ph",u+"j",H)+wrap("akp-pi",u+"k",I)+'</div>'}
 
 /* ===== ظل ناعم تحت الإيد (طبقة منفصلة بـ multiply عشان تتفاعل مع القماش). المركز = مركز القبضة ===== */
 function akShadowSVG(P){
@@ -11580,7 +11598,7 @@ function akFoldSVG(seed,size,P){
        عنيفة (من السحبة 4): strong (شدّة قوية والصفحة ترتد) / slip (القماش يفلت منها وتحاول تاني) / impatient (بتدق على الشاشة بصباعها بنفاد صبر)
        كل سحبة سادسة (6، 12، 18...): angry (بتتعصب وتخبط 3 مرات)
      لتجربة سيناريو من الكونسول: AKPull.play(0,"shy") (والأسماء فوق) أو AKPull.play(0,"angry") */
-  var SC_SOFT=["shy","twoTugs","blow","thumbs","shakeOff","normal"],SC_HARD=["strong","slip","impatient"],
+  var SC_SOFT=["shy","twoTugs","blow","thumbs","shakeOff","normal","peace","ok"],SC_HARD=["strong","slip","impatient","gun"],
       KNOWN=["wave","angry","normal"].concat(SC_SOFT,SC_HARD);
   function lastSc(){try{return sessionStorage.getItem("akps")||""}catch(e){return window._akps||""}}
   function setLastSc(v){try{sessionStorage.setItem("akps",v)}catch(e){window._akps=v}}
@@ -11598,7 +11616,7 @@ function akFoldSVG(seed,size,P){
     var scen=(typeof force==="string"&&KNOWN.indexOf(force)>=0)?force:(n===1&&firstToday())?"wave":chooseScen(n,R);
     setLastSc(scen);
     var side=(force===1||force==="right")?1:(force===-1||force==="left")?-1:(R()<.5?-1:1);   // 1 = يمين، -1 = شمال
-    var vw=window.innerWidth,sh=Math.min(vw,520)/460,K=.82,Rf=540*sh*K,u=sh*K,fs=Math.round(Math.min(640,Math.max(360,vw*1.4))),fh=fs/2,h0=Math.max(H,off||0);
+    var vw=window.innerWidth,sh=Math.min(vw,520)/460,K=.62,Rf=540*sh*K,u=sh*K,fs=Math.round(Math.min(640,Math.max(360,vw*1.4))),fh=fs/2,h0=Math.max(H,off||0);
     syncExt();build();fill(sh,K,fs);
     var cs=getComputedStyle(root),EA=(cs.getPropertyValue("--v5-ease")||"").trim()||"cubic-bezier(.22,1,.36,1)",
         EP="cubic-bezier(.55,0,.2,1)",      // الشد: بداية هادية وبعدين يسرّع ويهدى في الآخر
@@ -11626,24 +11644,30 @@ function akFoldSVG(seed,size,P){
       t+=80;st(t,{pose:0},ES);
       tg=t+260;
     }else if(scen==="shy"){     // بتطلّ من الحافة وتستخبّى وترجع
-      t+=440;st(t,{gx:side*(vw/2-26*u),gy:.55*h0,th:side*34,rx:-10,ry:side*40,so:.8,ss:1.5},EA);
+      t+=440;st(t,{gx:side*(vw/2-26*u),gy:.55*h0,th:side*34,rx:-10,ry:side*40,pose:6,so:.8,ss:1.5},EA);
       t+=380;st(t,{},ES);
       t+=340;st(t,{gx:gxS,th:side*38,rx:-22,ry:side*58,so:0},ES);
-      t+=280;st(t,{rx:0,ry:0},EA);
+      t+=280;st(t,{rx:0,ry:0,pose:0},EA);
       tg=t+700;
     }else if(scen==="angry"){   // بتتعصب وتخبط 3 مرات
       var tm=[6,-6,5,-4.5,3,0],hy=.5*h0,kd=[9,12,16];
       enter(560,hy);
-      t+=140;st(t,{pose:1},ES);
+      t+=140;st(t,{pose:8},ES);
       for(j=0;j<tm.length;j++){t+=42;st(t,{gy:hy+(j%2?4:-3),th:th0+tm[j]*side},ES)}
       for(j=0;j<3;j++){
-        t+=105;st(t,{gy:.28*h0,th:th0-5*side,rx:-28,so:.7,ss:1.6},EI);
+        t+=105;st(t,{gy:.28*h0,th:th0-5*side,rx:-28,pose:1,so:.7,ss:1.6},EI);
         t+=85;st(t,{gy:.93*h0,th:th0,rx:30,so:1,ss:1,cy:h0+kd[j]},EA);
         t+=55;st(t,{gy:.8*h0,rx:6,so:.9,ss:1.15,cy:h0-4},ES);
       }
       t+=60;st(t,{gy:.62*h0,pose:0,so:.8,ss:1.35,cy:h0+3},ES);
       t+=60;st(t,{cy:h0},EA);
       tg=t+320;
+    }else if(scen==="peace"||scen==="ok"){   // بتعمل علامة النصر / OK قبل ما تمسك
+      enter(620,.5*h0);t+=90;st(t,{pose:scen==="peace"?4:5},ES);osc([7,-7,7,-7,0],130,.5*h0);t+=90;st(t,{pose:0},ES);tg=t+260;
+    }else if(scen==="gun"){     // بتشاور بمسدس الصوابع وترجّع 3 مرات
+      enter(600,.48*h0);t+=90;st(t,{pose:7},ES);
+      for(j=0;j<3;j++){t+=110;st(t,{gy:.44*h0,rx:-16,th:th0+4*side},EI);t+=120;st(t,{gy:.5*h0,rx:6,th:th0},ES)}
+      t+=80;st(t,{pose:0,rx:0},ES);tg=t+260;
     }else tg=t+680;
 
     /* ---- المسك ---- */
@@ -11671,7 +11695,7 @@ function akFoldSVG(seed,size,P){
     }
 
     /* ---- الشدّة + بعدها ---- */
-    var keep=(scen==="thumbs"||scen==="shakeOff");   // اليد بتفضل ظاهرة بعد الشد
+    var keep=(scen==="thumbs"||scen==="shakeOff"||scen==="peace"||scen==="ok");   // اليد بتفضل ظاهرة بعد الشد
     if(scen==="strong"){
       pe=tp+380;st(tp,{},EI);
       st(pe,{cy:-12,gx:0,gy:-.3*h0,th:th0,fy2:1.8,ss:.6,so:0},EA);                // الشدّة القوية: القماش يطلع أعلى من مكانه
@@ -11692,6 +11716,14 @@ function akFoldSVG(seed,size,P){
         t+=170;st(t,{gy:.95*h0-6,ry:-24},ES);t+=120;st(t,{gy:.95*h0,ry:-38},ES);
         t+=260;st(t,{ry:-10},EA);
         t+=420;st(t,{gx:-(vw/2+110*u+30),so:0},EX);T=t;                              // وتطلع من الشمال
+      }else if(scen==="peace"||scen==="ok"){   // بتعرض الإشارة وتلف إيدها في 3D وتطلع
+        var ppz=scen==="peace"?4:5,psd=scen==="peace"?1:-1;
+        t=pe+110;st(t,{pose:ppz,fo:0,so:.6},EX);
+        t+=330;st(t,{th:90*psd,gy:.95*h0,rx:0,ry:38*psd,so:.5},ES);
+        t+=170;st(t,{gy:.95*h0-8,ry:22*psd},ES);t+=130;st(t,{gy:.95*h0,ry:38*psd},ES);
+        t+=170;st(t,{gy:.95*h0-6,ry:22*psd},ES);t+=120;st(t,{gy:.95*h0,ry:38*psd},ES);
+        t+=260;st(t,{ry:10*psd},EA);
+        t+=420;st(t,{gx:psd*(vw/2+110*u+30),so:0},EX);T=t;
       }else{
         st(pe+110,{pose:0},EX);
         st(pe+510,{gx:0,gy:fyH,th:0,fo:0},EA);T=pe+510;
@@ -11703,7 +11735,7 @@ function akFoldSVG(seed,size,P){
     var main=hand.animate(ks(function(s){var a=s.th*Rr;return {transform:"translate("+(s.gx+Rf*Math.sin(a)).toFixed(1)+"px,"+(s.gy-Rf*Math.cos(a)).toFixed(1)+"px)"}}),O);anims=[main];
     anims.push(hsvg.animate(ks(function(s){return {transform:"perspective(900px) rotateX("+s.rx+"deg) rotateY("+s.ry+"deg) rotate("+s.th+"deg)"}}),O));
     /* التبديل بين اليد المفتوحة (0) والقبضة (1) والقبضة بإبهام (2) والصباع المشاور (3): الطبقة اللي بتظهر بتظهر في أول الفترة، واللي بتختفي بتفضل لآخرها (من غير ما الإيد تبقى شفافة في النص) */
-    ["pa","pb","pc","pd"].forEach(function(cl,k){
+    ["pa","pb","pc","pd","pe","pf","pg","ph","pi"].forEach(function(cl,k){
       var L=hsvg.querySelector(".akp-"+cl);
       anims.push(L.animate(S.map(function(s,i){var nx=S[i+1],e="linear";if(nx){var a=s.pose===k?1:0,b=nx.pose===k?1:0;if(b>a)e="steps(1,start)";else if(b<a)e="steps(1,end)"}return {offset:s.t/T,opacity:s.pose===k?1:0,easing:e}}),O))});
     anims.push(fold.animate(ks(function(s){return {transform:"translate("+s.gx+"px,"+(s.gy-fh)+"px)",opacity:s.fo}}),O));
