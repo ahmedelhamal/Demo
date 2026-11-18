@@ -11350,27 +11350,123 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 })();
 </script>
 <style id="akp-css">
-/* ===== إيد بتشد الصفحة لفوق: مؤثر ترفيهي في الشاشة الرئيسية (طالب/معلم) بس، بألوان ثيم التطبيق ===== */
+/* ===== إيد بتشد الصفحة لفوق (مؤثر ترفيهي في الشاشة الرئيسية للطالب/المعلم بس) ===== */
 @media (prefers-reduced-motion:no-preference){html.akp-h{overscroll-behavior-y:contain}}
-#akPull{position:fixed;inset:0;z-index:8;pointer-events:none;display:none}
-#akPull .akp-art{position:absolute;top:0;left:50%;width:min(100%,480px);aspect-ratio:400/600;height:auto;overflow:visible;will-change:transform}
-#akPull .akp-h{transform-box:fill-box;transform-origin:50% 100%}
-#akPull .akp-w{transform-box:view-box;transform-origin:200px 140px}
-#akPull .akp-top{position:absolute;left:0;right:0;top:0;height:calc(env(safe-area-inset-top,0px) + 90px);background:linear-gradient(var(--bg) 25%,transparent);opacity:0}
-#akPull{filter:drop-shadow(0 12px 14px color-mix(in srgb,var(--h2) 38%,transparent))}
+#akExt{position:absolute;z-index:0;height:0;pointer-events:none}
+#akExt .akp-ext-in{position:absolute;left:0;right:0;bottom:0;transform:scaleY(-1);background-repeat:repeat-y}
+#akFold,#akShd,#akHand{position:fixed;top:0;pointer-events:none;display:none;z-index:8}
+#akFold{left:50%;margin-left:-320px;width:640px;height:640px;mix-blend-mode:overlay;will-change:transform,opacity}
+#akShd{left:50%;margin-left:-120px;width:240px;height:150px;margin-top:-75px;mix-blend-mode:multiply;will-change:transform,opacity;
+  background:radial-gradient(closest-side at 50% 50%,rgba(10,4,32,.55),rgba(10,4,32,.22) 50%,transparent 100%)}
+#akFold .akp-fg{transform-origin:0 0;transform-box:view-box}
+#akHand{left:50%;width:0;height:0;will-change:transform}
+#akHand .akp-hsvg{position:absolute;top:0;overflow:visible;transform-origin:50% 0;will-change:transform}
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
-/* لما الطالب يسحب الصفحة لتحت من فوق: الصفحة تنزل وتثبت، وإيد تنزل من فوق (تحت طبقة الأيقونات/الظل)
-   وتمسك حرف الصفحة وتشدها لفوق. بصري فقط. بيشتغل في الرئيسية بتاعت الطالب والمعلم بس. بيقفل مع reduce-motion أو localStorage.pullhand="0". */
+/* الإيد + القماش: الصفحة بتنزل مع السحب (والهيدر يكمّل لفوق بنفس اللون)، وإيد تنزل وتمسك القماش وتشده لفوق.
+   السحبة 1 و2 مباشرة، والتالتة بتدور ثانية/اتنين وبعدين تشد. بيشتغل في الرئيسية بس. تقفله: localStorage.pullhand="0" */
+/* ---- art: hand + folds generators (shared by test harness and app) ---- */
+function akRnd(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+function akHandSVG(sh,uid){
+  var u=uid||"h";
+  /* pose A: relaxed paw (fingers hanging, thumb out) — pose B: closed fist */
+  function shapesA(f,s){var a=(f?' fill="'+f+'"':' fill="none"')+(s?' '+s:'');return ''+
+    '<rect x="44" y="210" width="27" height="44" rx="13.5" transform="rotate(-42 54 216)"'+a+'/>'+
+    '<rect x="-48" y="226" width="26" height="58" rx="13" transform="rotate(5 -35 226)"'+a+'/>'+
+    '<rect x="-22" y="228" width="27" height="72" rx="13.5" transform="rotate(2 -8 228)"'+a+'/>'+
+    '<rect x="4" y="228" width="27" height="70" rx="13.5" transform="rotate(-2 17 228)"'+a+'/>'+
+    '<rect x="30" y="226" width="25" height="54" rx="12.5" transform="rotate(-6 42 226)"'+a+'/>'+
+    '<rect x="-56" y="180" width="112" height="76" rx="36"'+a+'/>'}
+  function shapesB(f,s){var a=(f?' fill="'+f+'"':' fill="none"')+(s?' '+s:'');return ''+
+    '<rect x="-58" y="182" width="116" height="104" rx="46"'+a+'/>'+
+    '<rect x="-50" y="244" width="27" height="50" rx="13.5"'+a+'/>'+
+    '<rect x="-25" y="248" width="28" height="52" rx="14"'+a+'/>'+
+    '<rect x="1" y="248" width="28" height="52" rx="14"'+a+'/>'+
+    '<rect x="26" y="244" width="26" height="46" rx="13"'+a+'/>'+
+    '<rect x="-72" y="216" width="26" height="56" rx="13" transform="rotate(-24 -59 220)"'+a+'/>'}
+  var P=function(x){return x.replace(/@/g,u)};
+  var svg='<svg class="akp-hsvg" viewBox="-120 -300 240 700" width="'+(240*sh)+'" height="'+(700*sh)+'" xmlns="http://www.w3.org/2000/svg"><defs>'+
+  '<linearGradient id="@ga" gradientUnits="userSpaceOnUse" x1="-38" x2="38"><stop offset="0" stop-color="#E58A92"/><stop offset=".16" stop-color="#F6B0AB"/><stop offset=".4" stop-color="#FFD5CC"/><stop offset=".66" stop-color="#F4A9A7"/><stop offset=".9" stop-color="#E5909A"/><stop offset="1" stop-color="#F3A5A4"/></linearGradient>'+
+  '<linearGradient id="@gf" x1="0" x2="1"><stop offset="0" stop-color="#EE9B9E"/><stop offset=".32" stop-color="#FFD0C8"/><stop offset=".72" stop-color="#F4A9A8"/><stop offset="1" stop-color="#DE8791"/></linearGradient>'+
+  '<radialGradient id="@gp" cx=".36" cy=".26" r=".85"><stop offset="0" stop-color="#FFE0D9"/><stop offset=".5" stop-color="#F8B8B1"/><stop offset="1" stop-color="#DF8A94"/></radialGradient>'+
+  '<filter id="@b2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2"/></filter>'+
+  '<filter id="@b4" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>'+
+  '<filter id="@b8" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8"/></filter>'+
+  '<clipPath id="@ca">'+shapesA("#000")+'</clipPath><clipPath id="@cb">'+shapesB("#000")+'</clipPath>'+
+  '<clipPath id="@cm"><path d="M-37 -300H37L33 -20C32 60 30 130 28 200H-28C-30 130 -32 60 -33 -20Z"/></clipPath></defs>';
+  /* forearm */
+  svg+='<g><path d="M-37 -300H37C37 -120 35 60 29 200H-29C-35 60 -37 -120 -37 -300Z" fill="url(#@ga)"/>'+
+       '<g clip-path="url(#@cm)"><ellipse cx="-13" cy="60" rx="6" ry="95" fill="#fff" opacity=".5" filter="url(#@b4)"/>'+
+       '<ellipse cx="26" cy="60" rx="9" ry="110" fill="#B8566A" opacity=".28" filter="url(#@b8)"/>'+
+       '<rect x="-40" y="186" width="80" height="16" fill="#C4616F" opacity=".38" filter="url(#@b4)"/></g></g>';
+  /* pose A */
+  svg+='<g class="akp-pa">'+shapesA("url(#@gf)")+
+    '<g clip-path="url(#@ca)">'+
+      '<g filter="url(#@b4)" opacity=".55">'+shapesA("none",'stroke="#FF8E9A" stroke-width="7"')+'</g>'+
+      '<g filter="url(#@b2)" stroke="#9E3F58" stroke-width="3.4" opacity=".55" stroke-linecap="round"><path d="M-22 236V290M4 236V300M30 236V290"/></g>'+
+      '<rect x="-60" y="248" width="120" height="12" fill="#B14C64" opacity=".38" filter="url(#@b4)"/>'+
+      '<ellipse cx="-22" cy="204" rx="26" ry="11" fill="#fff" opacity=".5" filter="url(#@b4)"/>'+
+      '<g fill="#fff" opacity=".45" filter="url(#@b2)"><circle cx="-33" cy="274" r="4.5"/><circle cx="-9" cy="288" r="4.5"/><circle cx="17" cy="286" r="4.5"/><circle cx="41" cy="270" r="4.5"/></g>'+
+      '<ellipse cx="38" cy="268" rx="42" ry="34" fill="#BF566C" opacity=".24" filter="url(#@b8)"/>'+
+    '</g></g>';
+  /* pose B */
+  svg+='<g class="akp-pb" opacity="0">'+shapesB("url(#@gf)")+
+    '<g clip-path="url(#@cb)">'+
+      '<g filter="url(#@b4)" opacity=".55">'+shapesB("none",'stroke="#FF8E9A" stroke-width="7"')+'</g>'+
+      '<ellipse cx="-6" cy="244" rx="52" ry="8" fill="#A9465E" opacity=".5" filter="url(#@b4)"/>'+
+      '<g filter="url(#@b2)" stroke="#9E3F58" stroke-width="3.4" opacity=".5" stroke-linecap="round"><path d="M-25 258V296M1 260V300M26 258V292"/></g>'+
+      '<ellipse cx="-18" cy="208" rx="32" ry="13" fill="#fff" opacity=".5" filter="url(#@b4)"/>'+
+      '<g fill="#fff" opacity=".4" filter="url(#@b2)"><circle cx="-37" cy="262" r="5"/><circle cx="-11" cy="268" r="5"/><circle cx="15" cy="268" r="5"/><circle cx="39" cy="262" r="5"/></g>'+
+      '<path d="M-70 236Q-52 248 -34 252" stroke="#9E3F58" stroke-width="3" fill="none" opacity=".45" filter="url(#@b2)"/>'+
+      '<ellipse cx="34" cy="258" rx="40" ry="38" fill="#BF566C" opacity=".26" filter="url(#@b8)"/>'+
+    '</g></g>';
+  return P(svg+'</svg>');
+}
+
+function akFoldSVG(seed,size){
+  var R=akRnd(seed),N=30,i,dk="",lt="",h=size/2;
+  function add(a,L,r0,w1,w2,bend,depth){
+    var nx=-Math.sin(a),ny=Math.cos(a),x0=Math.cos(a)*r0,y0=Math.sin(a)*r0*.92,x2=Math.cos(a)*(r0+L),y2=Math.sin(a)*(r0+L)*.98;
+    var cx=(x0+x2)/2+nx*bend*L,cy=(y0+y2)/2+ny*bend*L,pts=[],k;
+    for(k=0;k<=14;k++){var t=k/14,mt=1-t,bx=mt*mt*x0+2*mt*t*cx+t*t*x2,by=mt*mt*y0+2*mt*t*cy+t*t*y2;
+      var tx=2*mt*(cx-x0)+2*t*(x2-cx),ty=2*mt*(cy-y0)+2*t*(y2-cy),tl=Math.hypot(tx,ty)||1,px=-ty/tl,py=tx/tl;
+      var w=(w1+(w2-w1)*Math.pow(t,1.1))*(1-.82*Math.pow(t,2.6));
+      pts.push([bx,by,px,py,Math.max(.25,w)])}
+    function poly(off,wm){var L1=[],R1=[];pts.forEach(function(p){var w=p[4]*wm/2,o=p[4]*off;L1.push((p[0]+p[2]*(o+w)).toFixed(1)+" "+(p[1]+p[3]*(o+w)).toFixed(1));R1.unshift((p[0]+p[2]*(o-w)).toFixed(1)+" "+(p[1]+p[3]*(o-w)).toFixed(1))});return "M"+L1.join("L")+"L"+R1.join("L")+"Z"}
+    var op=(.5+depth*.5).toFixed(2);
+    dk+='<path d="'+poly(.4,1)+'" opacity="'+op+'"/>';
+    lt+='<path d="'+poly(-.36,.7)+'" opacity="'+op+'"/>';
+    return pts[8];
+  }
+  for(i=0;i<N;i++){
+    var a=i/N*Math.PI*2+(R()-.5)*.34,sn=Math.sin(a),cs=Math.cos(a),down=(sn+1)/2;
+    var L=70+R()*100+down*90,r0=36+R()*14,d=R();
+    /* fabric drapes: folds curve away from the pull axis, sides bend opposite ways */
+    var bend=(cs>0?1:-1)*(.06+R()*.12)*(sn>-.3?1:-.6)+(R()-.5)*.08;
+    var p=add(a,L,r0,.9+R()*.6,3.6+R()*4.4,bend,d);
+    if(R()<.4){var a2=a+(R()<.5?-1:1)*(.16+R()*.14),rr=Math.hypot(p[0],p[1]);add(a2,L*.4,rr,.7,2.6+R()*2.6,bend*.8,d*.7)}
+  }
+  return '<svg class="akp-fsvg" viewBox="'+(-h)+' '+(-h)+' '+size+' '+size+'" width="'+size+'" height="'+size+'" xmlns="http://www.w3.org/2000/svg"><defs>'+
+   '<radialGradient id="akpM" cx="0" cy="0" r="'+h+'" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
+   '<mask id="akpMask" maskUnits="userSpaceOnUse" x="'+(-h)+'" y="'+(-h)+'" width="'+size+'" height="'+size+'"><rect x="'+(-h)+'" y="'+(-h)+'" width="'+size+'" height="'+size+'" fill="url(#akpM)"/></mask>'+
+   '<radialGradient id="akpV" cx="0" cy="0" r="190" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset=".3" stop-color="#000" stop-opacity=".2"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>'+
+   '<filter id="akpB1" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.1"/></filter>'+
+   '<filter id="akpB2" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.3"/></filter></defs>'+
+   '<g class="akp-fg" mask="url(#akpMask)"><circle r="190" fill="url(#akpV)"/>'+
+   '<g fill="#07041a" opacity=".95" filter="url(#akpB1)">'+dk+'</g><g fill="#fff" opacity="1" filter="url(#akpB2)">'+lt+'</g></g></svg>';
+}
+
 (function(){
   var hd=document.getElementById("hd"),app=document.getElementById("app");
-  if(!app||!document.documentElement.animate)return;
+  if(!hd||!app||!document.documentElement.animate)return;
   var rm=window.matchMedia?matchMedia("(prefers-reduced-motion:reduce)"):{matches:false};
-  var root=document.documentElement,els=[hd,app].filter(Boolean);
-  var ov=null,anims=[],busy=false,st=null,H=130,TRIG=48,T=1650;
-  var REFRESH=true; // الطالب: تحديث بياناته بهدوء مع الحركة (بديل ريفرش المتصفح اللي اتقفل)
+  var root=document.documentElement,ext=null,extIn=null,fold=null,shd=null,hand=null,hsvg=null;
+  var anims=[],busy=false,st=null,TRIG=48,H=130,T=0,seed=7,REFRESH=true; // الطالب: تحديث بياناته بهدوء مع الحركة
   function disabled(){try{return localStorage.getItem("pullhand")==="0"}catch(e){return false}}
+  function cnt(){try{return +sessionStorage.getItem("akpn")||0}catch(e){return window._akpn||0}}
+  function setCnt(n){try{sessionStorage.setItem("akpn",n)}catch(e){window._akpn=n}}
   /* الشاشة الرئيسية بس: رئيسية المعلم (tab=home) أو رئيسية الطالب (ST.tab=home وفتح الإعدادات مقفول) */
   function isHome(){
     try{
@@ -11380,86 +11476,97 @@ html.akp-on #hd,html.akp-on #app{will-change:transform}
       return !!(window.AU&&AU.ready&&window.ST&&ST.data&&ST.tab==="home"&&!ST.set);
     }catch(e){return false}
   }
-  function wrinkles(){
-    var dk="",lt="",n=18,cx=200,cy=146,i;
-    for(i=0;i<n;i++){
-      var a=(i/(n-1))*Math.PI*0.96+0.1,L=70+((i*47)%120),r0=34+(i%3)*5,k=(i%2?1:-1)*(8+(i%4)*4);
-      var x0=cx+Math.cos(a)*r0*1.1,y0=cy+Math.sin(a)*r0,x1=cx+Math.cos(a)*L*1.25,y1=cy+Math.sin(a)*L*1.1;
-      var mx=(x0+x1)/2-Math.sin(a)*k,my=(y0+y1)/2+Math.cos(a)*k;
-      var d="M"+x0.toFixed(1)+" "+y0.toFixed(1)+"Q"+mx.toFixed(1)+" "+my.toFixed(1)+" "+x1.toFixed(1)+" "+y1.toFixed(1);
-      dk+='<path d="'+d+'" stroke-width="'+(7+(i%3)*2)+'"/>';
-      lt+='<path d="'+d+'" transform="translate(2.5 -2)" stroke-width="2.4"/>';
-    }
-    return '<g clip-path="url(#akpC)"><g filter="url(#akpB)" fill="none" style="stroke:color-mix(in srgb,var(--tx) 34%,transparent)" stroke-linecap="round">'+dk+'</g>'+
-           '<g fill="none" style="stroke:rgba(255,255,255,.30)" stroke-linecap="round">'+lt+'</g></g>';
+  /* ===== قماش واحد متصل: لون الهيدر يكمّل لفوق (نسخة معكوسة من خلفية الهيدر) فمفيش فاصل لما الصفحة تنزل ===== */
+  function mkExt(){
+    if(ext)return;
+    ext=document.createElement("div");ext.id="akExt";ext.setAttribute("aria-hidden","true");
+    extIn=document.createElement("div");extIn.className="akp-ext-in";ext.appendChild(extIn);
+    document.body.appendChild(ext);
   }
-  function build(){
-    if(ov)return;
-    ov=document.createElement("div");ov.id="akPull";ov.setAttribute("aria-hidden","true");
-    ov.innerHTML='<svg class="akp-art" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg"><defs>'+
-    '<linearGradient id="akpA" x1="0" x2="1"><stop offset="0" stop-color="#8e7cc4" style="stop-color:color-mix(in srgb,var(--pr) 60%,#fff)"/><stop offset=".35" stop-color="#d9d1f0" style="stop-color:color-mix(in srgb,var(--pr) 30%,#fff)"/><stop offset=".72" stop-color="#a493d4" style="stop-color:color-mix(in srgb,var(--pr) 52%,#fff)"/><stop offset="1" stop-color="#7c68b8" style="stop-color:color-mix(in srgb,var(--pr) 78%,#fff)"/></linearGradient>'+
-    '<radialGradient id="akpF" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="#e6e0f6" style="stop-color:color-mix(in srgb,var(--pr) 22%,#fff)"/><stop offset=".55" stop-color="#a999d6" style="stop-color:color-mix(in srgb,var(--pr) 55%,#fff)"/><stop offset="1" stop-color="#7a66b6" style="stop-color:color-mix(in srgb,var(--pr) 82%,#fff)"/></radialGradient>'+
-    '<filter id="akpB" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>'+
-    '<clipPath id="akpC"><rect x="-200" y="140" width="800" height="700"/></clipPath></defs>'+
-    '<g class="akp-w">'+wrinkles()+'</g>'+
-    '<g class="akp-h">'+
-      '<path d="M170 -140H230L228 100Q200 120 172 100Z" fill="url(#akpA)"/>'+
-      '<rect x="181" y="-140" width="9" height="236" rx="4.5" fill="#fff" opacity=".30"/>'+
-      '<rect x="162" y="50" width="76" height="28" rx="12" style="fill:var(--card);stroke:var(--bd);stroke-width:1.5"/>'+
-      '<rect x="172" y="58" width="56" height="4" rx="2" style="fill:var(--pr)" opacity=".35"/>'+
-      '<g style="stroke:var(--card);stroke-width:2.2;stroke-linejoin:round">'+
-        '<rect x="150" y="84" width="100" height="92" rx="38" fill="url(#akpF)"/>'+
-        '<rect x="152" y="140" width="24" height="40" rx="12" fill="url(#akpF)"/><rect x="174" y="144" width="26" height="42" rx="13" fill="url(#akpF)"/><rect x="199" y="144" width="26" height="42" rx="13" fill="url(#akpF)"/><rect x="224" y="140" width="24" height="40" rx="12" fill="url(#akpF)"/>'+
-        '<ellipse cx="147" cy="122" rx="13" ry="24" transform="rotate(-16 147 122)" fill="url(#akpF)"/></g>'+
-      '<path d="M162 128Q200 142 238 128" fill="none" stroke-linecap="round" stroke-width="2" style="stroke:var(--card)" opacity=".55"/>'+
-      '<ellipse cx="184" cy="110" rx="14" ry="8" fill="#fff" opacity=".30"/>'+
-    '</g></svg><div class="akp-top"></div>';
-    document.body.appendChild(ov);
+  function syncExt(){
+    mkExt();
+    var r=hd.getBoundingClientRect(),cs=getComputedStyle(hd),bs=getComputedStyle(hd,"::before"),ty=0;
+    try{ty=new DOMMatrix(cs.transform==="none"?undefined:cs.transform).m42||0}catch(e){}
+    r={left:r.left,top:r.top-ty,width:r.width,height:r.height};
+        imgs=[bs.backgroundImage,cs.backgroundImage].filter(function(x){return x&&x!=="none"}).join(",");
+    ext.style.left=r.left+"px";ext.style.width=r.width+"px";ext.style.top=(r.top+(window.pageYOffset||0))+"px";
+    extIn.style.height="191px";extIn.style.bottom="-1px";
+    extIn.style.backgroundColor=cs.backgroundColor&&cs.backgroundColor!=="rgba(0, 0, 0, 0)"?cs.backgroundColor:"var(--h1)";
+    extIn.style.backgroundImage=imgs||"linear-gradient(135deg,var(--h1),var(--h2))";
+    extIn.style.backgroundSize="100% "+Math.max(60,r.height)+"px";
   }
-  function setY(y,sx){var v=y?"translate3d(0,"+y+"px,0)"+(sx&&sx!==1?" scaleX("+sx+")":""):"";els.forEach(function(e){e.style.transform=v})}
-  function clearInline(){els.forEach(function(e){e.style.transform="";e.style.transition=""})}
+  function els(){return [ext,hd,app].filter(Boolean)}
+  function setY(y,sx){var v=y?"translate3d(0,"+y+"px,0)"+(sx&&sx!==1?" scaleX("+sx+")":""):"";els().forEach(function(e){e.style.transform=v})}
+  function clearInline(){els().forEach(function(e){e.style.transform="";e.style.transition=""})}
+  function build(sh){
+    if(fold)return;
+    fold=document.createElement("div");fold.id="akFold";fold.setAttribute("aria-hidden","true");
+    shd=document.createElement("div");shd.id="akShd";shd.setAttribute("aria-hidden","true");
+    hand=document.createElement("div");hand.id="akHand";hand.setAttribute("aria-hidden","true");
+    document.body.appendChild(fold);document.body.appendChild(shd);document.body.appendChild(hand);
+  }
+  function fill(sh){ // نبني الرسم من جديد مع كل سحبة عشان شكل التجاعيد يتغير
+    var vw=Math.min(window.innerWidth,520);
+    fold.innerHTML=akFoldSVG(seed,640);
+    hand.innerHTML=akHandSVG(sh,"k"+seed);
+    hsvg=hand.firstChild;hsvg.style.left=(-120*sh)+"px";
+  }
   function cleanup(){
     anims.forEach(function(a){try{a.cancel()}catch(e){}});anims=[];
-    clearInline();if(ov)ov.style.display="none";
+    clearInline();[fold,shd,hand].forEach(function(e){if(e)e.style.display="none"});
     root.classList.remove("akp-on");busy=false;
   }
-  /* الحركة: الصفحة نازلة بمقدار off → تثبت → الإيد تنزل وتمسك → تشد لفوق → الإيد تطلع */
-  function play(off){
+  /* ===== الحركة =====
+     عدّاد السحبات: 1 و2 الإيد تشد على طول، 3 تدور يمين وشمال ثانية أو اتنين وبعدين تشد (وتتكرر كل تالتة) */
+  function play(off,force){
     if(busy||rm.matches||disabled()||!isHome())return;
-    busy=true;build();
-    var W=Math.min(window.innerWidth,480),s=W/400,G=140*s,sY=-(178*s)-30,h0=Math.max(H,off||0);
-    var art=ov.querySelector(".akp-art"),hand=ov.querySelector(".akp-h"),wr=ov.querySelector(".akp-w"),top=ov.querySelector(".akp-top");
-    ov.style.display="block";root.classList.add("akp-on");
-    var O={duration:T,fill:"both"},f=function(ms){return ms/T};
-    var cs=getComputedStyle(root),EA=(cs.getPropertyValue("--v5-ease")||"").trim()||"cubic-bezier(.22,1,.36,1)",SP=(cs.getPropertyValue("--v5-spring")||"").trim()||"cubic-bezier(.3,1.45,.5,1)";
-    function tr(y){return "translate(-50%,"+y+"px)"}
-    function ct(y,sx){return "translate3d(0,"+y+"px,0) scaleX("+sx+")"}
-    var main=art.animate([
-      {transform:tr(sY),offset:0},
-      {transform:tr(sY),offset:f(240),easing:EA},
-      {transform:tr(h0-G),offset:f(600)},
-      {transform:tr(h0-G),offset:f(780),easing:SP},
-      {transform:tr(0-G),offset:f(1330),easing:"cubic-bezier(.64,0,.78,0)"},
-      {transform:tr(sY),offset:1}],O);
-    anims=[main];
-    var ck=[
-      {transform:ct(off||0,1),offset:0,easing:EA},
-      {transform:ct(h0,1),offset:f(600)},
-      {transform:ct(h0,.97),offset:f(780),easing:SP},
-      {transform:ct(0,1),offset:f(1330)},
-      {transform:ct(0,1),offset:1}];
-    els.forEach(function(e){e.style.transition="";anims.push(e.animate(ck,O))});
-    anims.push(hand.animate([
-      {transform:"scale(1)",offset:0},{transform:"scale(1)",offset:f(560)},
-      {transform:"scale(1.06,.94)",offset:f(620),easing:SP},{transform:"scale(.94,1.05)",offset:f(720),easing:EA},
-      {transform:"scale(1)",offset:f(800)},{transform:"scale(1)",offset:1}],O));
-    anims.push(wr.animate([
-      {opacity:0,transform:"scale(.6)",offset:0},{opacity:0,transform:"scale(.6)",offset:f(600)},
-      {opacity:1,transform:"scale(1)",offset:f(780),easing:EA},{opacity:1,transform:"scale(1)",offset:f(1050)},
-      {opacity:0,transform:"scale(1)",offset:f(1330)},{opacity:0,offset:1}],O));
-    anims.push(top.animate([{opacity:0,offset:0},{opacity:1,offset:f(240)},{opacity:1,offset:f(1500)},{opacity:0,offset:1}],O));
+    busy=true;
+    var n=cnt()+1;setCnt(n);var search=force!=null?force:(n%3===0);
+    seed=(seed*1103515245+12345+n*977)>>>0;var R=akRnd(seed);
+    var vw=window.innerWidth,sh=Math.min(vw,520)/320,Rf=540*sh,h0=Math.max(H,off||0);
+    syncExt();build();fill(sh);
+    var cs=getComputedStyle(root),EA=(cs.getPropertyValue("--v5-ease")||"").trim()||"cubic-bezier(.22,1,.36,1)",
+        SP=(cs.getPropertyValue("--v5-spring")||"").trim()||"cubic-bezier(.3,1.45,.5,1)",
+        EI="cubic-bezier(.64,0,.78,0)",ES="cubic-bezier(.45,0,.55,1)";
+    var fyH=-100*sh-40,S=[],cur=null;
+    function st(t,p,e){cur=Object.assign({},cur||{fy:fyH,th:0,pose:0,fo:0,fx:1,fy2:1,so:0,ss:1.3,cy:off||0,cs:1,sx:1,sy:1},p||{});cur.t=t;cur.e=e||EA;S.push(cur);return cur}
+    st(0,{},EA);
+    st(240,{cy:h0},EA);
+    var tg=640,thG=(R()-.5)*5;
+    if(search){
+      var hy=.3*h0,D=1000+R()*1000,k=Math.max(3,Math.round(D/340)),t=620,dir=R()<.5?-1:1;
+      st(t,{fy:hy,th:0,so:.85,ss:1.5},EA);
+      for(var j=0;j<k;j++){t+=D/k;var amp=(j===k-1?0:(11-j*2.2))*(j%2?-dir:dir);st(t,{fy:hy+(j%2?7:-5),th:amp,so:.85,ss:1.5},ES)}
+      t+=260;tg=t;st(tg-0,{fy:.55*h0,th:thG,so:.95,ss:1.3},EA);
+    }else{
+      st(tg-130,{fy:.2*h0,th:-2,so:.7,ss:1.5},EA);
+      st(tg,{fy:.55*h0,th:thG,so:.95,ss:1.3},EA);
+    }
+    st(tg+80,{pose:1,sx:1.05,sy:.95,ss:.85,fo:.35,fx:.35,fy2:.35},EA);
+    st(tg+170,{sx:.95,sy:1.05,fo:.8,fx:.75,fy2:.75,ss:.8},EA);
+    st(tg+260,{sx:1,sy:1,fo:1,fx:1,fy2:1},EA);              // القماش اتشد وطياته ظهرت
+    st(tg+440,{},SP);                                       // ثبات قصير وهي ماسكة، وبعدها الشد لفوق
+    var pe=tg+440+620;
+    st(pe,{cy:0,fy:-.45*h0,th:thG*.3,fy2:1.45,ss:.6,so:0},EI);
+    st(pe+130,{fo:0},EA);
+    st(pe+380,{fy:fyH,th:0},EA);
+    T=pe+380;
+    /* بعد الشد: الإيد ماشية مع القماش (fy = cy - .45*h0) */
+    var Rr=Math.PI/180,fx=function(s){return Rf*Math.sin(s.th*Rr)};
+    var O={duration:T,fill:"both"},ks=function(f){return S.map(function(s){var o=f(s);o.offset=s.t/T;o.easing=s.e;return o})};
+    var main=hand.animate(ks(function(s){return {transform:"translate(0px,"+(s.fy-Rf)+"px)"}}),O);anims=[main];
+    anims.push(hsvg.animate(ks(function(s){return {transform:"rotate("+s.th+"deg)"}}),O));
+    var pa=hsvg.querySelector(".akp-pa"),pb=hsvg.querySelector(".akp-pb"),sq=hsvg;
+    anims.push(pa.animate(ks(function(s){return {opacity:1-s.pose}}),O));
+    anims.push(pb.animate(ks(function(s){return {opacity:s.pose}}),O));
+    anims.push(fold.animate(ks(function(s){return {transform:"translate("+fx(s)+"px,"+(s.fy-320)+"px)",opacity:s.fo}}),O));
+    anims.push(fold.querySelector(".akp-fg").animate(ks(function(s){return {transform:"scale("+s.fx+","+s.fy2+")"}}),O));
+    anims.push(shd.animate(ks(function(s){return {transform:"translate("+(fx(s)+16)+"px,"+(s.fy+30)+"px) scale("+s.ss+")",opacity:s.so}}),O));
+    var cont=ks(function(s){return {transform:"translate3d(0,"+s.cy+"px,0) scaleX("+s.cs+")"}});
+    els().forEach(function(e){e.style.transition="";anims.push(e.animate(cont,O))});
+    [fold,shd,hand].forEach(function(e){e.style.display="block"});root.classList.add("akp-on");
     main.onfinish=cleanup;
-    setTimeout(function(){if(busy&&ov&&ov.style.display==="block"&&!anims.length)cleanup()},T+500);
+    setTimeout(function(){if(busy&&!anims.length)cleanup()},T+600);
     if(REFRESH){try{if(typeof studentRefresh==="function"&&window.ST&&ST.data&&!(window.AU&&AU.user))studentRefresh()}catch(e){}}
   }
   /* ===== التقاط السحب لتحت من أول الصفحة ===== */
@@ -11469,9 +11576,9 @@ html.akp-on #hd,html.akp-on #app{will-change:transform}
     if(document.body.classList.contains("a4open"))return true;
     var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a!==document.body)return true;
     for(var e=t;e&&e!==document.body&&e!==root;e=e.parentElement){
-      var cs=getComputedStyle(e);
-      if(cs.position==="fixed"||cs.position==="sticky"&&e.id==="nav")return true;
-      if(/(auto|scroll)/.test(cs.overflowY)&&e.scrollHeight>e.clientHeight+1)return true;
+      var c=getComputedStyle(e);
+      if(c.position==="fixed"||c.position==="sticky"&&e.id==="nav")return true;
+      if(/(auto|scroll)/.test(c.overflowY)&&e.scrollHeight>e.clientHeight+1)return true;
     }
     return false;
   }
@@ -11490,7 +11597,7 @@ html.akp-on #hd,html.akp-on #app{will-change:transform}
       if(dy<-6||Math.abs(dx)>Math.abs(dy)*1.2&&Math.abs(dx)>8){st=null;return}
       if(dy<8)return;
       if(scrollY()>0){st=null;return}
-      st.on=true;root.classList.add("akp-on");els.forEach(function(x){x.style.transition=""});
+      st.on=true;syncExt();root.classList.add("akp-on");els().forEach(function(x){x.style.transition=""});
     }
     st.dy=Math.max(0,dy);
     if(e.cancelable)e.preventDefault();
@@ -11500,13 +11607,13 @@ html.akp-on #hd,html.akp-on #app{will-change:transform}
     if(!st||!st.on){st=null;return}
     var dy=st.dy;st=null;
     if(dy>=TRIG){play(rub(dy));return}
-    els.forEach(function(x){x.style.transition="transform .3s cubic-bezier(.2,.8,.3,1)"});
+    els().forEach(function(x){x.style.transition="transform .3s cubic-bezier(.2,.8,.3,1)"});
     setY(0,1);
     setTimeout(function(){if(!busy){clearInline();root.classList.remove("akp-on")}},340);
   }
   document.addEventListener("touchend",end,{passive:true,capture:true});
   document.addEventListener("touchcancel",end,{passive:true,capture:true});
-  window.AKPull={play:play,_a:function(){return anims},T:T};
+  window.AKPull={play:play,_a:function(){return anims},T:function(){return T},_n:cnt};
 })();
 </script>
 
