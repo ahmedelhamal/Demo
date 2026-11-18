@@ -11366,16 +11366,43 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
-/* الإيد + القماش: الصفحة بتنزل مع السحب (والهيدر يكمّل لفوق بنفس اللون)، وإيد clay ناعمة تنزل وتمسك القماش وتشده لفوق (تجاعيد قليلة ونظيفة).
-   السحبة 1 و2 مباشرة، والتالتة بتدور ثانية/اتنين وبعدين تشد. بيشتغل في الرئيسية بس. تقفله: localStorage.pullhand="0" */
+/* الإيد + القماش: الصفحة بتنزل مع السحب (والهيدر يكمّل لفوق بنفس اللون)، وإيد clay ناعمة بألوان ثيم التطبيق تنزل وتمسك القماش وتشده لفوق (تجاعيد قليلة ونظيفة).
+   السحبة 1 و2 مباشرة، والتالتة بتدور وتتعصب وتخبط على التطبيق (بيهتز) وبعدين تشد. بيشتغل في الرئيسية بس. تقفله: localStorage.pullhand="0" */
 /* ---- art: hand + folds generators (shared by test harness and app) ---- */
 function akRnd(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ===== ألوان من ثيم التطبيق الحالي (--h1 --h2 --pr --oa + نهاري/ليلي): اليد والظل والتجاعيد بياخدوا نفس روح الواجهة ===== */
+function akPal(){
+  var root=document.documentElement,pr=document.createElement("i"),R={};
+  pr.style.cssText="position:absolute;visibility:hidden;pointer-events:none";root.appendChild(pr);
+  function rgb(v){pr.style.color="";pr.style.color=v;var m=(getComputedStyle(pr).color||"").match(/[\d.]+/g)||[];return m.length>2?[+m[0],+m[1],+m[2]]:[90,59,140]}
+  var h1=rgb("var(--h1)"),h2=rgb("var(--h2)"),pc=rgb("var(--pr)"),oa=rgb("var(--oa)");
+  root.removeChild(pr);
+  function mx(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]}
+  function hx(c){return "#"+c.map(function(v){v=Math.max(0,Math.min(255,Math.round(v)));return (v<16?"0":"")+v.toString(16)}).join("")}
+  var dark=root.getAttribute("data-theme")==="dark",K=[0,0,0];
+  var skin=[[228,138,146],[242,168,162],[253,207,195],[248,182,170],[239,160,158],[221,135,150]].map(function(c){
+    c=mx(c,h1,.06);return hx(dark?mx(c,mx([96,44,60],h2,.35),.16):c)});           // الجلد: طبيعي بميل خفيف للثيم، وأهدى في الليلي
+  R.skin=skin;R.dark=dark;R.hi=dark?.85:1;                      // hi = قوة اللمعات
+  R.rim=hx(mx([176,72,102],h2,dark?.5:.28));R.sh=hx(mx([178,78,102],h2,dark?.45:.25));R.sh2=hx(mx([169,70,94],h2,.35));
+  R.crease=hx(mx([154,58,88],h2,.35));R.cast=hx(mx([126,36,66],h2,.4));R.blush=hx(mx([238,133,144],pc,.14));
+  R.fd=hx(mx(h2,K,.62));R.fl=hx(mx([255,255,255],oa,.3));      // طيّات القماش: ظل من لون الهيدر + إضاءة من لون الثيم
+  R.shadow=hx(mx(h2,K,.7));R.sa=dark?1.3:1;
+  return R}
+/* بيبدّل ألوان الرسم الثابتة بألوان الثيم (ومعاها شدة اللمعات) */
+function akTint(h,P){
+  if(!P)return h;
+  var m={"#E48A92":P.skin[0],"#F2A8A2":P.skin[1],"#FDCFC3":P.skin[2],"#F8B6AA":P.skin[3],"#EFA09E":P.skin[4],"#DD8796":P.skin[5],
+    "#B04866":P.rim,"#B24E66":P.sh,"#B85A6C":P.sh,"#A9465E":P.sh2,"#9A3A58":P.crease,"#7E2442":P.cast,"#EE8590":P.blush};
+  for(var k in m)h=h.split(k).join(m[k]);
+  if(P.hi!==1)h=h.replace(/(fill|flood)(-color)?="#fff"( opacity|\s+flood-opacity)="([\d.]+)"/g,function(a,b,c,d,o){return a.replace('"'+o+'"','"'+(o*P.hi).toFixed(2)+'"')});
+  return h}
 
 /* ===== اليد: شكل clay ناعم (زي إيد طفل 3D)، كل الإيد (ذراع + كفّ + أصابع + إبهام) شكل واحد متصل بتظليل واحد.
    3 طبقات SVG: قاعدة (الذراع) + A (إيد مرتخية) + B (قبضة). A و B بيتبدلوا بالشفافية بس (من غير إعادة رسم) فالحركة خفيفة.
    في كل طبقة: لون الجلد واحد ممتد على الشكل كله، وبعدين ظل حوافّ داخلي ناعم (filter) + خطوط فصل رفيعة بين الأصابع، فمفيش حاجة "برّه الديزاين".
    نقطة المسك (مركز القبضة) عند y=206 ===== */
-function akHandSVG(sh,uid,kx,ky){kx=kx||1;ky=ky||1;
+function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   var u=uid||"h",W=240*sh*kx,H=700*sh*ky;
   function wrap(cls,id,body,defs){
     return ('<svg class="'+cls+'" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><defs>'+defs+'</defs>'+body+'</svg>').replace(/@/g,id)}
@@ -11389,7 +11416,7 @@ function akHandSVG(sh,uid,kx,ky){kx=kx||1;ky=ky||1;
    '<filter id="@in" filterUnits="userSpaceOnUse" x="'+fx+'" y="'+fy+'" width="'+fw+'" height="'+fh+'" color-interpolation-filters="sRGB">'+
     '<feGaussianBlur in="SourceAlpha" stdDeviation="4.6" result="bl"/>'+
     '<feOffset in="bl" dx="-3.5" dy="-4" result="bs"/><feComposite in="SourceAlpha" in2="bs" operator="out" result="rs"/>'+
-    '<feFlood flood-color="#B04866" flood-opacity=".42"/><feComposite in2="rs" operator="in" result="shade"/>'+
+    '<feFlood flood-color="#B04866" flood-opacity=".44"/><feComposite in2="rs" operator="in" result="shade"/>'+
     '<feOffset in="bl" dx="3" dy="3.5" result="bh"/><feComposite in="SourceAlpha" in2="bh" operator="out" result="rh"/>'+
     '<feFlood flood-color="#fff" flood-opacity=".5"/><feComposite in2="rh" operator="in" result="glow"/>'+
     '<feMerge><feMergeNode in="shade"/><feMergeNode in="glow"/></feMerge></filter>'}
@@ -11463,22 +11490,24 @@ function akHandSVG(sh,uid,kx,ky){kx=kx||1;ky=ky||1;
   over='<clipPath id="@tc">'+THB()+'</clipPath>'+'<linearGradient id="@tg" gradientUnits="userSpaceOnUse" x1="0" y1="206" x2="0" y2="240"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient><mask id="@tm" maskUnits="userSpaceOnUse" x="-120" y="-340" width="240" height="700"><rect x="-120" y="-340" width="240" height="700" fill="url(#@tg)"/></mask><g mask="url(#@tm)">'+over+'</g>';
   var B=layer(SB,DB,over);
 
-  return '<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px">'+
+  return akTint('<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px">'+
     wrap("akp-pbase",u+"c",base,DARM)+
     wrap("akp-pa",u+"a",A,DHAND)+
-    wrap("akp-pb",u+"b",B,DHAND)+'</div>'}
+    wrap("akp-pb",u+"b",B,DHAND)+'</div>',P)}
 
 /* ===== ظل ناعم تحت الإيد (طبقة منفصلة بـ multiply عشان تتفاعل مع القماش). المركز = مركز القبضة ===== */
-function akShadowSVG(){
-  return '<svg width="260" height="400" viewBox="-130 -200 260 400" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><defs>'+
+function akShadowSVG(P){
+  var svg='<svg width="260" height="400" viewBox="-130 -200 260 400" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><defs>'+
    '<filter id="akSb1" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8"/></filter>'+
    '<filter id="akSb2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter></defs>'+
    '<g filter="url(#akSb1)" fill="#0a0420" opacity=".3"><rect x="-31" y="-200" width="62" height="170" rx="26"/><rect x="-52" y="-62" width="104" height="134" rx="44"/></g>'+
-   '<g filter="url(#akSb2)" fill="#0a0420" opacity=".28"><rect x="-42" y="-46" width="84" height="100" rx="36"/></g></svg>'}
+   '<g filter="url(#akSb2)" fill="#0a0420" opacity=".28"><rect x="-42" y="-46" width="84" height="100" rx="36"/></g></svg>';
+  if(P)svg=svg.split("#0a0420").join(P.shadow).replace(/opacity="\.(3|28)"/g,function(a,v){return 'opacity="'+((v==="3"?.3:.28)*P.sa).toFixed(2)+'"'});
+  return svg}
 
 /* ===== تجاعيد القماش: شوية طيّات بس، كل طية خط رفيع مدبّب (ظل من ناحية وإضاءة من الناحية التانية) بيطلع من نقطة المسك ويخفت مع المسافة.
    زي مرجع التصميم: حوالي 11 طية أساسية + 4 صغيرة، من غير بقع blur عريضة ولا تجمّع حوالين القبضة ===== */
-function akFoldSVG(seed,size){
+function akFoldSVG(seed,size,P){
   var R=akRnd(seed),h=320,i,hD="",hL="",bD="",bL="",fD="",fL="";
   function rib(a,L,r0,wmax,bend){
     var nx=-Math.sin(a),ny=Math.cos(a),x0=Math.cos(a)*r0,y0=Math.sin(a)*r0,x2=Math.cos(a)*(r0+L),y2=Math.sin(a)*(r0+L);
@@ -11504,14 +11533,16 @@ function akFoldSVG(seed,size){
   for(i=0;i<4;i++){
     var a2=(ang[1+i*3]+(ang[2+i*3]-ang[1+i*3])*(.35+R()*.3))*Math.PI/180,L2=70+R()*55,p2=rib(a2,L2,34+R()*8,3.4+R()*1.4,(R()<.5?-1:1)*.05);
     fD+='<path d="'+p2(.4,.62)+'" opacity=".75"/>';fL+='<path d="'+p2(-.45,.5)+'" opacity=".7"/>'}
-  return '<svg class="akp-fsvg" viewBox="'+(-h)+' '+(-h)+' 640 640" width="'+size+'" height="'+size+'" xmlns="http://www.w3.org/2000/svg"><defs>'+
+  var out='<svg class="akp-fsvg" viewBox="'+(-h)+' '+(-h)+' 640 640" width="'+size+'" height="'+size+'" xmlns="http://www.w3.org/2000/svg"><defs>'+
    '<radialGradient id="akpM" cx="0" cy="0" r="'+h+'" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
    '<mask id="akpMask" maskUnits="userSpaceOnUse" x="'+(-h)+'" y="'+(-h)+'" width="640" height="640"><rect x="'+(-h)+'" y="'+(-h)+'" width="640" height="640" fill="url(#akpM)"/></mask>'+
    '<filter id="akpB0" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>'+
    '<filter id="akpB1" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.5"/></filter></defs>'+
    '<g class="akp-fg" mask="url(#akpMask)">'+
    '<g fill="#07041a" opacity=".22" filter="url(#akpB0)">'+hD+'</g><g fill="#fff" opacity=".16" filter="url(#akpB0)">'+hL+'</g>'+
-   '<g fill="#07041a" opacity=".52" filter="url(#akpB1)">'+bD+fD+'</g><g fill="#fff" opacity=".58" filter="url(#akpB1)">'+bL+fL+'</g></g></svg>'}
+   '<g fill="#07041a" opacity=".52" filter="url(#akpB1)">'+bD+fD+'</g><g fill="#fff" opacity=".58" filter="url(#akpB1)">'+bL+fL+'</g></g></svg>';
+  if(P)out=out.split('fill="#07041a"').join('fill="'+P.fd+'"').split('fill="#fff"').join('fill="'+P.fl+'"');
+  return out}
 
 (function(){
   var hd=document.getElementById("hd"),app=document.getElementById("app");
@@ -11562,8 +11593,10 @@ function akFoldSVG(seed,size){
   }
   function fill(sh,K,fs){ // نبني الرسم من جديد مع كل سحبة عشان شكل التجاعيد يتغير
     fold.style.width=fold.style.height=fs+"px";fold.style.marginLeft=(-fs/2)+"px";
-    fold.innerHTML='<div class="akp-fgw">'+akFoldSVG(seed,fs)+'</div>';
-    hand.innerHTML=akHandSVG(sh,"k"+seed,K,K);
+    var pal=null;try{pal=akPal()}catch(e){}   // ألوان الثيم الحالي (نهاري/ليلي + الباليت)
+    fold.innerHTML='<div class="akp-fgw">'+akFoldSVG(seed,fs,pal)+'</div>';
+    shd.innerHTML=akShadowSVG(pal);
+    hand.innerHTML=akHandSVG(sh,"k"+seed,K,K,pal);
     hsvg=hand.firstChild;hsvg.style.left=(-120*sh*K)+"px";
   }
   function cleanup(){
@@ -11572,7 +11605,7 @@ function akFoldSVG(seed,size){
     root.classList.remove("akp-on");busy=false;
   }
   /* ===== الحركة =====
-     عدّاد السحبات: 1 و2 الإيد تشد على طول، 3 تدور يمين وشمال ثانية أو اتنين وبعدين تشد (وتتكرر كل تالتة) */
+     عدّاد السحبات: 1 و2 الإيد تشد على طول، 3 تدور يمين وشمال وتتعصب وتخبط مرتين على التطبيق وبعدين تشد (وتتكرر كل تالتة) */
   function play(off,force){
     if(busy||rm.matches||disabled()||!isHome())return;
     busy=true;
@@ -11589,10 +11622,24 @@ function akFoldSVG(seed,size){
     st(240,{cy:h0},EA);
     var tg=640,thG=(R()-.5)*5;
     if(search){
-      var hy=.5*h0,D=1000+R()*1000,k=Math.max(3,Math.round(D/340)),t=620,dir=R()<.5?-1:1;
+      /* السحبة التالتة: تدور على حاجة، وما تلاقيش → تتعصب (تضم صوابعها وترتعش) → تخبط على التطبيق مرتين (والتطبيق يهتز اهتزاز بسيط) → تفتح إيدها وتمسك وتشد.
+         اهتزاز التطبيق رأسي بس (cy) عشان مفيش حواف تبان على الجنب. كل st(t,...) فيه easing بتاع المسافة اللي بعده */
+      var hy=.5*h0,D=420+R()*180,k=Math.max(3,Math.round(D/230)),t=360,dir=R()<.5?-1:1;
       st(t,{fy:hy,th:0,so:.85,ss:1.5},EA);
       for(var j=0;j<k;j++){t+=D/k;var amp=(j===k-1?0:(11-j*2.2))*(j%2?-dir:dir);st(t,{fy:hy+(j%2?7:-5),th:amp,so:.85,ss:1.5},ES)}
-      t+=260;tg=t;st(tg-0,{fy:.78*h0,th:thG,so:.95,ss:1.3},EA);
+      t+=60;st(t,{fy:hy,th:0,pose:1,so:.85,ss:1.45},ES);                       // تضم صوابعها (قبضة)
+      var tm=[6,-6,5,-4.5,3,0];                                                // ارتعاش غضب سريع
+      for(var q=0;q<tm.length;q++){t+=42;st(t,{fy:hy+(q%2?4:-3),th:tm[q]*dir},ES)}
+      t+=110;st(t,{fy:.28*h0,th:-6*dir,so:.7,ss:1.6},EI);                      // ترفع إيدها
+      t+=85;st(t,{fy:.93*h0,th:2,so:1,ss:1,cy:h0+9},EA);                       // خبطة 1: التطبيق ينزل شوية
+      t+=55;st(t,{fy:.8*h0,th:0,so:.9,ss:1.15,cy:h0-4},ES);                    // ارتداد
+      t+=55;st(t,{fy:.36*h0,th:-5*dir,so:.7,ss:1.55,cy:h0+2},EI);              // ترفع تاني
+      t+=80;st(t,{fy:.95*h0,th:2,so:1,ss:1,cy:h0+12},EA);                      // خبطة 2: أقوى شوية
+      t+=50;st(t,{fy:.82*h0,th:0,so:.9,ss:1.15,cy:h0-5},ES);
+      t+=55;st(t,{fy:.62*h0,pose:0,so:.8,ss:1.35,cy:h0+3},ES);                 // تفتح إيدها والتطبيق بيهدى
+      t+=55;st(t,{cy:h0-1},ES);
+      t+=55;st(t,{cy:h0},EA);
+      t+=120;tg=t;st(tg-0,{fy:.78*h0,th:thG,so:.95,ss:1.3},EA);                // وبعدين تمسك وتشد زي الأول
     }else{
       st(tg-130,{fy:.45*h0,th:-2,so:.7,ss:1.5},EA);
       st(tg,{fy:.78*h0,th:thG,so:.95,ss:1.3},EA);
