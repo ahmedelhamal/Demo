@@ -11361,7 +11361,7 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 #akShd{left:50%;margin-left:-130px;width:260px;height:400px;margin-top:-200px;mix-blend-mode:multiply;will-change:transform,opacity}
 #akHand{left:50%;width:0;height:0;will-change:transform}
 #akHand .akp-hsvg{position:absolute;top:0;overflow:visible;transform-origin:50% 0;will-change:transform;backface-visibility:visible}
-#akHand .akp-t3{position:absolute;left:0;top:0;width:100%;height:100%;transform-style:preserve-3d;transform-origin:50% 77%;will-change:transform}
+#akHand .akp-t3{position:absolute;left:0;top:0;width:100%;height:100%;transform-style:preserve-3d;transform-origin:50% 66%;will-change:transform}
 #akHand .akp-slc{position:absolute;left:0;top:0;width:100%;height:100%;transform-style:flat;backface-visibility:visible}
 #akHand .akp-pa,#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi,#akHand .akp-pj,#akHand .akp-pk,#akHand .akp-pl,#akHand .akp-pm{will-change:opacity}
 #akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi,#akHand .akp-pj,#akHand .akp-pk,#akHand .akp-pl,#akHand .akp-pm{opacity:0}
@@ -11419,14 +11419,14 @@ function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   function line(d,w){return '<path d="'+d+'" fill="none" stroke="'+OL+'" stroke-width="'+(w||3.4)+'" stroke-linecap="round" stroke-linejoin="round"/>'}
   /* شكل قفاز: إطار غامق (من برّه بس، من غير خطوط جوّا الشكل) + أبيض + ظل أزرق فاتح على الحافة اليمين/تحت */
   function SHD(id){
-    return '<defs><radialGradient id="'+id+'h" gradientUnits="userSpaceOnUse" cx="-20" cy="198" r="74"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
-      '<linearGradient id="'+id+'s" gradientUnits="userSpaceOnUse" x1="-58" y1="0" x2="62" y2="0"><stop offset="0" stop-color="#9aa3bf" stop-opacity=".18"/><stop offset=".4" stop-color="#9aa3bf" stop-opacity="0"/><stop offset="1" stop-color="#6f79a0" stop-opacity=".55"/></linearGradient>'+
-      '<linearGradient id="'+id+'v" gradientUnits="userSpaceOnUse" x1="0" y1="150" x2="0" y2="310"><stop offset="0" stop-color="#8b94b0" stop-opacity="0"/><stop offset="1" stop-color="#6f79a0" stop-opacity=".42"/></linearGradient></defs>'+
+    return '<defs><filter id="'+id+'f" x="-12%" y="-8%" width="124%" height="118%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="4.6" result="b"/><feDiffuseLighting in="b" surfaceScale="15" diffuseConstant="1.3" lighting-color="#ffffff" result="d"><feDistantLight azimuth="228" elevation="52"/></feDiffuseLighting><feColorMatrix in="d" type="matrix" values="0.92 0 0 0 0  0 0.95 0 0 0  0 0 1.05 0 0  0 0 0 1 0" result="dc"/><feComposite in="dc" in2="SourceAlpha" operator="in" result="lit"/><feBlend in="lit" in2="SourceGraphic" mode="multiply"/></filter>'+'<radialGradient id="'+id+'h" gradientUnits="userSpaceOnUse" cx="-20" cy="198" r="74"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
+      '<linearGradient id="'+id+'s" gradientUnits="userSpaceOnUse" x1="-58" y1="0" x2="62" y2="0"><stop offset="0" stop-color="#9aa3bf" stop-opacity=".1"/><stop offset=".45" stop-color="#9aa3bf" stop-opacity="0"/><stop offset="1" stop-color="#6f79a0" stop-opacity=".28"/></linearGradient>'+
+      '<linearGradient id="'+id+'v" gradientUnits="userSpaceOnUse" x1="0" y1="150" x2="0" y2="310"><stop offset="0" stop-color="#8b94b0" stop-opacity="0"/><stop offset="1" stop-color="#6f79a0" stop-opacity=".26"/></linearGradient></defs>'+
       '<g clip-path="url(#'+id+')"><rect x="-120" y="60" width="240" height="330" fill="url(#'+id+'s)"/><rect x="-120" y="60" width="240" height="330" fill="url(#'+id+'v)"/><rect x="-120" y="60" width="240" height="330" fill="url(#'+id+'h)"/></g>'}
   function glove(shapes,dx,dy){
     var id="@c"+(++cn);dx=dx==null?-7:dx;dy=dy==null?-7:dy;
     return '<g fill="'+OL+'" stroke="'+OL+'" stroke-width="'+SW*2+'" stroke-linejoin="round" stroke-linecap="round">'+shapes+'</g>'+
-      '<g fill="'+WH+'">'+shapes+'</g>'+
+      '<g fill="'+WH+'" filter="url(#'+id+'f)">'+shapes+'</g>'+
       '<clipPath id="'+id+'">'+shapes+'</clipPath><g clip-path="url(#'+id+')"><rect x="-120" y="60" width="240" height="330" fill="'+BL+'"/><g transform="translate('+dx+' '+dy+')" fill="'+WH+'">'+shapes+'</g></g>'+SHD(id)}
   /* الكُم: حلقة منفوخة في الرسغ */
   var CUFF=glove('<rect x="-50" y="104" width="100" height="48" rx="22"/>',-3,-10)+line('M-34 121Q0 131 34 121',3.4);
@@ -11434,12 +11434,12 @@ function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
 
   /* ---- الذراع (غامقة زي مرجع الأذرع السودا) ---- */
   var SHc='C39 148 52 164 52 196';
-  var ARM='M-31 -340H31C31 -170 36 40 37 118'+SHc+'V206H-52V196C-52 164 -39 148 -37 118C-36 40 -31 -170 -31 -340Z';
+  var ARM='M-31 -340H31C31 -170 33 40 34 118C34 134 18 142 0 142C-18 142 -34 134 -34 118C-33 40 -31 -170 -31 -340Z';
   var base='<defs><linearGradient id="@ag" gradientUnits="userSpaceOnUse" x1="-37" y1="0" x2="37" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".3" stop-color="#34343c"/><stop offset=".55" stop-color="#101014"/><stop offset="1" stop-color="#000"/></linearGradient></defs><path d="'+ARM+'" fill="url(#@ag)"/>';
 
   /* ---- A: إيد مفتوحة: كف + 4 صوابع تخينة + إبهام ---- */
   var PA='<path d="M-37 100V118C-42 148 -54 164 -54 196C-54 203 -52 207 -48 208H48C52 207 54 203 54 196C54 164 42 148 37 118V100Z"/>';
-  var FA=[[-40,198,22,22,60,9],[-13.5,194,23,23,74,3.5],[13.5,194,23,23,78,-2],[40,198,22,22,66,-8.5]];
+  var FA=[[-40,198,25,20,60,9],[-13.5,194,26,21,74,3.5],[13.5,194,26,21,78,-2],[40,198,25,20,66,-8.5]];
   var SA=PA;
   FA.forEach(function(f){SA+=fing(f[0],f[1],f[2],f[3],f[4],f[5])});
   SA+=fing(48,174,27,25,54,-60,182);
@@ -11493,13 +11493,13 @@ function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   var M5=layer(SM,line('M0 268L0 252')+line('M-24 240Q0 249 24 240'));
   var ux=sh*kx,gap=5.5,N3=(function(){try{return localStorage.getItem("hand3d")==="0"?1:5}catch(e){return 5}})(),sl="",i2,q;
   /* الشرايح اللي في النص: جدار جانبي رمادي فاتح من غير إطار أسود، عشان الحافة تبان كسُمك واحد مش خطوط */
-  function sw(s){return(i2>0&&i2<N3-1)?s.split(OL).join("#aab0c4"):s}
+  function sw(s){return(i2>0&&i2<N3-1)?s.split(OL).join("#aab0c4").replace(/ filter="url\(#[^"]*\)"/g,""):s}
   for(i2=0;i2<N3;i2++){q=u+"s"+i2;
     sl+='<div class="akp-slc" style="transform:translateZ('+(((N3-1)/2-i2)*gap*ux).toFixed(1)+'px)">'+
-      wrap("akp-pbase",q+"e",base)+wrap("akp-pa",q+"a",sw(A))+wrap("akp-pb",q+"b",sw(B))+wrap("akp-pc",q+"d",sw(C))+wrap("akp-pd",q+"f",sw(D))+
+      wrap("akp-pa",q+"a",sw(A))+wrap("akp-pb",q+"b",sw(B))+wrap("akp-pc",q+"d",sw(C))+wrap("akp-pd",q+"f",sw(D))+
       wrap("akp-pe",q+"g",sw(E))+wrap("akp-pf",q+"h",sw(F))+wrap("akp-pg",q+"i",sw(G))+wrap("akp-ph",q+"j",sw(HG))+wrap("akp-pi",q+"k",sw(I))+
       wrap("akp-pj",q+"l",sw(J))+wrap("akp-pk",q+"m",sw(K3))+wrap("akp-pl",q+"n",sw(L4))+wrap("akp-pm",q+"o",sw(M5))+'</div>'}
-  return '<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px"><div class="akp-t3">'+sl+'</div></div>'}
+  return '<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px">'+wrap("akp-arm",u+"arm",base)+'<div class="akp-t3">'+sl+'</div></div>'}
 
 /* ===== ظل ناعم تحت الإيد (طبقة منفصلة بـ multiply عشان تتفاعل مع القماش). المركز = مركز القبضة ===== */
 function akShadowSVG(P){
@@ -11621,13 +11621,12 @@ function akFoldSVG(seed,size,P){
        عنيفة (من السحبة 4): strong (شدّة قوية والصفحة ترتد) / slip (القماش يفلت منها وتحاول تاني) / impatient (بتدق على الشاشة بصباعها بنفاد صبر)
        كل سحبة سادسة (6، 12، 18...): angry (بتتعصب وتخبط 3 مرات)
      لتجربة سيناريو من الكونسول: AKPull.play(0,"shy") (والأسماء فوق) أو AKPull.play(0,"angry") */
-  var SC_SOFT=["shy","twoTugs","blow","thumbs","shakeOff","normal","peace","ok","talk","beckon","reach","flip","bye","rock","count","mix","somersault","twirl","tumble","showoff","backflip","spinout"],SC_HARD=["strong","slip","impatient","gun","scold"],
+  var SC_SOFT=["wave","shy","twoTugs","blow","thumbs","shakeOff","normal","peace","ok","talk","beckon","reach","flip","bye","rock","count","mix","somersault","twirl","tumble","showoff","backflip","spinout"],SC_HARD=["strong","slip","impatient","gun","scold","angry"],
       KNOWN=["wave","angry","normal"].concat(SC_SOFT,SC_HARD);
-  function lastSc(){try{return sessionStorage.getItem("akps")||""}catch(e){return window._akps||""}}
-  function setLastSc(v){try{sessionStorage.setItem("akps",v)}catch(e){window._akps=v}}
+  function lastSc(){try{return localStorage.getItem("akps")||""}catch(e){return window._akps||""}}
+  function setLastSc(v){try{localStorage.setItem("akps",v)}catch(e){window._akps=v}}
   function firstToday(){try{var d=new Date().toDateString();if(localStorage.getItem("akpday")===d)return false;localStorage.setItem("akpday",d);return true}catch(e){return false}}
   function chooseScen(n,R){
-    if(n%6===0)return "angry";
     var pool=(n>=4&&R()<.55)?SC_HARD:SC_SOFT,last=lastSc(),sc,k=0;
     do{sc=pool[Math.floor(R()*pool.length)];k++}while(sc===last&&k<8);
     return sc}
@@ -11635,8 +11634,8 @@ function akFoldSVG(seed,size,P){
     if(busy||rm.matches||disabled()||!isHome())return;
     busy=true;
     var n=cnt()+1;setCnt(n);
-    seed=(seed*1103515245+12345+n*977)>>>0;var R=akRnd(seed);
-    var scen=(typeof force==="string"&&KNOWN.indexOf(force)>=0)?force:(n===1&&firstToday())?"wave":chooseScen(n,R);
+    seed=((Math.random()*4294967296)^Date.now()^(n*977))>>>0;var R=akRnd(seed);
+    var scen=(typeof force==="string"&&KNOWN.indexOf(force)>=0)?force:chooseScen(n,R);
     setLastSc(scen);
     var side=(force===1||force==="right")?1:(force===-1||force==="left")?-1:(R()<.5?-1:1);   // 1 = يمين، -1 = شمال
     var vw=window.innerWidth,sh=Math.min(vw,520)/460,K=.56,Rf=540*sh*K,u=sh*K,fs=Math.round(Math.min(640,Math.max(360,vw*1.4))),fh=fs/2,h0=Math.max(H,off||0);
