@@ -11361,8 +11361,8 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 #akShd{left:50%;margin-left:-130px;width:260px;height:400px;margin-top:-200px;mix-blend-mode:multiply;will-change:transform,opacity}
 #akHand{left:50%;width:0;height:0;will-change:transform}
 #akHand .akp-hsvg{position:absolute;top:0;overflow:visible;transform-origin:50% 0;will-change:transform}
-#akHand .akp-pa,#akHand .akp-pb{will-change:opacity}
-#akHand .akp-pb{opacity:0}
+#akHand .akp-pa,#akHand .akp-pb,#akHand .akp-pc{will-change:opacity}
+#akHand .akp-pb,#akHand .akp-pc{opacity:0}
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
@@ -11408,43 +11408,51 @@ function akTint(h,P){
 function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   var u=uid||"h",W=240*sh*kx,H=700*sh*ky;
   var SK=(P&&P.cf)||"#FFCBA4",SD=(P&&P.cs)||"#F0A27E";
+  /* لون فاتح للكُم (الكاف) اللي في الرسغ، زي القفاز الكرتوني */
+  function lite(c,t){var n=parseInt(c.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255;
+    function m(v){return Math.round(v+(255-v)*t)}return "#"+((1<<24)+(m(r)<<16)+(m(g)<<8)+m(b)).toString(16).slice(1)}
+  var CK=lite(SK,.5),CD=lite(SD,.38);
+  function grad(id,a,b){return '<linearGradient id="@'+id+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+a+'"/><stop offset=".38" stop-color="'+a+'"/><stop offset="1" stop-color="'+b+'"/></linearGradient>'}
   function wrap(cls,id,body){
-    return ('<svg class="'+cls+'" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><defs>'+
-      '<linearGradient id="@g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+SK+'"/><stop offset=".38" stop-color="'+SK+'"/><stop offset="1" stop-color="'+SD+'"/></linearGradient></defs>'+body+'</svg>').replace(/@/g,id)}
+    return ('<svg class="'+cls+'" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><defs>'+grad("g",SK,SD)+grad("k",CK,CD)+'</defs>'+body+'</svg>').replace(/@/g,id)}
   function tr(rot,px,py){return rot?' transform="rotate('+rot+' '+px+' '+py+')"':''}
-  /* صباع "سجق" تخين بطرف مدوّر */
+  /* صباع تخين بطرف مدوّر (شكل قفاز كرتوني) */
   function fing(cx,top,wb,wt,len,rot,py){
     var yb=top+len-wt/2;
     return '<path d="M'+(cx-wb/2)+' '+top+'L'+(cx-wt/2)+' '+yb+'A'+(wt/2)+' '+(wt/2)+' 0 0 0 '+(cx+wt/2)+' '+yb+'L'+(cx+wb/2)+' '+top+'Z"'+tr(rot,cx,py==null?top:py)+'/>'}
-  /* كل شكل بياخد تدرّج الظل الخاص بيه (فاتح من الشمال، أغمق شوية من اليمين) فالصوابع بتتفصل عن بعض من غير أي خط */
-  function fill(shapes){return '<g fill="url(#@g)">'+shapes+'</g>'}
-  function layer(shapes){return '<clipPath id="@vc"><rect x="-120" y="128" width="240" height="400"/></clipPath><g clip-path="url(#@vc)">'+fill(shapes)+'</g>'}
+  /* كل شكل بياخد تدرّج الظل الخاص بيه (من غير أي خط) فالصوابع بتتفصل عن بعض بالظل بس */
+  function fill(shapes,g){return '<g fill="url(#@'+(g||"g")+')">'+shapes+'</g>'}
+  /* الكُم: حلقة مدوّرة منفوخة في الرسغ */
+  var CUFF='<rect x="-47" y="108" width="94" height="42" rx="21"/>';
+  function layer(shapes){return '<clipPath id="@vc"><rect x="-120" y="60" width="240" height="500"/></clipPath><g clip-path="url(#@vc)">'+fill(shapes)+fill(CUFF,"k")+'</g>'}
 
   /* ---- الذراع ---- */
   var SHc='C39 148 52 164 52 196';
   var ARM='M-31 -340H31C31 -170 36 40 37 118'+SHc+'V206H-52V196C-52 164 -39 148 -37 118C-36 40 -31 -170 -31 -340Z';
   var base=fill('<path d="'+ARM+'"/>');
 
-  /* ---- A: إيد مفتوحة: كف مدوّر + 4 صوابع تخينة + إبهام ---- */
-  var PA='<path d="M-37 100V118C-39 148 -52 164 -52 196C-52 206 -50 214 -44 218H44C50 214 52 206 52 196C52 164 39 148 37 118V100Z"/>';
-  var FA=[[-39,198,23,23,58,9],[-13,196,24,24,72,3.5],[13,196,24,24,76,-2],[39,198,23,23,64,-8.5]];
+  /* ---- A: إيد مفتوحة: كف مدوّر + 4 صوابع تخينة قصيرة + إبهام تخين ---- */
+  var PA='<path d="M-37 100V118C-42 148 -54 164 -54 196C-54 208 -52 216 -46 220H46C52 216 54 208 54 196C54 164 42 148 37 118V100Z"/>';
+  var FA=[[-40,198,26,26,56,9],[-13.5,194,27,27,70,3.5],[13.5,194,27,27,74,-2],[40,198,26,26,62,-8.5]];
   var SA=PA;
   FA.forEach(function(f){SA+=fing(f[0],f[1],f[2],f[3],f[4],f[5])});
-  SA+=fing(47,176,26,24,52,-62,184);
+  SA+=fing(48,174,29,27,54,-60,182);
   var A=layer(SA);
 
-  /* ---- B: قبضة كرتونية: كف مدوّر + 4 كور صغيرة (الصوابع المقفولة) + إبهام قدّام ---- */
-  var PB='<path d="M-37 100V118C-39 148 -52 164 -52 196C-52 226 -51 240 -46 246H46C51 240 52 226 52 196C52 164 39 148 37 118V100Z"/>';
-  var KB=[[-37,252],[-12.5,256],[12.5,256],[37,252]];
+  /* ---- B: قبضة: كف مدوّر + 4 كور كبيرة (الصوابع المقفولة على القماش). الإبهام مخفي وقت المسك ---- */
+  var PB='<path d="M-37 100V118C-42 148 -54 164 -54 196C-54 226 -53 240 -48 246H48C53 240 54 226 54 196C54 164 42 148 37 118V100Z"/>';
+  var KB=[[-37,250],[-12.5,256],[12.5,256],[37,250]];
   var SB=PB;
-  KB.forEach(function(k){SB+='<circle cx="'+k[0]+'" cy="'+k[1]+'" r="16"/>'});
-  SB+='<rect x="14" y="200" width="32" height="70" rx="16" transform="rotate(14 30 214)"/>';
+  KB.forEach(function(k){SB+='<circle cx="'+k[0]+'" cy="'+k[1]+'" r="18.5"/>'});
   var B=layer(SB);
+  /* ---- C: قبضة بإبهام مرفوع (بتتلف الإيد 90 درجة وقت "برافو") ---- */
+  var C=layer(SB+'<rect x="40" y="198" width="58" height="32" rx="16"/>');
 
   return '<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px">'+
     wrap("akp-pbase",u+"c",base)+
     wrap("akp-pa",u+"a",A)+
-    wrap("akp-pb",u+"b",B)+'</div>'}
+    wrap("akp-pb",u+"b",B)+
+    wrap("akp-pc",u+"d",C)+'</div>'}
 
 /* ===== ظل ناعم تحت الإيد (طبقة منفصلة بـ multiply عشان تتفاعل مع القماش). المركز = مركز القبضة ===== */
 function akShadowSVG(P){
@@ -11555,66 +11563,138 @@ function akFoldSVG(seed,size,P){
     clearInline();[fold,shd,hand].forEach(function(e){if(e)e.style.display="none"});
     root.classList.remove("akp-on");busy=false;
   }
-  /* ===== الحركة (سلسة وبسيطة) =====
-     اليد بتدخل من اليمين أو من الشمال (عشوائي)، تروح للقماش من الناحية دي وتمسكه (تقفل إيدها)، وتشده لفوق مع الصفحة، وبعدين تسيبه وتطلع بره الشاشة.
-     كل سحبة سادسة (6، 12، 18...) اليد بتتعصب وتخبط 3 مرات قبل ما تشد. لتجربتها: AKPull.play(0,"angry")
-     gx/gy = مكان نقطة المسك (gx من منتصف الشاشة: موجب = يمين)، th = ميلان الذراع (بيخلّيها تبان داخلة من الجنب) */
+  /* ===== الحركة =====
+     اليد بتدخل من اليمين أو الشمال (عشوائي)، تروح لنص القماش وتمسكه (تقفل إيدها) وتشده لفوق مع الصفحة، وبعدين تسيبه وتطلع.
+     السيناريوهات بتتختار عشوائي، بس الأهدى بس في أول 3 سحبات، ومن السحبة الرابعة بتبدأ تظهر السيناريوهات الأعنف.
+       هادية: wave (أول سحبة في اليوم: بتلوّح) / shy (بتتكسّف وتستخبّى) / twoTugs (شدّتين صغيرين) / blow (بتنفض إيدها قبل الشد)
+              thumbs (بتقول برافو بإبهام) / shakeOff (بتنفض إيدها بعد الشد) / normal (شد عادي)
+       عنيفة (من السحبة 4): strong (شدّة قوية والصفحة ترتد) / slip (القماش يفلت منها وتحاول تاني) / impatient (بتدق بنفاد صبر)
+       كل سحبة سادسة (6، 12، 18...): angry (بتتعصب وتخبط 3 مرات)
+     لتجربة سيناريو من الكونسول: AKPull.play(0,"shy") (والأسماء فوق) أو AKPull.play(0,"angry") */
+  var SC_SOFT=["shy","twoTugs","blow","thumbs","shakeOff","normal"],SC_HARD=["strong","slip","impatient"],
+      KNOWN=["wave","angry","normal"].concat(SC_SOFT,SC_HARD);
+  function lastSc(){try{return sessionStorage.getItem("akps")||""}catch(e){return window._akps||""}}
+  function setLastSc(v){try{sessionStorage.setItem("akps",v)}catch(e){window._akps=v}}
+  function firstToday(){try{var d=new Date().toDateString();if(localStorage.getItem("akpday")===d)return false;localStorage.setItem("akpday",d);return true}catch(e){return false}}
+  function chooseScen(n,R){
+    if(n%6===0)return "angry";
+    var pool=(n>=4&&R()<.55)?SC_HARD:SC_SOFT,last=lastSc(),sc,k=0;
+    do{sc=pool[Math.floor(R()*pool.length)];k++}while(sc===last&&k<8);
+    return sc}
   function play(off,force){
     if(busy||rm.matches||disabled()||!isHome())return;
     busy=true;
     var n=cnt()+1;setCnt(n);
     seed=(seed*1103515245+12345+n*977)>>>0;var R=akRnd(seed);
-    var scen=(force==="angry"||(typeof force!=="number"&&typeof force!=="string"&&n%6===0))?"angry":"normal";   // كل سحبة سادسة: اليد بتتعصب
+    var scen=(typeof force==="string"&&KNOWN.indexOf(force)>=0)?force:(n===1&&firstToday())?"wave":chooseScen(n,R);
+    setLastSc(scen);
     var side=(force===1||force==="right")?1:(force===-1||force==="left")?-1:(R()<.5?-1:1);   // 1 = يمين، -1 = شمال
     var vw=window.innerWidth,sh=Math.min(vw,520)/460,K=.82,Rf=540*sh*K,u=sh*K,fs=Math.round(Math.min(640,Math.max(360,vw*1.4))),fh=fs/2,h0=Math.max(H,off||0);
     syncExt();build();fill(sh,K,fs);
     var cs=getComputedStyle(root),EA=(cs.getPropertyValue("--v5-ease")||"").trim()||"cubic-bezier(.22,1,.36,1)",
         EP="cubic-bezier(.55,0,.2,1)",      // الشد: بداية هادية وبعدين يسرّع ويهدى في الآخر
-        EX="cubic-bezier(.5,0,.85,.6)",ES="cubic-bezier(.45,0,.55,1)";     // الطلوع: يسرّع بالتدريج
+        EX="cubic-bezier(.5,0,.85,.6)",     // الطلوع: يسرّع بالتدريج
+        ES="cubic-bezier(.45,0,.55,1)",
+        EI="cubic-bezier(.64,0,.78,0)";
     var gxS=side*(vw/2+70*u+30),            // برّه الشاشة من الجنب
-        gxG=side*vw*.28,                    // مكان المسك: ناحية الجنب مش في النص
         fyH=-100*u-40;                      // فوق الشاشة (مخفية)
-    var S=[],cur=null;
-    function st(t,p,e){cur=Object.assign({},cur||{gx:gxS,gy:.35*h0,th:side*38,pose:0,fo:0,fx:1,fy2:1,so:0,ss:1.3,cy:off||0,cs:1},p||{});cur.t=t;cur.e=e||EA;S.push(cur);return cur}
+    var S=[],cur=null,th0=side*4,t=220,tg,tp,pe,j;
+    function st(tm,p,e){cur=Object.assign({},cur||{gx:gxS,gy:.35*h0,th:side*38,pose:0,fo:0,fx:1,fy2:1,so:0,ss:1.3,cy:off||0,cs:1},p||{});cur.t=tm;cur.e=e||EA;S.push(cur);return cur}
+    function enter(dur,gy){t+=dur;st(t,{gx:0,gy:gy,th:th0,so:.85,ss:1.5},EA)}                    // تدخل من الجنب لنص الشاشة وتقف
+    function osc(arr,step,gy){arr.forEach(function(a,i){t+=step;st(t,{gy:gy+(i%2?3:-3),th:th0+a},ES)})}   // هزّات يمين وشمال
     st(0,{},EA);
-    st(220,{cy:h0},EA);                                                       // الصفحة تستقر تحت
-    var tg=220+680;
-    if(scen==="angry"){
-      /* السحبة السادسة: بتدخل من الجنب وتقف قدام القماش، تقفل إيدها وترتعش من الغيظ، وتخبط 3 مرات (كل مرة أقوى والتطبيق يهتز)، وبعدين تهدى وتمسك القماش وتشده عادي */
-      var t=220+560,th0=side*16,j,tm=[6,-6,5,-4.5,3,0],hy=.5*h0;
-      st(t,{gx:gxG,gy:hy,th:th0,so:.85,ss:1.5},EA);
-      t+=140;st(t,{pose:1},ES);                                                  // تقفل إيدها
-      for(j=0;j<tm.length;j++){t+=42;st(t,{gy:hy+(j%2?4:-3),th:th0+tm[j]*side},ES)}   // ارتعاش غضب
-      var kd=[9,12,16];
+    st(220,{cy:h0},EA);                                                                           // الصفحة تستقر تحت
+
+    /* ---- قبل المسك ---- */
+    if(scen==="wave"){          // بتلوّح للطلبة
+      enter(620,.45*h0);osc([10,-10,10,-10,8,-8,0],120,.45*h0);t+=100;tg=t+260;
+    }else if(scen==="blow"){    // بتنفض إيدها كأنها بتسخّنها
+      enter(620,.5*h0);osc([14,-14,13,-13,10,-10,6,0],65,.5*h0);tg=t+300;
+    }else if(scen==="impatient"){   // بتدق بنفاد صبر
+      enter(600,.48*h0);
+      for(j=0;j<5;j++){t+=95;st(t,{gy:.64*h0,th:th0+(j%2?3:-3),so:1,ss:1.1},EA);t+=85;st(t,{gy:.5*h0,so:.85,ss:1.5},ES)}
+      tg=t+260;
+    }else if(scen==="shy"){     // بتطلّ من الحافة وتستخبّى وترجع
+      t+=440;st(t,{gx:side*(vw/2-26*u),gy:.55*h0,th:side*34,so:.8,ss:1.5},EA);
+      t+=380;st(t,{},ES);
+      t+=340;st(t,{gx:gxS,th:side*38,so:0},ES);
+      t+=280;st(t,{},EA);
+      tg=t+700;
+    }else if(scen==="angry"){   // بتتعصب وتخبط 3 مرات
+      var tm=[6,-6,5,-4.5,3,0],hy=.5*h0,kd=[9,12,16];
+      enter(560,hy);
+      t+=140;st(t,{pose:1},ES);
+      for(j=0;j<tm.length;j++){t+=42;st(t,{gy:hy+(j%2?4:-3),th:th0+tm[j]*side},ES)}
       for(j=0;j<3;j++){
-        t+=105;st(t,{gy:.28*h0,th:th0-5*side,so:.7,ss:1.6},"cubic-bezier(.64,0,.78,0)");   // ترفع إيدها
-        t+=85;st(t,{gy:.93*h0,th:th0,so:1,ss:1,cy:h0+kd[j]},EA);                           // خبطة
+        t+=105;st(t,{gy:.28*h0,th:th0-5*side,so:.7,ss:1.6},EI);
+        t+=85;st(t,{gy:.93*h0,th:th0,so:1,ss:1,cy:h0+kd[j]},EA);
         t+=55;st(t,{gy:.8*h0,so:.9,ss:1.15,cy:h0-4},ES);
       }
-      t+=60;st(t,{gy:.62*h0,pose:0,so:.8,ss:1.35,cy:h0+3},ES);                    // تفتح إيدها وتهدى
+      t+=60;st(t,{gy:.62*h0,pose:0,so:.8,ss:1.35,cy:h0+3},ES);
       t+=60;st(t,{cy:h0},EA);
       tg=t+320;
-    }
-    st(tg,{gx:gxG,gy:.78*h0,th:side*16,so:.95,ss:1.3},EA);                   // اليد بتدخل/بتروح للقماش
-    st(tg+90,{pose:1,ss:.85,fo:.35,fx:.35,fy2:.35},EA);                      // بتمسك (تقفل إيدها)
+    }else tg=t+680;
+
+    /* ---- المسك ---- */
+    st(tg,{gx:0,gy:.78*h0,th:th0,so:.95,ss:1.3},EA);
+    st(tg+90,{pose:1,ss:.85,fo:.35,fx:.35,fy2:.35},EA);
     st(tg+180,{fo:.8,fx:.75,fy2:.75,ss:.8},EA);
-    st(tg+270,{fo:1,fx:1,fy2:1},EA);                                          // القماش اتشد وطياته ظهرت
-    var tp=tg+420;
-    st(tp,{},EP);                                                             // ثبات قصير وهي ماسكة
-    var pe=tp+720;
-    st(pe,{cy:0,gx:gxG*1.06,gy:-.22*h0,th:side*11,fy2:1.4,ss:.6,so:0},EA);   // الشد لفوق (الصفحة واليد مع بعض)
-    st(pe+110,{pose:0},EX);                                                   // بتسيب القماش وتفتح إيدها
-    st(pe+110+400,{gx:gxG*1.12,gy:fyH,th:side*6,fo:0},EA);                    // وتطلع بره الشاشة
-    T=pe+110+400;
+    st(tg+270,{fo:1,fx:1,fy2:1},EA);
+    tp=tg+420;
+
+    /* ---- قبل الشدّة الكبيرة ---- */
+    if(scen==="twoTugs"){       // شدّتين صغيرين زي اللعب
+      for(j=0;j<2;j++){
+        st(tp,{},ES);st(tp+170,{cy:.78*h0,gy:.6*h0,fy2:1.12},ES);st(tp+340,{cy:h0,gy:.78*h0,fy2:1},ES);tp+=420;
+      }
+    }else if(scen==="slip"){    // بتشد والقماش يفلت منها وتحاول تاني
+      st(tp,{},EA);
+      st(tp+240,{cy:.5*h0,gy:.28*h0,th:th0+2,fy2:1.25,ss:.9},ES);
+      st(tp+330,{th:th0-2},ES);
+      st(tp+420,{cy:h0+10,gy:.9*h0,th:th0+5,fy2:.9,ss:1.05},EA);
+      st(tp+520,{cy:h0-4,gy:.76*h0,th:th0-3},ES);
+      st(tp+610,{cy:h0,gy:.78*h0,th:th0,fy2:1,ss:1.3},EA);
+      tp+=800;
+    }else if(scen==="strong"){  // بتشد لورا الأول عشان تاخد قوة
+      st(tp,{},ES);st(tp+230,{cy:h0+16,gy:.93*h0,ss:1,fy2:.85},ES);tp+=330;
+    }
+
+    /* ---- الشدّة + بعدها ---- */
+    var keep=(scen==="thumbs"||scen==="shakeOff");   // اليد بتفضل ظاهرة بعد الشد
+    if(scen==="strong"){
+      pe=tp+380;st(tp,{},EI);
+      st(pe,{cy:-12,gx:0,gy:-.3*h0,th:th0,fy2:1.8,ss:.6,so:0},EA);                // الشدّة القوية: القماش يطلع أعلى من مكانه
+      st(pe+110,{cy:6,pose:0,fo:.6},ES);st(pe+210,{cy:-3,fo:.2},ES);st(pe+300,{cy:0,fo:0},EA);   // والصفحة ترتد وتستقر
+      st(pe+560,{gy:fyH,th:0},EA);T=pe+560;
+    }else{
+      pe=tp+720;st(tp,{},EP);
+      st(pe,{cy:0,gx:0,gy:keep?.14*h0:-.22*h0,th:th0,fy2:1.4,ss:.6,so:keep?.5:0},EA);
+      if(scen==="shakeOff"){          // بتنفض إيدها بعد الشد
+        t=pe+110;st(t,{pose:0,fo:0,so:.6},EX);
+        [16,-16,14,-14,10,-10,0].forEach(function(a,i){t+=85;st(t,{th:th0+a,gy:.14*h0+(i%2?2:-2)},ES)});
+        t+=140;st(t,{},EA);
+        t+=420;st(t,{gy:fyH,th:0,so:0},EX);T=t;
+      }else if(scen==="thumbs"){      // بتقول برافو بإبهام مرفوع
+        t=pe+110;st(t,{pose:2,fo:0,so:.6},EX);
+        t+=330;st(t,{th:-90,gy:.95*h0,so:.5},ES);                                    // بتلف إيدها والذراع بتيجي من الشمال
+        t+=170;st(t,{gy:.95*h0-9},ES);t+=130;st(t,{gy:.95*h0},ES);
+        t+=170;st(t,{gy:.95*h0-6},ES);t+=120;st(t,{gy:.95*h0},ES);
+        t+=260;st(t,{},EA);
+        t+=420;st(t,{gx:-(vw/2+110*u+30),so:0},EX);T=t;                              // وتطلع من الشمال
+      }else{
+        st(pe+110,{pose:0},EX);
+        st(pe+510,{gx:0,gy:fyH,th:0,fo:0},EA);T=pe+510;
+      }
+    }
     var Rr=Math.PI/180;
     var O={duration:T,fill:"both"},ks=function(f){return S.map(function(s){var o=f(s);o.offset=s.t/T;o.easing=s.e;return o})};
     /* مكان الدوران عند الكتف: لو عايزين نقطة المسك تبقى في (gx,gy) والذراع مايلة th، الترجمة = (gx+Rf*sin th , gy-Rf*cos th) */
     var main=hand.animate(ks(function(s){var a=s.th*Rr;return {transform:"translate("+(s.gx+Rf*Math.sin(a)).toFixed(1)+"px,"+(s.gy-Rf*Math.cos(a)).toFixed(1)+"px)"}}),O);anims=[main];
     anims.push(hsvg.animate(ks(function(s){return {transform:"rotate("+s.th+"deg)"}}),O));
-    var pa=hsvg.querySelector(".akp-pa"),pb=hsvg.querySelector(".akp-pb");
-    /* التبديل بين اليد المفتوحة والقبضة: القبضة بتظهر/تختفي فوق المفتوحة (بدون ما الإيد تبقى شفافة في النص) */
-    anims.push(pa.animate(S.map(function(s,i){var nx=S[i+1],e="linear";if(nx){if(nx.pose>s.pose)e="steps(1,end)";else if(nx.pose<s.pose)e="steps(1,start)"}return {offset:s.t/T,opacity:1-s.pose,easing:e}}),O));
-    anims.push(pb.animate(ks(function(s){return {opacity:s.pose}}),O));
+    /* التبديل بين اليد المفتوحة (0) والقبضة (1) والقبضة بإبهام (2): الطبقة اللي بتظهر بتظهر في أول الفترة، واللي بتختفي بتفضل لآخرها (من غير ما الإيد تبقى شفافة في النص) */
+    ["pa","pb","pc"].forEach(function(cl,k){
+      var L=hsvg.querySelector(".akp-"+cl);
+      anims.push(L.animate(S.map(function(s,i){var nx=S[i+1],e="linear";if(nx){var a=s.pose===k?1:0,b=nx.pose===k?1:0;if(b>a)e="steps(1,start)";else if(b<a)e="steps(1,end)"}return {offset:s.t/T,opacity:s.pose===k?1:0,easing:e}}),O))});
     anims.push(fold.animate(ks(function(s){return {transform:"translate("+s.gx+"px,"+(s.gy-fh)+"px)",opacity:s.fo}}),O));
     anims.push(fold.querySelector(".akp-fgw").animate(ks(function(s){return {transform:"scale("+s.fx+","+s.fy2+")"}}),O));
     anims.push(shd.animate(ks(function(s){return {transform:"translate("+(s.gx+14*u)+"px,"+(s.gy+16*u)+"px) scale("+(s.ss*u)+")",opacity:s.so*.5}}),O));
@@ -11624,6 +11704,7 @@ function akFoldSVG(seed,size,P){
     main.onfinish=cleanup;
     setTimeout(function(){if(busy&&!anims.length)cleanup()},T+600);
     if(REFRESH){try{if(typeof studentRefresh==="function"&&window.ST&&ST.data&&!(window.AU&&AU.user))studentRefresh()}catch(e){}}
+    return scen;
   }
   /* ===== التقاط السحب لتحت من أول الصفحة ===== */
   function scrollY(){return window.pageYOffset||document.documentElement.scrollTop||0}
