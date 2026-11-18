@@ -11358,13 +11358,13 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 #akFold{left:50%;mix-blend-mode:overlay;will-change:transform,opacity}
 #akFold .akp-fgw{transform-origin:50% 50%;will-change:transform}
 #akFold svg{display:block}
-#akShd{left:50%;margin-left:-130px;width:260px;height:400px;margin-top:-200px;mix-blend-mode:multiply;will-change:transform,opacity}
-#akHand{left:50%;width:0;height:0;will-change:transform}
-#akHand .akp-hsvg{position:absolute;top:0;overflow:visible;transform-origin:50% 0;will-change:transform;backface-visibility:visible}
-#akHand .akp-t3{position:absolute;left:0;top:0;width:100%;height:100%;transform-style:preserve-3d;transform-origin:50% 66%;will-change:transform}
-#akHand .akp-slc{position:absolute;left:0;top:0;width:100%;height:100%;transform-style:flat;backface-visibility:visible}
-#akHand .akp-pa,#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi,#akHand .akp-pj,#akHand .akp-pk,#akHand .akp-pl,#akHand .akp-pm{will-change:opacity}
-#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi,#akHand .akp-pj,#akHand .akp-pk,#akHand .akp-pl,#akHand .akp-pm{opacity:0}
+#akShd{left:50%;width:220px;height:220px;margin-left:-110px;margin-top:-110px;border-radius:50%;background:radial-gradient(closest-side,rgba(10,4,32,.55),rgba(10,4,32,.22) 60%,rgba(10,4,32,0));will-change:transform,opacity}
+#akHand{left:50%;width:0;height:0;will-change:transform,filter}
+#akHand .akp-rt{position:absolute;left:0;top:0;width:0;height:0;will-change:transform}
+#akHand .akp-hsvg{position:absolute;overflow:visible}
+#akHand .akp-gl{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:50% 66%;will-change:transform}
+#akHand .akp-p0,#akHand .akp-p1,#akHand .akp-p2,#akHand .akp-p3,#akHand .akp-p4{will-change:opacity}
+#akHand .akp-p1,#akHand .akp-p2,#akHand .akp-p3,#akHand .akp-p4{opacity:0}
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
@@ -11403,21 +11403,23 @@ function akTint(h,P){
   if(P.hi!==1)h=h.replace(/(fill|flood)(-color)?="#fff"( opacity|\s+flood-opacity)="([\d.]+)"/g,function(a,b,c,d,o){return a.replace('"'+o+'"','"'+(o*P.hi).toFixed(2)+'"')});
   return h}
 
-/* ===== اليد: قفاز كرتوني أبيض زي الصور المرجعية: لون أبيض + إطار غامق رفيع + ظل أزرق فاتح على الحواف + كُم منفوخ في الرسغ + شوية خطوط صغيرة (قاعدة الصوابع وثنية الكف).
-   الذراع غامقة زي مرجع الأذرع السودا. 4 طبقات SVG: قاعدة (الذراع) + A (إيد مفتوحة) + B (قبضة) + C (إبهام مرفوع) + D (صباع مشاور).
-   نقطة المسك (مركز القبضة) عند y=206. تغيير الألوان: WH لون القفاز، BL لون الظل، OL لون الإطار والذراع، SW سمك الإطار ===== */
+/* ===== اليد: قفاز كرتوني أبيض + إطار غامق + ظل أزرق فاتح + كُم منفوخ في الرسغ.
+   الهيكل (قطعة واحدة صلبة، مفيش حاجة بتتفك):
+     .akp-rt   = نقطة المسك (مركز القبضة) هي الأصل (0,0). الدوران والتكبير (الرفع) بيحصلوا حواليها.
+       .akp-hsvg = صندوق الرسم
+          .akp-arm = الساعد: طويل جداً (بيطلع لبرّه الشاشة من فوق دايماً) فبدايته عمرها ما تبان
+          .akp-gl  = الكف كله (كل الأوضاع + الكم): ميلان 3D (rotateX/rotateY) حوالين الرسغ، والكم دايماً فوق نهاية الساعد
+   الأوضاع (طبقة واحدة بس بتبان في كل لحظة): 0 مفتوحة / 1 قبضة / 2 إبهام مرفوع / 3 صوابع متقاطعة (بتتكسّف) / 4 مخلب (بتتعصب) ===== */
 function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
-  var u=uid||"h",W=240*sh*kx,H=700*sh*ky;
+  var u=uid||"h",ux=sh*kx,uy=sh*ky,W=240*ux,H=700*uy;
   var WH="#FFFFFF",BL="#B4B9C4",OL="#14141A",SW=5,cn=0;
   function wrap(cls,id,body){
     return ('<svg class="'+cls+'" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><defs></defs>'+body+'</svg>').replace(/@/g,id)}
   function tr(rot,px,py){return rot?' transform="rotate('+rot+' '+px+' '+py+')"':''}
-  /* صباع تخين بطرف مدوّر */
   function fing(cx,top,wb,wt,len,rot,py){
     var yb=top+len-wt/2;
     return '<path d="M'+(cx-wb/2)+' '+top+'L'+(cx-wt/2)+' '+yb+'A'+(wt/2)+' '+(wt/2)+' 0 0 0 '+(cx+wt/2)+' '+yb+'L'+(cx+wb/2)+' '+top+'Z"'+tr(rot,cx,py==null?top:py)+'/>'}
   function line(d,w){return '<path d="'+d+'" fill="none" stroke="'+OL+'" stroke-width="'+(w||3.4)+'" stroke-linecap="round" stroke-linejoin="round"/>'}
-  /* شكل قفاز: إطار غامق (من برّه بس، من غير خطوط جوّا الشكل) + أبيض + ظل أزرق فاتح على الحافة اليمين/تحت */
   function SHD(id){
     return '<defs><filter id="'+id+'f" x="-12%" y="-8%" width="124%" height="118%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="4.6" result="b"/><feDiffuseLighting in="b" surfaceScale="15" diffuseConstant="1.3" lighting-color="#ffffff" result="d"><feDistantLight azimuth="228" elevation="52"/></feDiffuseLighting><feColorMatrix in="d" type="matrix" values="0.92 0 0 0 0  0 0.95 0 0 0  0 0 1.05 0 0  0 0 0 1 0" result="dc"/><feComposite in="dc" in2="SourceAlpha" operator="in" result="lit"/><feBlend in="lit" in2="SourceGraphic" mode="multiply"/></filter>'+'<radialGradient id="'+id+'h" gradientUnits="userSpaceOnUse" cx="-20" cy="198" r="74"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
       '<linearGradient id="'+id+'s" gradientUnits="userSpaceOnUse" x1="-58" y1="0" x2="62" y2="0"><stop offset="0" stop-color="#9aa3bf" stop-opacity=".1"/><stop offset=".45" stop-color="#9aa3bf" stop-opacity="0"/><stop offset="1" stop-color="#6f79a0" stop-opacity=".28"/></linearGradient>'+
@@ -11428,88 +11430,35 @@ function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
     return '<g fill="'+OL+'" stroke="'+OL+'" stroke-width="'+SW*2+'" stroke-linejoin="round" stroke-linecap="round">'+shapes+'</g>'+
       '<g fill="'+WH+'" filter="url(#'+id+'f)">'+shapes+'</g>'+
       '<clipPath id="'+id+'">'+shapes+'</clipPath><g clip-path="url(#'+id+')"><rect x="-120" y="60" width="240" height="330" fill="'+BL+'"/><g transform="translate('+dx+' '+dy+')" fill="'+WH+'">'+shapes+'</g></g>'+SHD(id)}
-  /* الكُم: حلقة منفوخة في الرسغ */
   var CUFF=glove('<rect x="-50" y="104" width="100" height="48" rx="22"/>',-3,-10)+line('M-34 121Q0 131 34 121',3.4);
   function layer(body,det){return '<clipPath id="@vc"><rect x="-120" y="60" width="240" height="500"/></clipPath><g clip-path="url(#@vc)">'+glove(body)+(det||'')+CUFF+'</g>'}
 
-  /* ---- الذراع (غامقة زي مرجع الأذرع السودا) ---- */
-  var SHc='C39 148 52 164 52 196';
-  var ARM='M-31 -340H31C31 -170 33 40 34 118C34 134 18 142 0 142C-18 142 -34 134 -34 118C-33 40 -31 -170 -31 -340Z';
+  /* ---- الساعد: طويل جداً لفوق (بداية الساعد دايماً برّه الشاشة) ومتصل بالكم في الرسغ ---- */
+  var ARM='M-31 -4500H31V-340C31 -170 33 40 34 118C34 134 18 142 0 142C-18 142 -34 134 -34 118C-33 40 -31 -170 -31 -340Z';
   var base='<defs><linearGradient id="@ag" gradientUnits="userSpaceOnUse" x1="-37" y1="0" x2="37" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".3" stop-color="#34343c"/><stop offset=".55" stop-color="#101014"/><stop offset="1" stop-color="#000"/></linearGradient></defs><path d="'+ARM+'" fill="url(#@ag)"/>';
 
-  /* ---- A: إيد مفتوحة: كف + 4 صوابع تخينة + إبهام ---- */
+  /* 0: إيد مفتوحة */
   var PA='<path d="M-37 100V118C-42 148 -54 164 -54 196C-54 203 -52 207 -48 208H48C52 207 54 203 54 196C54 164 42 148 37 118V100Z"/>';
   var FA=[[-40,198,25,20,60,9],[-13.5,194,26,21,74,3.5],[13.5,194,26,21,78,-2],[40,198,25,20,66,-8.5]];
-  var SA=PA;
-  FA.forEach(function(f){SA+=fing(f[0],f[1],f[2],f[3],f[4],f[5])});
+  var SA=PA;FA.forEach(function(f){SA+=fing(f[0],f[1],f[2],f[3],f[4],f[5])});
   SA+=fing(48,174,27,25,54,-60,182);
-  var DA=line('M-14 150Q-22 168 -12 186')+line('M34 188Q41 200 34 212');
-  var A=layer(SA,DA);
-
-  /* ---- B: قبضة: كف + 4 كور (الصوابع المقفولة على القماش). الإبهام مخفي وقت المسك ---- */
+  var A=layer(SA,line('M-14 150Q-22 168 -12 186')+line('M34 188Q41 200 34 212'));
+  /* 1: قبضة */
   var PB='<path d="M-37 100V118C-42 148 -54 164 -54 196C-54 226 -53 240 -48 246H48C53 240 54 226 54 196C54 164 42 148 37 118V100Z"/>';
-  var KB=[[-37,250],[-12.5,256],[12.5,256],[37,250]];
-  var SB=PB;
-  KB.forEach(function(k){SB+='<circle cx="'+k[0]+'" cy="'+k[1]+'" r="18.5"/>'});
+  var SB=PB;[[-37,250],[-12.5,256],[12.5,256],[37,250]].forEach(function(k){SB+='<circle cx="'+k[0]+'" cy="'+k[1]+'" r="18.5"/>'});
   var DB=line('M-24.7 262L-24.7 248')+line('M0 268L0 252')+line('M24.7 262L24.7 248');
   var B=layer(SB,DB);
-
-  /* ---- C: قبضة بإبهام مرفوع (بتتلف الإيد 90 درجة وقت "برافو") ---- */
+  /* 2: قبضة بإبهام مرفوع */
   var C=layer(SB+'<rect x="40" y="198" width="58" height="32" rx="16"/>',DB+line('M42 202Q36 214 42 227'));
-
-  /* ---- D: قبضة بصباع مشاور لتحت (للدق على الشاشة) ---- */
-  var SD=PB;
-  [[-37,250],[-12.5,256],[12.5,256]].forEach(function(k){SD+='<circle cx="'+k[0]+'" cy="'+k[1]+'" r="18.5"/>'});
-  SD+=fing(39,200,25,25,96);
-  var D=layer(SD,line('M-24.7 262L-24.7 248')+line('M0 268L0 252')+line('M27 236Q39 242 51 236'));
-
-
-  /* ---- E: علامة النصر (V): صباعين مفتوحين + الباقي مقفول ---- */
-  var SE=PB+'<circle cx="-37" cy="250" r="18.5"/><circle cx="37" cy="250" r="18.5"/>'+fing(-14,196,23,22,132,12,200)+fing(14,196,23,22,132,-12,200)+'<rect x="-22" y="226" width="44" height="24" rx="12"/>';
-  var E=layer(SE,line('M-37 262L-37 248')+line('M37 262L37 248')+line('M-24 236Q0 246 24 236'));
-  /* ---- F: OK: دايرة من السبابة والإبهام + 3 صوابع مفتوحة ---- */
-  var SF=PA;[0,1,2].forEach(function(i){var f=FA[i];SF+=fing(f[0],f[1],f[2],f[3],f[4]+8,f[5]*1.4)});
-  SF+='<circle cx="46" cy="236" r="23"/>';
-  var F=layer(SF,'<ellipse cx="46" cy="238" rx="8.5" ry="10.5" fill="#fff" stroke="'+OL+'" stroke-width="3.4"/>'+DA);
-  /* ---- G: صوابع متقاطعة (حظ سعيد / بتتكسّف) ---- */
+  /* 3: صوابع متقاطعة (بتتكسّف) */
   var SG=PB+'<circle cx="-37" cy="250" r="18.5"/><circle cx="37" cy="250" r="18.5"/>'+fing(-9,196,23,22,134,-17,200)+fing(9,196,23,22,134,17,200);
   var G=layer(SG,line('M-37 262L-37 248')+line('M37 262L37 248')+line('M-10 244L10 258'));
-  /* ---- H: مسدس بالصوابع: سبابة طويلة + إبهام مرفوع ---- */
-  var SH=PB+'<circle cx="-37" cy="250" r="18.5"/><circle cx="-12.5" cy="256" r="18.5"/><circle cx="12.5" cy="256" r="18.5"/>'+fing(39,200,25,25,128)+'<rect x="40" y="184" width="58" height="28" rx="14" transform="rotate(-22 44 198)"/>';
-  var HG=layer(SH,line('M-24.7 262L-24.7 248')+line('M0 268L0 252')+line('M27 238Q39 244 51 238'));
-  /* ---- I: مخلب (بتتعصب): صوابع مقوّسة ---- */
+  /* 4: مخلب (بتتعصب) */
   var SI=SB+'<circle cx="-40" cy="282" r="16"/><circle cx="-14" cy="296" r="16"/><circle cx="14" cy="296" r="16"/><circle cx="40" cy="282" r="16"/>';
   var I=layer(SI,line('M-37 265L-31 271')+line('M-12 272L-10 280')+line('M12 272L10 280')+line('M37 265L31 271'));
-  /* ---- J: كف بصوابع مثنية نص ثنية: بيتبدّل مع المفتوحة بسرعة فيبان إن الصوابع بتتحرك (كلام / تعالى / باي) ---- */
-  var SJ=PA;FA.forEach(function(f){SJ+=fing(f[0],f[1]+12,f[2],f[3],f[4]*.52,f[5]*.5)});
-  SJ+=fing(48,176,27,25,44,-46,184);
-  var J=layer(SJ,line('M-27 222Q-14 230 -1 222')+line('M3 222Q16 230 29 222'));
-  /* ---- K: 3 صوابع (السبابة والوسطى والبنصر) / L: 4 صوابع والإبهام مطوي / M: روك (السبابة والخنصر) ---- */
-  var SK=PB+'<circle cx="-37" cy="250" r="18.5"/>'+fing(-13.5,194,23,23,74,3.5)+fing(13.5,194,23,23,78,-2)+fing(40,198,22,22,66,-8.5)+'<rect x="-22" y="228" width="44" height="22" rx="11"/>';
-  var K3=layer(SK,line('M-37 262L-37 248')+line('M-24 238Q0 247 24 238'));
-  var SL=PB+fing(-40,198,22,22,60,9)+fing(-13.5,194,23,23,74,3.5)+fing(13.5,194,23,23,78,-2)+fing(40,198,22,22,66,-8.5)+'<rect x="-22" y="228" width="44" height="22" rx="11"/>';
-  var L4=layer(SL,line('M-24 238Q0 247 24 238'));
-  var SM=PB+'<circle cx="-12.5" cy="256" r="18.5"/><circle cx="12.5" cy="256" r="18.5"/>'+fing(-40,198,22,22,70,9)+fing(40,198,22,22,70,-9)+'<rect x="-22" y="230" width="44" height="22" rx="11"/>';
-  var M5=layer(SM,line('M0 268L0 252')+line('M-24 240Q0 249 24 240'));
-  var ux=sh*kx,gap=5.5,N3=(function(){try{return localStorage.getItem("hand3d")==="0"?1:5}catch(e){return 5}})(),sl="",i2,q;
-  /* الشرايح اللي في النص: جدار جانبي رمادي فاتح من غير إطار أسود، عشان الحافة تبان كسُمك واحد مش خطوط */
-  function sw(s){return(i2>0&&i2<N3-1)?s.split(OL).join("#aab0c4").replace(/ filter="url\(#[^"]*\)"/g,""):s}
-  for(i2=0;i2<N3;i2++){q=u+"s"+i2;
-    sl+='<div class="akp-slc" style="transform:translateZ('+(((N3-1)/2-i2)*gap*ux).toFixed(1)+'px)">'+
-      wrap("akp-pa",q+"a",sw(A))+wrap("akp-pb",q+"b",sw(B))+wrap("akp-pc",q+"d",sw(C))+wrap("akp-pd",q+"f",sw(D))+
-      wrap("akp-pe",q+"g",sw(E))+wrap("akp-pf",q+"h",sw(F))+wrap("akp-pg",q+"i",sw(G))+wrap("akp-ph",q+"j",sw(HG))+wrap("akp-pi",q+"k",sw(I))+
-      wrap("akp-pj",q+"l",sw(J))+wrap("akp-pk",q+"m",sw(K3))+wrap("akp-pl",q+"n",sw(L4))+wrap("akp-pm",q+"o",sw(M5))+'</div>'}
-  return '<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px">'+wrap("akp-arm",u+"arm",base)+'<div class="akp-t3">'+sl+'</div></div>'}
 
-/* ===== ظل ناعم تحت الإيد (طبقة منفصلة بـ multiply عشان تتفاعل مع القماش). المركز = مركز القبضة ===== */
-function akShadowSVG(P){
-  var svg='<svg width="260" height="400" viewBox="-130 -200 260 400" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><defs>'+
-   '<filter id="akSb1" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8"/></filter>'+
-   '<filter id="akSb2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter></defs>'+
-   '<g filter="url(#akSb1)" fill="#0a0420" opacity=".3"><rect x="-31" y="-200" width="62" height="170" rx="26"/><rect x="-52" y="-62" width="104" height="134" rx="44"/></g>'+
-   '<g filter="url(#akSb2)" fill="#0a0420" opacity=".28"><rect x="-42" y="-46" width="84" height="100" rx="36"/></g></svg>';
-  if(P)svg=svg.split("#0a0420").join(P.shadow).replace(/opacity="\.(3|28)"/g,function(a,v){return 'opacity="'+((v==="3"?.3:.28)*P.sa).toFixed(2)+'"'});
-  return svg}
+  var cl="";[A,B,C,G,I].forEach(function(s,i){cl+=wrap("akp-p"+i,u+"p"+i,s)});
+  return '<div class="akp-rt"><div class="akp-hsvg" style="left:'+(-120*ux)+'px;top:'+(-540*uy)+'px;width:'+W+'px;height:'+H+'px">'+wrap("akp-arm",u+"arm",base)+'<div class="akp-gl">'+cl+'</div></div></div>'}
 
 /* ===== تجاعيد القماش: شوية طيّات بس، كل طية خط رفيع مدبّب (ظل من ناحية وإضاءة من الناحية التانية) بيطلع من نقطة المسك ويخفت مع المسافة.
    زي مرجع التصميم: حوالي 11 طية أساسية + 4 صغيرة، من غير بقع blur عريضة ولا تجمّع حوالين القبضة ===== */
@@ -11554,8 +11503,8 @@ function akFoldSVG(seed,size,P){
   var hd=document.getElementById("hd"),app=document.getElementById("app");
   if(!hd||!app||!document.documentElement.animate)return;
   var rm=window.matchMedia?matchMedia("(prefers-reduced-motion:reduce)"):{matches:false};
-  var root=document.documentElement,ext=null,extIn=null,fold=null,shd=null,hand=null,hsvg=null;
-  var anims=[],busy=false,st=null,TRIG=48,H=130,T=0,seed=7,REFRESH=true; // الطالب: تحديث بياناته بهدوء مع الحركة
+  var root=document.documentElement,ext=null,extIn=null,fold=null,shd=null,hand=null,rt=null,gl=null;
+  var anims=[],busy=false,lastEnd=0,streak=0,st=null,TRIG=48,H=130,T=0,seed=7,REFRESH=true; // الطالب: تحديث بياناته بهدوء مع الحركة
   function disabled(){try{return localStorage.getItem("pullhand")==="0"}catch(e){return false}}
   function cnt(){try{return +sessionStorage.getItem("akpn")||0}catch(e){return window._akpn||0}}
   function setCnt(n){try{sessionStorage.setItem("akpn",n)}catch(e){window._akpn=n}}
@@ -11580,7 +11529,7 @@ function akFoldSVG(seed,size,P){
     var r=hd.getBoundingClientRect(),cs=getComputedStyle(hd),bs=getComputedStyle(hd,"::before"),ty=0;
     try{ty=new DOMMatrix(cs.transform==="none"?undefined:cs.transform).m42||0}catch(e){}
     r={left:r.left,top:r.top-ty,width:r.width,height:r.height};
-        imgs=[bs.backgroundImage,cs.backgroundImage].filter(function(x){return x&&x!=="none"}).join(",");
+    var imgs=[bs.backgroundImage,cs.backgroundImage].filter(function(x){return x&&x!=="none"}).join(",");
     ext.style.left=r.left+"px";ext.style.width=r.width+"px";ext.style.top=(r.top+(window.pageYOffset||0))+"px";
     extIn.style.height="191px";extIn.style.bottom="-1px";
     extIn.style.backgroundColor=cs.backgroundColor&&cs.backgroundColor!=="rgba(0, 0, 0, 0)"?cs.backgroundColor:"var(--h1)";
@@ -11590,45 +11539,42 @@ function akFoldSVG(seed,size,P){
   function els(){return [ext,hd,app].filter(Boolean)}
   function setY(y,sx){var v=y?"translate3d(0,"+y+"px,0)"+(sx&&sx!==1?" scaleX("+sx+")":""):"";els().forEach(function(e){e.style.transform=v})}
   function clearInline(){els().forEach(function(e){e.style.transform="";e.style.transition=""})}
-  function build(sh){
+  function build(){
     if(fold)return;
     fold=document.createElement("div");fold.id="akFold";fold.setAttribute("aria-hidden","true");
-    shd=document.createElement("div");shd.id="akShd";shd.setAttribute("aria-hidden","true");shd.innerHTML=akShadowSVG();
+    shd=document.createElement("div");shd.id="akShd";shd.setAttribute("aria-hidden","true");
     hand=document.createElement("div");hand.id="akHand";hand.setAttribute("aria-hidden","true");
     document.body.appendChild(fold);document.body.appendChild(shd);document.body.appendChild(hand);
   }
   function fill(sh,K,fs){ // نبني الرسم من جديد مع كل سحبة عشان شكل التجاعيد يتغير
     fold.style.width=fold.style.height=fs+"px";fold.style.marginLeft=(-fs/2)+"px";
-    var pal=null;try{pal=akPal()}catch(e){}   // ألوان الثيم الحالي (نهاري/ليلي + الباليت)
+    var pal=null;try{pal=akPal()}catch(e){}
     fold.innerHTML='<div class="akp-fgw">'+akFoldSVG(seed,fs,pal)+'</div>';
-    shd.innerHTML=akShadowSVG(pal);
     hand.innerHTML=akHandSVG(sh,"k"+seed,K,K,pal);
-    hsvg=hand.firstChild;hsvg.style.left=(-120*sh*K)+"px";
+    rt=hand.firstChild;gl=hand.querySelector(".akp-gl");
   }
   function cleanup(){
     anims.forEach(function(a){try{a.cancel()}catch(e){}});anims=[];
     clearInline();[fold,shd,hand].forEach(function(e){if(e)e.style.display="none"});
-    root.classList.remove("akp-on");busy=false;
+    root.classList.remove("akp-on");busy=false;lastEnd=Date.now();
   }
   /* ===== الحركة =====
-     اليد بتدخل من اليمين أو الشمال (عشوائي)، تروح لنص القماش وتمسكه (تقفل إيدها) وتشده لفوق مع الصفحة، وبعدين تسيبه وتطلع.
-     السيناريوهات بتتختار عشوائي، بس الأهدى بس في أول 3 سحبات، ومن السحبة الرابعة بتبدأ تظهر السيناريوهات الأعنف.
-       هادية: wave (أول سحبة في اليوم: بتلوّح) / shy (بتتكسّف وتستخبّى) / twoTugs (شدّتين صغيرين) / blow (بتنفض إيدها قبل الشد)
-              thumbs (بتقول برافو بإبهام) / shakeOff (بتنفض إيدها بعد الشد) / normal (شد عادي)
-       شقلبات 3D: somersault / twirl / tumble / showoff / flip / backflip / spinout
-       جديدة (إيماءات من صور المرجع): rock (روك 🤘) / count (عدّ 1-5) / mix (4 إيماءات عشوائية في حركة)
-       جديدة: talk (بتكلّم بصوابعها) / beckon (تعالى) / reach (بتمدّ دراعها لفوق وتنزل 3D) / flip (بتقلب كفها 3D بعد الشد) / bye (باي بالصوابع) / scold (صباع لا-لا)
-       عنيفة (من السحبة 4): strong (شدّة قوية والصفحة ترتد) / slip (القماش يفلت منها وتحاول تاني) / impatient (بتدق على الشاشة بصباعها بنفاد صبر)
-       كل سحبة سادسة (6، 12، 18...): angry (بتتعصب وتخبط 3 مرات)
-     لتجربة سيناريو من الكونسول: AKPull.play(0,"shy") (والأسماء فوق) أو AKPull.play(0,"angry") */
-  var SC_SOFT=["wave","shy","twoTugs","blow","thumbs","shakeOff","normal","peace","ok","talk","beckon","reach","flip","bye","rock","count","mix","somersault","twirl","tumble","showoff","backflip","spinout"],SC_HARD=["strong","slip","impatient","gun","scold","angry"],
-      KNOWN=["wave","angry","normal"].concat(SC_SOFT,SC_HARD);
+     اليد (الساعد + الكف قطعة واحدة) بتدخل من اليمين أو الشمال، تنزل على القماش (الظل بيقرّب ويغمق)، تمسكه وتشده لفوق، وبعدين تترفع وتطلع (الظل يبعد ويفتح).
+     السيناريوهات (بس دول):
+       wave (أول سحبة في اليوم: بتلوّح) / shy (بتتكسّف: تطلّ من الجنب وترجع وتطلع تاني تشد) / twoTugs (شدّتين صغيرين)
+       blow (بتنفض إيدها قبل الشد) / thumbs (برافو بإبهام بعد الشد) / shakeOff (بتنفض إيدها بعد الشد) / normal (شد عادي)
+       angry (بتتعصب وتخبط 3 مرات): كل سحبة سادسة، أو لو السحب اتكرر ورا بعض بسرعة
+     لتجربة سيناريو من الكونسول: AKPull.play(0,"shy") */
+  var SC_SOFT=["shy","twoTugs","blow","thumbs","shakeOff","normal"],KNOWN=["wave","angry"].concat(SC_SOFT);
   function lastSc(){try{return localStorage.getItem("akps")||""}catch(e){return window._akps||""}}
   function setLastSc(v){try{localStorage.setItem("akps",v)}catch(e){window._akps=v}}
   function firstToday(){try{var d=new Date().toDateString();if(localStorage.getItem("akpday")===d)return false;localStorage.setItem("akpday",d);return true}catch(e){return false}}
   function chooseScen(n,R){
-    var pool=(n>=4&&R()<.55)?SC_HARD:SC_SOFT,last=lastSc(),sc,k=0;
-    do{sc=pool[Math.floor(R()*pool.length)];k++}while(sc===last&&k<8);
+    var now=Date.now();streak=(lastEnd&&now-lastEnd<7000)?streak+1:0;
+    if(streak>=2||n%6===0){streak=0;return "angry"}
+    if(firstToday())return "wave";
+    var last=lastSc(),sc,k=0;
+    do{sc=SC_SOFT[Math.floor(R()*SC_SOFT.length)];k++}while(sc===last&&k<8);
     return sc}
   function play(off,force){
     if(busy||rm.matches||disabled()||!isHome())return;
@@ -11638,204 +11584,103 @@ function akFoldSVG(seed,size,P){
     var scen=(typeof force==="string"&&KNOWN.indexOf(force)>=0)?force:chooseScen(n,R);
     setLastSc(scen);
     var side=(force===1||force==="right")?1:(force===-1||force==="left")?-1:(R()<.5?-1:1);   // 1 = يمين، -1 = شمال
-    var vw=window.innerWidth,sh=Math.min(vw,520)/460,K=.56,Rf=540*sh*K,u=sh*K,fs=Math.round(Math.min(640,Math.max(360,vw*1.4))),fh=fs/2,h0=Math.max(H,off||0);
+    var vw=window.innerWidth,sh=Math.min(vw,520)/460,K=.56,u=sh*K,k48=u/.48,fs=Math.round(Math.min(640,Math.max(360,vw*1.4))),fh=fs/2,h0=Math.max(H,off||0);
     syncExt();build();fill(sh,K,fs);
     var cs=getComputedStyle(root),EA=(cs.getPropertyValue("--v5-ease")||"").trim()||"cubic-bezier(.22,1,.36,1)",
-        EP="cubic-bezier(.55,0,.2,1)",      // الشد: بداية هادية وبعدين يسرّع ويهدى في الآخر
-        EX="cubic-bezier(.5,0,.85,.6)",     // الطلوع: يسرّع بالتدريج
-        ES="cubic-bezier(.45,0,.55,1)",
-        EI="cubic-bezier(.64,0,.78,0)";
-    var gxS=side*(vw/2+70*u+30),            // برّه الشاشة من الجنب
-        fyH=-100*u-40;                      // فوق الشاشة (مخفية)
+        EP="cubic-bezier(.55,0,.2,1)",EX="cubic-bezier(.5,0,.85,.6)",ES="cubic-bezier(.45,0,.55,1)",EI="cubic-bezier(.64,0,.78,0)";
+    var gxS=side*(vw/2+70*u+30),fyH=-100*u-40;      // برّه الشاشة من الجنب / فوق الشاشة
+    /* z = ارتفاع الكف عن القماش: 0 = لامس القماش، 1 = مرفوع (أكبر + ظل بعيد وخفيف) */
     var S=[],cur=null,th0=side*4,t=220,tg,tp,pe,j;
-    function st(tm,p,e){cur=Object.assign({},cur||{gx:gxS,gy:.35*h0,th:side*38,rx:-22,ry:side*58,pose:0,sc:1,fo:0,fx:1,fy2:1,so:0,ss:1.3,cy:off||0,cs:1},p||{});cur.t=tm;cur.e=e||EA;S.push(cur);return cur}
-    function enter(dur,gy){t+=dur;st(t,{gx:0,gy:gy,th:th0,rx:0,ry:0,so:.85,ss:1.5},EA)}                    // تدخل من الجنب لنص الشاشة وتقف
-    function osc(arr,step,gy){arr.forEach(function(a,i){t+=step;st(t,{gy:gy+(i%2?3:-3),th:th0+a,ry:a*2.6,rx:(i%2?-6:6)},ES)})}   // هزّات يمين وشمال
+    function st(tm,p,e){cur=Object.assign({},cur||{gx:gxS,gy:.35*h0,th:side*38,rx:-22,ry:side*58,pose:0,z:1,fo:0,fx:1,fy2:1,cy:off||0,cs:1},p||{});cur.t=tm;cur.e=e||EA;S.push(cur);return cur}
+    function enter(dur,gy){t+=dur;st(t,{gx:0,gy:gy,th:th0,rx:0,ry:0,z:.9},EA)}
+    function osc(arr,step,gy){arr.forEach(function(a,i){t+=step;st(t,{gy:gy+(i%2?3:-3),th:th0+a,ry:a*2.6,rx:(i%2?-6:6)},ES)})}
     st(0,{},EA);
-    st(220,{cy:h0},EA);                                                                           // الصفحة تستقر تحت
+    st(220,{cy:h0},EA);
 
     /* ---- قبل المسك ---- */
-    if(scen==="wave"){          // بتلوّح للطلبة
+    if(scen==="wave"){
       enter(620,.45*h0);osc([10,-10,10,-10,8,-8,0],120,.45*h0);t+=100;tg=t+260;
-    }else if(scen==="blow"){    // بتنفض إيدها كأنها بتسخّنها
+    }else if(scen==="blow"){
       enter(620,.5*h0);osc([14,-14,13,-13,10,-10,6,0],65,.5*h0);tg=t+300;
-    }else if(scen==="impatient"){   // بتدق بنفاد صبر
-      enter(600,.48*h0);
-      t+=90;st(t,{pose:3},ES);                                                    // بتشاور بصباعها
-      for(j=0;j<5;j++){t+=95;st(t,{gy:.66*h0,th:th0+(j%2?3:-3),rx:24,ry:(j%2?10:-10),so:1,ss:1.1},EA);t+=85;st(t,{gy:.5*h0,rx:-8,ry:0,so:.85,ss:1.5},ES)}
-      t+=80;st(t,{pose:0},ES);
-      tg=t+260;
     }else if(scen==="shy"){     // بتطلّ من الحافة وتستخبّى وترجع
-      t+=440;st(t,{gx:side*(vw/2-26*u),gy:.55*h0,th:side*34,rx:-10,ry:side*40,pose:6,so:.8,ss:1.5},EA);
+      t+=440;st(t,{gx:side*(vw/2-26*u),gy:.55*h0,th:side*34,rx:-10,ry:side*40,pose:3,z:.8},EA);
       t+=380;st(t,{},ES);
-      t+=340;st(t,{gx:gxS,th:side*38,rx:-22,ry:side*58,so:0},ES);
+      t+=340;st(t,{gx:gxS,th:side*38,rx:-22,ry:side*58,z:1},ES);
       t+=280;st(t,{rx:0,ry:0,pose:0},EA);
       tg=t+700;
     }else if(scen==="angry"){   // بتتعصب وتخبط 3 مرات
       var tm=[6,-6,5,-4.5,3,0],hy=.5*h0,kd=[9,12,16];
       enter(560,hy);
-      t+=140;st(t,{pose:8},ES);
+      t+=140;st(t,{pose:4},ES);
       for(j=0;j<tm.length;j++){t+=42;st(t,{gy:hy+(j%2?4:-3),th:th0+tm[j]*side},ES)}
       for(j=0;j<3;j++){
-        t+=105;st(t,{gy:.28*h0,th:th0-5*side,rx:-28,pose:1,so:.7,ss:1.6},EI);
-        t+=85;st(t,{gy:.93*h0,th:th0,rx:30,so:1,ss:1,cy:h0+kd[j]},EA);
-        t+=55;st(t,{gy:.8*h0,rx:6,so:.9,ss:1.15,cy:h0-4},ES);
+        t+=105;st(t,{gy:.28*h0,th:th0-5*side,rx:-28,pose:1,z:.85},EI);
+        t+=85;st(t,{gy:.93*h0,th:th0,rx:30,z:0,cy:h0+kd[j]},EA);
+        t+=55;st(t,{gy:.8*h0,rx:6,z:.25,cy:h0-4},ES);
       }
-      t+=60;st(t,{gy:.62*h0,pose:0,so:.8,ss:1.35,cy:h0+3},ES);
+      t+=60;st(t,{gy:.62*h0,pose:0,z:.6,cy:h0+3},ES);
       t+=60;st(t,{cy:h0},EA);
       tg=t+320;
-    }else if(scen==="peace"||scen==="ok"){   // بتعمل علامة النصر / OK قبل ما تمسك
-      enter(620,.5*h0);t+=90;st(t,{pose:scen==="peace"?4:5},ES);osc([7,-7,7,-7,0],130,.5*h0);t+=90;st(t,{pose:0},ES);tg=t+260;
-    }else if(scen==="gun"){     // بتشاور بمسدس الصوابع وترجّع 3 مرات
-      enter(600,.48*h0);t+=90;st(t,{pose:7},ES);
-      for(j=0;j<3;j++){t+=110;st(t,{gy:.44*h0,rx:-16,th:th0+4*side},EI);t+=120;st(t,{gy:.5*h0,rx:6,th:th0},ES)}
-      t+=80;st(t,{pose:0,rx:0},ES);tg=t+260;
-    }else if(scen==="talk"){    // بتكلّم اللي قدامها: الصوابع بتتفتح وتتقفل نص قفلة زي بقّ بيتكلم، والكف بيميل خفيف
-      enter(600,.5*h0);
-      for(j=0;j<7;j++){t+=115;st(t,{pose:9,gy:.5*h0+(j%2?-3:3),rx:(j%2?-5:11),th:th0+(j%2?3:-3)},ES);t+=105;st(t,{pose:0,rx:(j%2?4:-3)},ES)}
-      t+=110;st(t,{pose:0,rx:0,th:th0,gy:.5*h0},ES);tg=t+220;
-    }else if(scen==="beckon"){  // بتشاور "تعالى": الكف مايل لقدّام والصوابع بتتني وتتفرد
-      enter(600,.46*h0);t+=90;st(t,{pose:0,rx:-26,ry:-10},ES);
-      for(j=0;j<3;j++){t+=170;st(t,{pose:9,rx:-8,gy:.5*h0},ES);t+=170;st(t,{pose:0,rx:-26,gy:.46*h0},ES)}
-      t+=110;st(t,{rx:0,ry:0,gy:.5*h0},ES);tg=t+240;
-    }else if(scen==="reach"){   // بتمدّ دراعها لفوق وتنزل: الكف بيبعد ويصغر وبعدين يقرّب من الشاشة ويكبر
-      enter(560,.42*h0);
-      t+=300;st(t,{gy:.04*h0,sc:.8,rx:-18,so:.35,ss:.8},EA);
-      t+=270;st(t,{gy:.72*h0,sc:1.32,rx:20,so:1,ss:1.2},EP);
-      t+=250;st(t,{gy:.46*h0,sc:1,rx:0,so:.85,ss:1.5},ES);
-      tg=t+200;
-    }else if(scen==="scold"){   // بتحرّك صباعها يمين وشمال "لا لا لا" في 3D
-      enter(600,.48*h0);t+=90;st(t,{pose:3},ES);
-      osc([15,-15,15,-15,11,-11,0],92,.48*h0);t+=90;st(t,{pose:0,rx:0,ry:0},ES);tg=t+260;
-    }else if(scen==="rock"){    // روك: بتعمل القرون وتهزّ إيدها في 3D
-      enter(600,.5*h0);t+=90;st(t,{pose:12},ES);osc([10,-10,10,-10,7,-7,0],110,.5*h0);t+=90;st(t,{pose:0,rx:0,ry:0},ES);tg=t+260;
-    }else if(scen==="count"){   // بتعدّ على صوابعها: 1 ثم 2 ثم 3 ثم 4 ثم 5 (5 إيماءات في حركة واحدة)
-      enter(560,.5*h0);
-      [3,4,10,11,0].forEach(function(q,i){t+=i?300:140;st(t,{pose:q,gy:.5*h0+(i%2?-3:3),ry:(i%2?-8:8)},ES)});
-      t+=260;st(t,{ry:0,gy:.5*h0},ES);tg=t+220;
-    }else if(scen==="mix"){     // 4 إيماءات عشوائية ورا بعض في حركة واحدة (من غير تكرار)
-      var mp=[4,5,12,10,11,3],mq=[],mk;
-      while(mq.length<4){mk=mp.splice(Math.floor(R()*mp.length),1)[0];mq.push(mk)}
-      enter(560,.5*h0);
-      mq.forEach(function(q,i){t+=i?320:140;st(t,{pose:q,gy:.5*h0+(i%2?-3:3),ry:(i%2?-12:12),rx:(i%2?-4:6)},ES)});
-      t+=280;st(t,{pose:0,ry:0,rx:0,gy:.5*h0},ES);tg=t+220;
-    }else if(scen==="somersault"){   // القفاز بيتشقلب مرتين حوالين محور الساعد (الساعد ثابت)
-      enter(600,.5*h0);t+=120;st(t,{},ES);
-      t+=520;st(t,{rx:-42,ry:360,gy:.38*h0,sc:1.15,so:.6},ES);t+=320;st(t,{rx:34,ry:720,gy:.5*h0,sc:1,so:.85},ES);
-      t+=2;st(t,{rx:0,ry:0},ES);t+=90;tg=t+200;
-    }else if(scen==="twirl"){        // بتلف حوالين نفسها زي عملة (3 لفّات)
-      enter(600,.5*h0);t+=120;st(t,{},ES);
-      t+=520;st(t,{ry:540,gy:.44*h0,sc:1.12},ES);t+=520;st(t,{ry:1080,gy:.5*h0,sc:1},ES);
-      t+=2;st(t,{ry:0},ES);t+=90;tg=t+200;
-    }else if(scen==="tumble"){       // تتشقلب على محورين مع بعض (لفّة + شقلبة)
-      enter(600,.5*h0);t+=120;st(t,{},ES);
-      t+=520;st(t,{rx:-30,ry:-360,gy:.4*h0,sc:1.18,th:th0+5*side},ES);t+=520;st(t,{rx:26,ry:-720,gy:.5*h0,sc:1,th:th0},ES);
-      t+=2;st(t,{rx:0,ry:0},ES);t+=90;tg=t+200;
-    }else if(scen==="showoff"){      // بتوري ضهر إيدها وبعدين كفها وتحرّك صوابعها
-      enter(600,.5*h0);
-      t+=420;st(t,{ry:180,rx:-8},ES);
-      for(j=0;j<3;j++){t+=130;st(t,{pose:9},ES);t+=130;st(t,{pose:0},ES)}
-      t+=420;st(t,{ry:360,rx:0},ES);t+=2;st(t,{ry:0},ES);t+=100;tg=t+240;
     }else tg=t+680;
 
-    /* ---- المسك ---- */
-    st(tg,{gx:0,gy:.78*h0,th:th0,rx:16,ry:0,so:.95,ss:1.3},EA);
-    st(tg+90,{pose:1,ss:.85,fo:.35,fx:.35,fy2:.35},EA);
-    st(tg+180,{fo:.8,fx:.75,fy2:.75,ss:.8},EA);
+    /* ---- المسك: الكف بينزل على القماش (z لـ 0) ويقفل ---- */
+    st(tg,{gx:0,gy:.78*h0,th:th0,rx:16,ry:0,z:.5},EA);
+    st(tg+90,{pose:1,z:.15,rx:6,fo:.35,fx:.35,fy2:.35},EA);
+    st(tg+180,{z:0,fo:.8,fx:.75,fy2:.75},EA);
     st(tg+270,{fo:1,fx:1,fy2:1,rx:-6},EA);
     tp=tg+420;
 
-    /* ---- قبل الشدّة الكبيرة ---- */
-    if(scen==="twoTugs"){       // شدّتين صغيرين زي اللعب
+    if(scen==="twoTugs"){
       for(j=0;j<2;j++){
         st(tp,{},ES);st(tp+170,{cy:.78*h0,gy:.6*h0,fy2:1.12},ES);st(tp+340,{cy:h0,gy:.78*h0,fy2:1},ES);tp+=420;
       }
-    }else if(scen==="slip"){    // بتشد والقماش يفلت منها وتحاول تاني
-      st(tp,{},EA);
-      st(tp+240,{cy:.5*h0,gy:.28*h0,th:th0+2,fy2:1.25,ss:.9},ES);
-      st(tp+330,{th:th0-2},ES);
-      st(tp+420,{cy:h0+10,gy:.9*h0,th:th0+5,fy2:.9,ss:1.05},EA);
-      st(tp+520,{cy:h0-4,gy:.76*h0,th:th0-3},ES);
-      st(tp+610,{cy:h0,gy:.78*h0,th:th0,fy2:1,ss:1.3},EA);
-      tp+=800;
-    }else if(scen==="strong"){  // بتشد لورا الأول عشان تاخد قوة
-      st(tp,{},ES);st(tp+230,{cy:h0+16,gy:.93*h0,ss:1,fy2:.85},ES);tp+=330;
     }
 
-    /* ---- الشدّة + بعدها ---- */
-    var keep=(scen==="thumbs"||scen==="shakeOff"||scen==="peace"||scen==="ok"||scen==="flip"||scen==="bye"||scen==="backflip"||scen==="spinout");   // اليد بتفضل ظاهرة بعد الشد
-    if(scen==="strong"){
-      pe=tp+380;st(tp,{},EI);
-      st(pe,{cy:-12,gx:0,gy:-.3*h0,th:th0,fy2:1.8,ss:.6,so:0},EA);                // الشدّة القوية: القماش يطلع أعلى من مكانه
-      st(pe+110,{cy:6,pose:0,fo:.6},ES);st(pe+210,{cy:-3,fo:.2},ES);st(pe+300,{cy:0,fo:0},EA);   // والصفحة ترتد وتستقر
-      st(pe+560,{gy:fyH,th:0},EA);T=pe+560;
+    /* ---- الشدّة + بعدها (الكف بيترفع) ---- */
+    var keep=(scen==="thumbs"||scen==="shakeOff");
+    pe=tp+720;st(tp,{},EP);
+    st(pe,{cy:0,gx:0,gy:keep?.14*h0:-.22*h0,th:th0,rx:-18,fy2:1.4,z:.6},EA);
+    if(scen==="shakeOff"){
+      t=pe+110;st(t,{pose:0,fo:0,z:.7},EX);
+      [16,-16,14,-14,10,-10,0].forEach(function(a,i){t+=85;st(t,{th:th0+a,ry:a*2.4,rx:(i%2?-8:8),gy:.14*h0+(i%2?2:-2)},ES)});
+      t+=140;st(t,{rx:0,ry:0},EA);
+      t+=420;st(t,{gy:fyH,th:0,z:1},EX);
+    }else if(scen==="thumbs"){
+      t=pe+110;st(t,{pose:2,fo:0,z:.6},EX);
+      t+=330;st(t,{th:-90,gy:.95*h0,rx:0,ry:-38,z:.45},ES);
+      t+=170;st(t,{gy:.95*h0-9,ry:-24},ES);t+=130;st(t,{gy:.95*h0,ry:-38},ES);
+      t+=170;st(t,{gy:.95*h0-6,ry:-24},ES);t+=120;st(t,{gy:.95*h0,ry:-38},ES);
+      t+=260;st(t,{ry:-10},EA);
+      t+=420;st(t,{gx:-(vw/2+110*u+30),z:1},EX);
     }else{
-      pe=tp+720;st(tp,{},EP);
-      st(pe,{cy:0,gx:0,gy:keep?.14*h0:-.22*h0,th:th0,rx:-18,fy2:1.4,ss:.6,so:keep?.5:0},EA);
-      if(scen==="shakeOff"){          // بتنفض إيدها بعد الشد
-        t=pe+110;st(t,{pose:0,fo:0,so:.6},EX);
-        [16,-16,14,-14,10,-10,0].forEach(function(a,i){t+=85;st(t,{th:th0+a,ry:a*2.8,rx:(i%2?-8:8),gy:.14*h0+(i%2?2:-2)},ES)});
-        t+=140;st(t,{rx:0,ry:0},EA);
-        t+=420;st(t,{gy:fyH,th:0,so:0},EX);T=t;
-      }else if(scen==="thumbs"){      // بتقول برافو بإبهام مرفوع
-        t=pe+110;st(t,{pose:2,fo:0,so:.6},EX);
-        t+=330;st(t,{th:-90,gy:.95*h0,rx:0,ry:-38,so:.5},ES);                                    // بتلف إيدها والذراع بتيجي من الشمال
-        t+=170;st(t,{gy:.95*h0-9,ry:-24},ES);t+=130;st(t,{gy:.95*h0,ry:-38},ES);
-        t+=170;st(t,{gy:.95*h0-6,ry:-24},ES);t+=120;st(t,{gy:.95*h0,ry:-38},ES);
-        t+=260;st(t,{ry:-10},EA);
-        t+=420;st(t,{gx:-(vw/2+110*u+30),so:0},EX);T=t;                              // وتطلع من الشمال
-      }else if(scen==="peace"||scen==="ok"){   // بتعرض الإشارة وتلف إيدها في 3D وتطلع
-        var ppz=scen==="peace"?4:5,psd=scen==="peace"?1:-1;
-        t=pe+110;st(t,{pose:ppz,fo:0,so:.6},EX);
-        t+=330;st(t,{th:90*psd,gy:.95*h0,rx:0,ry:38*psd,so:.5},ES);
-        t+=170;st(t,{gy:.95*h0-8,ry:22*psd},ES);t+=130;st(t,{gy:.95*h0,ry:38*psd},ES);
-        t+=170;st(t,{gy:.95*h0-6,ry:22*psd},ES);t+=120;st(t,{gy:.95*h0,ry:38*psd},ES);
-        t+=260;st(t,{ry:10*psd},EA);
-        t+=420;st(t,{gx:psd*(vw/2+110*u+30),so:0},EX);T=t;
-      }else if(scen==="flip"){        // بتقلب كفها في 3D قدام الشاشة (قدّام وضهر) وتطلع
-        t=pe+110;st(t,{pose:0,fo:0,so:.6},EX);
-        t+=300;st(t,{gy:.7*h0,rx:-20,sc:1.15,so:.6},ES);
-        t+=390;st(t,{ry:180,rx:-8},ES);
-        t+=390;st(t,{ry:360,rx:14,gy:.62*h0},ES);
-        t+=300;st(t,{rx:0,sc:1},ES);
-        t+=380;st(t,{gy:fyH,th:0,so:0},EX);T=t;
-      }else if(scen==="backflip"){    // بعد الشد بتعمل شقلبة لورا في 3D وتطلع
-        t=pe+110;st(t,{pose:0,fo:0,so:.6},EX);
-        t+=240;st(t,{gy:.55*h0,sc:1.1},ES);
-        t+=760;st(t,{rx:-40,ry:-360,gy:.4*h0,sc:1.2},ES);t+=2;st(t,{rx:0,ry:0},ES);
-        t+=360;st(t,{gy:fyH,th:0,so:0,sc:1},EX);T=t;
-      }else if(scen==="spinout"){     // بعد الشد بتلف 3 لفّات حوالين نفسها وهي طالعة
-        t=pe+110;st(t,{pose:0,fo:0,so:.6},EX);
-        t+=240;st(t,{gy:.5*h0,sc:1.08},ES);
-        t+=900;st(t,{ry:1080,gy:fyH,th:0,so:0,sc:1},EX);t+=2;st(t,{ry:0},ES);T=t;
-      }else if(scen==="bye"){         // بتقول باي: الكف بيتهزّ والصوابع بتتحرك وبعدين تطلع
-        t=pe+110;st(t,{pose:0,fo:0,so:.6},EX);
-        t+=260;st(t,{gy:.62*h0,rx:-12,so:.6},ES);
-        for(j=0;j<5;j++){t+=130;st(t,{pose:9,th:th0+(j%2?-9:9),ry:(j%2?-14:14)},ES);t+=120;st(t,{pose:0},ES)}
-        t+=160;st(t,{th:th0,ry:0,rx:0},EA);
-        t+=380;st(t,{gy:fyH,th:0,so:0},EX);T=t;
-      }else{
-        st(pe+110,{pose:0},EX);
-        st(pe+510,{gx:0,gy:fyH,th:0,fo:0},EA);T=pe+510;
-      }
+      st(pe+110,{pose:0,z:.8},EX);
+      st(pe+510,{gx:0,gy:fyH,th:0,fo:0,z:1},EA);
     }
-    var Rr=Math.PI/180;
+    T=S[S.length-1].t;
+
+    /* ===== الأنيميشن: كل حاجة على نفس الخط الزمني ===== */
     var O={duration:T,fill:"both"},ks=function(f){return S.map(function(s){var o=f(s);o.offset=s.t/T;o.easing=s.e;return o})};
-    /* مكان الدوران عند الكتف: لو عايزين نقطة المسك تبقى في (gx,gy) والذراع مايلة th، الترجمة = (gx+Rf*sin th , gy-Rf*cos th) */
-    var main=hand.animate(ks(function(s){var a=s.th*Rr;return {transform:"translate("+(s.gx+Rf*Math.sin(a)).toFixed(1)+"px,"+(s.gy-Rf*Math.cos(a)).toFixed(1)+"px)"}}),O);anims=[main];
-    anims.push(hsvg.animate(ks(function(s){return {transform:"rotate("+s.th+"deg) scale("+s.sc+")"}}),O));
-    anims.push(hsvg.firstChild.animate(ks(function(s){return {transform:"perspective(900px) rotateX("+s.rx+"deg) rotateY("+s.ry+"deg)"}}),O));
-    /* التبديل بين اليد المفتوحة (0) والقبضة (1) والقبضة بإبهام (2) والصباع المشاور (3): الطبقة اللي بتظهر بتظهر في أول الفترة، واللي بتختفي بتفضل لآخرها (من غير ما الإيد تبقى شفافة في النص) */
-    ["pa","pb","pc","pd","pe","pf","pg","ph","pi","pj","pk","pl","pm"].forEach(function(cl,k){
-      hsvg.querySelectorAll(".akp-"+cl).forEach(function(L){anims.push(L.animate(S.map(function(s,i){var nx=S[i+1],e="linear";if(nx){var a=s.pose===k?1:0,b=nx.pose===k?1:0;if(b>a)e="steps(1,start)";else if(b<a)e="steps(1,end)"}return {offset:s.t/T,opacity:s.pose===k?1:0,easing:e}}),O))})});
+    function sdw(s){var d=(2+26*s.z)*k48,b=(1.5+10*s.z)*k48,a=.46-.24*s.z;
+      return "drop-shadow("+(d*.55).toFixed(1)+"px "+d.toFixed(1)+"px "+b.toFixed(1)+"px rgba(10,4,32,"+a.toFixed(2)+"))"}
+    /* الموضع + ظل الرفع (الظل في اتجاه ثابت على الشاشة) */
+    var main=hand.animate(ks(function(s){return {transform:"translate("+s.gx.toFixed(1)+"px,"+s.gy.toFixed(1)+"px)",filter:sdw(s)}}),O);anims=[main];
+    /* دوران الذراع + التكبير بالرفع: حوالين نقطة المسك، الساعد والكف سوا */
+    anims.push(rt.animate(ks(function(s){return {transform:"rotate("+s.th+"deg) scale("+(1+.3*s.z).toFixed(3)+")"}}),O));
+    /* ميلان 3D للكف حوالين الرسغ (الساعد ثابت متصل) */
+    anims.push(gl.animate(ks(function(s){return {transform:"perspective(800px) rotateX("+s.rx+"deg) rotateY("+s.ry+"deg)"}}),O));
+    /* تبديل الأوضاع: كل طبقة بتتبدّل في نفس اللحظة بالظبط (steps end) فمفيش لحظة بيبان فيها وضعين فوق بعض */
+    [0,1,2,3,4].forEach(function(k){
+      gl.querySelectorAll(".akp-p"+k).forEach(function(L){
+        anims.push(L.animate(S.map(function(s){return {offset:s.t/T,opacity:s.pose===k?1:0,easing:"steps(1,end)"}}),O))})});
     anims.push(fold.animate(ks(function(s){return {transform:"translate("+s.gx+"px,"+(s.gy-fh)+"px)",opacity:s.fo}}),O));
     anims.push(fold.querySelector(".akp-fgw").animate(ks(function(s){return {transform:"scale("+s.fx+","+s.fy2+")"}}),O));
-    anims.push(shd.animate(ks(function(s){return {transform:"translate("+(s.gx+14*u)+"px,"+(s.gy+16*u)+"px) scale("+(s.ss*u)+")",opacity:s.so*.5}}),O));
+    /* ظل التلامس على القماش: بيغمق لما الكف ينزل ويختفي لما يترفع */
+    anims.push(shd.animate(ks(function(s){return {transform:"translate("+s.gx.toFixed(1)+"px,"+(s.gy+10*k48).toFixed(1)+"px) scale("+(1.1*k48*(1+.6*s.z)).toFixed(3)+")",opacity:Math.max(0,.5-.6*s.z).toFixed(2)}}),O));
     var cont=ks(function(s){return {transform:"translate3d(0,"+s.cy+"px,0) scaleX("+s.cs+")"}});
     els().forEach(function(e){e.style.transition="";anims.push(e.animate(cont,O))});
     [fold,shd,hand].forEach(function(e){e.style.display="block"});root.classList.add("akp-on");
     main.onfinish=cleanup;
-    setTimeout(function(){if(busy&&!anims.length)cleanup()},T+600);
+    setTimeout(function(){if(busy)cleanup()},T+900);
     if(REFRESH){try{if(typeof studentRefresh==="function"&&window.ST&&ST.data&&!(window.AU&&AU.user))studentRefresh()}catch(e){}}
     return scen;
   }
