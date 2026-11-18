@@ -11360,9 +11360,9 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 #akFold svg{display:block}
 #akShd{left:50%;margin-left:-130px;width:260px;height:400px;margin-top:-200px;mix-blend-mode:multiply;will-change:transform,opacity}
 #akHand{left:50%;width:0;height:0;will-change:transform}
-#akHand .akp-hsvg{position:absolute;top:0;overflow:visible;transform-origin:50% 0;will-change:transform}
-#akHand .akp-pa,#akHand .akp-pb,#akHand .akp-pc{will-change:opacity}
-#akHand .akp-pb,#akHand .akp-pc{opacity:0}
+#akHand .akp-hsvg{position:absolute;top:0;overflow:visible;transform-origin:50% 0;will-change:transform;backface-visibility:visible}
+#akHand .akp-pa,#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd{will-change:opacity}
+#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd{opacity:0}
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
@@ -11401,58 +11401,67 @@ function akTint(h,P){
   if(P.hi!==1)h=h.replace(/(fill|flood)(-color)?="#fff"( opacity|\s+flood-opacity)="([\d.]+)"/g,function(a,b,c,d,o){return a.replace('"'+o+'"','"'+(o*P.hi).toFixed(2)+'"')});
   return h}
 
-/* ===== اليد: كرتونية بسيطة خالص، مجسّمة بس من غير أي تفاصيل: لون جلد واحد + تدرّج ناعم للظل على جنب (بيدّي إحساس الحجم)،
-   من غير إطار، ولا لمعات، ولا خطوط مفاصل أو أظافر.
-   3 طبقات SVG: قاعدة (الذراع) + A (إيد مفتوحة) + B (قبضة). نقطة المسك (مركز القبضة) عند y=206.
-   تغيير الألوان: SK لون الجلد، SD لون الظل ===== */
+/* ===== اليد: قفاز كرتوني أبيض زي الصور المرجعية: لون أبيض + إطار غامق رفيع + ظل أزرق فاتح على الحواف + كُم منفوخ في الرسغ + شوية خطوط صغيرة (قاعدة الصوابع وثنية الكف).
+   الذراع غامقة زي مرجع الأذرع السودا. 4 طبقات SVG: قاعدة (الذراع) + A (إيد مفتوحة) + B (قبضة) + C (إبهام مرفوع) + D (صباع مشاور).
+   نقطة المسك (مركز القبضة) عند y=206. تغيير الألوان: WH لون القفاز، BL لون الظل، OL لون الإطار والذراع، SW سمك الإطار ===== */
 function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   var u=uid||"h",W=240*sh*kx,H=700*sh*ky;
-  var SK=(P&&P.cf)||"#FFCBA4",SD=(P&&P.cs)||"#F0A27E";
-  /* لون فاتح للكُم (الكاف) اللي في الرسغ، زي القفاز الكرتوني */
-  function lite(c,t){var n=parseInt(c.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255;
-    function m(v){return Math.round(v+(255-v)*t)}return "#"+((1<<24)+(m(r)<<16)+(m(g)<<8)+m(b)).toString(16).slice(1)}
-  var CK=lite(SK,.5),CD=lite(SD,.38);
-  function grad(id,a,b){return '<linearGradient id="@'+id+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+a+'"/><stop offset=".38" stop-color="'+a+'"/><stop offset="1" stop-color="'+b+'"/></linearGradient>'}
+  var WH="#FFFFFF",BL="#D3EEFC",OL="#1F1B4D",SW=6,cn=0;
   function wrap(cls,id,body){
-    return ('<svg class="'+cls+'" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><defs>'+grad("g",SK,SD)+grad("k",CK,CD)+'</defs>'+body+'</svg>').replace(/@/g,id)}
+    return ('<svg class="'+cls+'" viewBox="-120 -334 240 700" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0;top:0;overflow:visible"><defs></defs>'+body+'</svg>').replace(/@/g,id)}
   function tr(rot,px,py){return rot?' transform="rotate('+rot+' '+px+' '+py+')"':''}
-  /* صباع تخين بطرف مدوّر (شكل قفاز كرتوني) */
+  /* صباع تخين بطرف مدوّر */
   function fing(cx,top,wb,wt,len,rot,py){
     var yb=top+len-wt/2;
     return '<path d="M'+(cx-wb/2)+' '+top+'L'+(cx-wt/2)+' '+yb+'A'+(wt/2)+' '+(wt/2)+' 0 0 0 '+(cx+wt/2)+' '+yb+'L'+(cx+wb/2)+' '+top+'Z"'+tr(rot,cx,py==null?top:py)+'/>'}
-  /* كل شكل بياخد تدرّج الظل الخاص بيه (من غير أي خط) فالصوابع بتتفصل عن بعض بالظل بس */
-  function fill(shapes,g){return '<g fill="url(#@'+(g||"g")+')">'+shapes+'</g>'}
-  /* الكُم: حلقة مدوّرة منفوخة في الرسغ */
-  var CUFF='<rect x="-47" y="108" width="94" height="42" rx="21"/>';
-  function layer(shapes){return '<clipPath id="@vc"><rect x="-120" y="60" width="240" height="500"/></clipPath><g clip-path="url(#@vc)">'+fill(shapes)+fill(CUFF,"k")+'</g>'}
+  function line(d,w){return '<path d="'+d+'" fill="none" stroke="'+OL+'" stroke-width="'+(w||3.4)+'" stroke-linecap="round" stroke-linejoin="round"/>'}
+  /* شكل قفاز: إطار غامق (من برّه بس، من غير خطوط جوّا الشكل) + أبيض + ظل أزرق فاتح على الحافة اليمين/تحت */
+  function glove(shapes,dx,dy){
+    var id="@c"+(++cn);dx=dx==null?-7:dx;dy=dy==null?-7:dy;
+    return '<g fill="'+OL+'" stroke="'+OL+'" stroke-width="'+SW*2+'" stroke-linejoin="round" stroke-linecap="round">'+shapes+'</g>'+
+      '<g fill="'+WH+'">'+shapes+'</g>'+
+      '<clipPath id="'+id+'">'+shapes+'</clipPath><g clip-path="url(#'+id+')"><rect x="-120" y="60" width="240" height="330" fill="'+BL+'"/><g transform="translate('+dx+' '+dy+')" fill="'+WH+'">'+shapes+'</g></g>'}
+  /* الكُم: حلقة منفوخة في الرسغ */
+  var CUFF=glove('<rect x="-50" y="104" width="100" height="48" rx="22"/>',-3,-10)+line('M-34 121Q0 131 34 121',3.4);
+  function layer(body,det){return '<clipPath id="@vc"><rect x="-120" y="60" width="240" height="500"/></clipPath><g clip-path="url(#@vc)">'+glove(body)+(det||'')+CUFF+'</g>'}
 
-  /* ---- الذراع ---- */
+  /* ---- الذراع (غامقة زي مرجع الأذرع السودا) ---- */
   var SHc='C39 148 52 164 52 196';
   var ARM='M-31 -340H31C31 -170 36 40 37 118'+SHc+'V206H-52V196C-52 164 -39 148 -37 118C-36 40 -31 -170 -31 -340Z';
-  var base=fill('<path d="'+ARM+'"/>');
+  var base='<path d="'+ARM+'" fill="'+OL+'"/>';
 
-  /* ---- A: إيد مفتوحة: كف مدوّر + 4 صوابع تخينة قصيرة + إبهام تخين ---- */
-  var PA='<path d="M-37 100V118C-42 148 -54 164 -54 196C-54 208 -52 216 -46 220H46C52 216 54 208 54 196C54 164 42 148 37 118V100Z"/>';
-  var FA=[[-40,198,26,26,56,9],[-13.5,194,27,27,70,3.5],[13.5,194,27,27,74,-2],[40,198,26,26,62,-8.5]];
+  /* ---- A: إيد مفتوحة: كف + 4 صوابع تخينة + إبهام ---- */
+  var PA='<path d="M-37 100V118C-42 148 -54 164 -54 196C-54 203 -52 207 -48 208H48C52 207 54 203 54 196C54 164 42 148 37 118V100Z"/>';
+  var FA=[[-40,198,22,22,60,9],[-13.5,194,23,23,74,3.5],[13.5,194,23,23,78,-2],[40,198,22,22,66,-8.5]];
   var SA=PA;
   FA.forEach(function(f){SA+=fing(f[0],f[1],f[2],f[3],f[4],f[5])});
-  SA+=fing(48,174,29,27,54,-60,182);
-  var A=layer(SA);
+  SA+=fing(48,174,27,25,54,-60,182);
+  var DA=line('M-14 150Q-22 168 -12 186')+line('M34 188Q41 200 34 212');
+  var A=layer(SA,DA);
 
-  /* ---- B: قبضة: كف مدوّر + 4 كور كبيرة (الصوابع المقفولة على القماش). الإبهام مخفي وقت المسك ---- */
+  /* ---- B: قبضة: كف + 4 كور (الصوابع المقفولة على القماش). الإبهام مخفي وقت المسك ---- */
   var PB='<path d="M-37 100V118C-42 148 -54 164 -54 196C-54 226 -53 240 -48 246H48C53 240 54 226 54 196C54 164 42 148 37 118V100Z"/>';
   var KB=[[-37,250],[-12.5,256],[12.5,256],[37,250]];
   var SB=PB;
   KB.forEach(function(k){SB+='<circle cx="'+k[0]+'" cy="'+k[1]+'" r="18.5"/>'});
-  var B=layer(SB);
+  var DB=line('M-24.7 262L-24.7 248')+line('M0 268L0 252')+line('M24.7 262L24.7 248');
+  var B=layer(SB,DB);
+
   /* ---- C: قبضة بإبهام مرفوع (بتتلف الإيد 90 درجة وقت "برافو") ---- */
-  var C=layer(SB+'<rect x="40" y="198" width="58" height="32" rx="16"/>');
+  var C=layer(SB+'<rect x="40" y="198" width="58" height="32" rx="16"/>',DB+line('M42 202Q36 214 42 227'));
+
+  /* ---- D: قبضة بصباع مشاور لتحت (للدق على الشاشة) ---- */
+  var SD=PB;
+  [[-37,250],[-12.5,256],[12.5,256]].forEach(function(k){SD+='<circle cx="'+k[0]+'" cy="'+k[1]+'" r="18.5"/>'});
+  SD+=fing(39,200,25,25,96);
+  var D=layer(SD,line('M-24.7 262L-24.7 248')+line('M0 268L0 252')+line('M27 236Q39 242 51 236'));
 
   return '<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px">'+
-    wrap("akp-pbase",u+"c",base)+
+    wrap("akp-pbase",u+"e",base)+
     wrap("akp-pa",u+"a",A)+
     wrap("akp-pb",u+"b",B)+
-    wrap("akp-pc",u+"d",C)+'</div>'}
+    wrap("akp-pc",u+"d",C)+
+    wrap("akp-pd",u+"f",D)+'</div>'}
 
 /* ===== ظل ناعم تحت الإيد (طبقة منفصلة بـ multiply عشان تتفاعل مع القماش). المركز = مركز القبضة ===== */
 function akShadowSVG(P){
@@ -11568,7 +11577,7 @@ function akFoldSVG(seed,size,P){
      السيناريوهات بتتختار عشوائي، بس الأهدى بس في أول 3 سحبات، ومن السحبة الرابعة بتبدأ تظهر السيناريوهات الأعنف.
        هادية: wave (أول سحبة في اليوم: بتلوّح) / shy (بتتكسّف وتستخبّى) / twoTugs (شدّتين صغيرين) / blow (بتنفض إيدها قبل الشد)
               thumbs (بتقول برافو بإبهام) / shakeOff (بتنفض إيدها بعد الشد) / normal (شد عادي)
-       عنيفة (من السحبة 4): strong (شدّة قوية والصفحة ترتد) / slip (القماش يفلت منها وتحاول تاني) / impatient (بتدق بنفاد صبر)
+       عنيفة (من السحبة 4): strong (شدّة قوية والصفحة ترتد) / slip (القماش يفلت منها وتحاول تاني) / impatient (بتدق على الشاشة بصباعها بنفاد صبر)
        كل سحبة سادسة (6، 12، 18...): angry (بتتعصب وتخبط 3 مرات)
      لتجربة سيناريو من الكونسول: AKPull.play(0,"shy") (والأسماء فوق) أو AKPull.play(0,"angry") */
   var SC_SOFT=["shy","twoTugs","blow","thumbs","shakeOff","normal"],SC_HARD=["strong","slip","impatient"],
@@ -11599,9 +11608,9 @@ function akFoldSVG(seed,size,P){
     var gxS=side*(vw/2+70*u+30),            // برّه الشاشة من الجنب
         fyH=-100*u-40;                      // فوق الشاشة (مخفية)
     var S=[],cur=null,th0=side*4,t=220,tg,tp,pe,j;
-    function st(tm,p,e){cur=Object.assign({},cur||{gx:gxS,gy:.35*h0,th:side*38,pose:0,fo:0,fx:1,fy2:1,so:0,ss:1.3,cy:off||0,cs:1},p||{});cur.t=tm;cur.e=e||EA;S.push(cur);return cur}
-    function enter(dur,gy){t+=dur;st(t,{gx:0,gy:gy,th:th0,so:.85,ss:1.5},EA)}                    // تدخل من الجنب لنص الشاشة وتقف
-    function osc(arr,step,gy){arr.forEach(function(a,i){t+=step;st(t,{gy:gy+(i%2?3:-3),th:th0+a},ES)})}   // هزّات يمين وشمال
+    function st(tm,p,e){cur=Object.assign({},cur||{gx:gxS,gy:.35*h0,th:side*38,rx:-22,ry:side*58,pose:0,fo:0,fx:1,fy2:1,so:0,ss:1.3,cy:off||0,cs:1},p||{});cur.t=tm;cur.e=e||EA;S.push(cur);return cur}
+    function enter(dur,gy){t+=dur;st(t,{gx:0,gy:gy,th:th0,rx:0,ry:0,so:.85,ss:1.5},EA)}                    // تدخل من الجنب لنص الشاشة وتقف
+    function osc(arr,step,gy){arr.forEach(function(a,i){t+=step;st(t,{gy:gy+(i%2?3:-3),th:th0+a,ry:a*2.6,rx:(i%2?-6:6)},ES)})}   // هزّات يمين وشمال
     st(0,{},EA);
     st(220,{cy:h0},EA);                                                                           // الصفحة تستقر تحت
 
@@ -11612,13 +11621,15 @@ function akFoldSVG(seed,size,P){
       enter(620,.5*h0);osc([14,-14,13,-13,10,-10,6,0],65,.5*h0);tg=t+300;
     }else if(scen==="impatient"){   // بتدق بنفاد صبر
       enter(600,.48*h0);
-      for(j=0;j<5;j++){t+=95;st(t,{gy:.64*h0,th:th0+(j%2?3:-3),so:1,ss:1.1},EA);t+=85;st(t,{gy:.5*h0,so:.85,ss:1.5},ES)}
+      t+=90;st(t,{pose:3},ES);                                                    // بتشاور بصباعها
+      for(j=0;j<5;j++){t+=95;st(t,{gy:.66*h0,th:th0+(j%2?3:-3),rx:24,ry:(j%2?10:-10),so:1,ss:1.1},EA);t+=85;st(t,{gy:.5*h0,rx:-8,ry:0,so:.85,ss:1.5},ES)}
+      t+=80;st(t,{pose:0},ES);
       tg=t+260;
     }else if(scen==="shy"){     // بتطلّ من الحافة وتستخبّى وترجع
-      t+=440;st(t,{gx:side*(vw/2-26*u),gy:.55*h0,th:side*34,so:.8,ss:1.5},EA);
+      t+=440;st(t,{gx:side*(vw/2-26*u),gy:.55*h0,th:side*34,rx:-10,ry:side*40,so:.8,ss:1.5},EA);
       t+=380;st(t,{},ES);
-      t+=340;st(t,{gx:gxS,th:side*38,so:0},ES);
-      t+=280;st(t,{},EA);
+      t+=340;st(t,{gx:gxS,th:side*38,rx:-22,ry:side*58,so:0},ES);
+      t+=280;st(t,{rx:0,ry:0},EA);
       tg=t+700;
     }else if(scen==="angry"){   // بتتعصب وتخبط 3 مرات
       var tm=[6,-6,5,-4.5,3,0],hy=.5*h0,kd=[9,12,16];
@@ -11626,9 +11637,9 @@ function akFoldSVG(seed,size,P){
       t+=140;st(t,{pose:1},ES);
       for(j=0;j<tm.length;j++){t+=42;st(t,{gy:hy+(j%2?4:-3),th:th0+tm[j]*side},ES)}
       for(j=0;j<3;j++){
-        t+=105;st(t,{gy:.28*h0,th:th0-5*side,so:.7,ss:1.6},EI);
-        t+=85;st(t,{gy:.93*h0,th:th0,so:1,ss:1,cy:h0+kd[j]},EA);
-        t+=55;st(t,{gy:.8*h0,so:.9,ss:1.15,cy:h0-4},ES);
+        t+=105;st(t,{gy:.28*h0,th:th0-5*side,rx:-28,so:.7,ss:1.6},EI);
+        t+=85;st(t,{gy:.93*h0,th:th0,rx:30,so:1,ss:1,cy:h0+kd[j]},EA);
+        t+=55;st(t,{gy:.8*h0,rx:6,so:.9,ss:1.15,cy:h0-4},ES);
       }
       t+=60;st(t,{gy:.62*h0,pose:0,so:.8,ss:1.35,cy:h0+3},ES);
       t+=60;st(t,{cy:h0},EA);
@@ -11636,10 +11647,10 @@ function akFoldSVG(seed,size,P){
     }else tg=t+680;
 
     /* ---- المسك ---- */
-    st(tg,{gx:0,gy:.78*h0,th:th0,so:.95,ss:1.3},EA);
+    st(tg,{gx:0,gy:.78*h0,th:th0,rx:16,ry:0,so:.95,ss:1.3},EA);
     st(tg+90,{pose:1,ss:.85,fo:.35,fx:.35,fy2:.35},EA);
     st(tg+180,{fo:.8,fx:.75,fy2:.75,ss:.8},EA);
-    st(tg+270,{fo:1,fx:1,fy2:1},EA);
+    st(tg+270,{fo:1,fx:1,fy2:1,rx:-6},EA);
     tp=tg+420;
 
     /* ---- قبل الشدّة الكبيرة ---- */
@@ -11668,18 +11679,18 @@ function akFoldSVG(seed,size,P){
       st(pe+560,{gy:fyH,th:0},EA);T=pe+560;
     }else{
       pe=tp+720;st(tp,{},EP);
-      st(pe,{cy:0,gx:0,gy:keep?.14*h0:-.22*h0,th:th0,fy2:1.4,ss:.6,so:keep?.5:0},EA);
+      st(pe,{cy:0,gx:0,gy:keep?.14*h0:-.22*h0,th:th0,rx:-18,fy2:1.4,ss:.6,so:keep?.5:0},EA);
       if(scen==="shakeOff"){          // بتنفض إيدها بعد الشد
         t=pe+110;st(t,{pose:0,fo:0,so:.6},EX);
-        [16,-16,14,-14,10,-10,0].forEach(function(a,i){t+=85;st(t,{th:th0+a,gy:.14*h0+(i%2?2:-2)},ES)});
-        t+=140;st(t,{},EA);
+        [16,-16,14,-14,10,-10,0].forEach(function(a,i){t+=85;st(t,{th:th0+a,ry:a*2.8,rx:(i%2?-8:8),gy:.14*h0+(i%2?2:-2)},ES)});
+        t+=140;st(t,{rx:0,ry:0},EA);
         t+=420;st(t,{gy:fyH,th:0,so:0},EX);T=t;
       }else if(scen==="thumbs"){      // بتقول برافو بإبهام مرفوع
         t=pe+110;st(t,{pose:2,fo:0,so:.6},EX);
-        t+=330;st(t,{th:-90,gy:.95*h0,so:.5},ES);                                    // بتلف إيدها والذراع بتيجي من الشمال
-        t+=170;st(t,{gy:.95*h0-9},ES);t+=130;st(t,{gy:.95*h0},ES);
-        t+=170;st(t,{gy:.95*h0-6},ES);t+=120;st(t,{gy:.95*h0},ES);
-        t+=260;st(t,{},EA);
+        t+=330;st(t,{th:-90,gy:.95*h0,rx:0,ry:-38,so:.5},ES);                                    // بتلف إيدها والذراع بتيجي من الشمال
+        t+=170;st(t,{gy:.95*h0-9,ry:-24},ES);t+=130;st(t,{gy:.95*h0,ry:-38},ES);
+        t+=170;st(t,{gy:.95*h0-6,ry:-24},ES);t+=120;st(t,{gy:.95*h0,ry:-38},ES);
+        t+=260;st(t,{ry:-10},EA);
         t+=420;st(t,{gx:-(vw/2+110*u+30),so:0},EX);T=t;                              // وتطلع من الشمال
       }else{
         st(pe+110,{pose:0},EX);
@@ -11690,9 +11701,9 @@ function akFoldSVG(seed,size,P){
     var O={duration:T,fill:"both"},ks=function(f){return S.map(function(s){var o=f(s);o.offset=s.t/T;o.easing=s.e;return o})};
     /* مكان الدوران عند الكتف: لو عايزين نقطة المسك تبقى في (gx,gy) والذراع مايلة th، الترجمة = (gx+Rf*sin th , gy-Rf*cos th) */
     var main=hand.animate(ks(function(s){var a=s.th*Rr;return {transform:"translate("+(s.gx+Rf*Math.sin(a)).toFixed(1)+"px,"+(s.gy-Rf*Math.cos(a)).toFixed(1)+"px)"}}),O);anims=[main];
-    anims.push(hsvg.animate(ks(function(s){return {transform:"rotate("+s.th+"deg)"}}),O));
-    /* التبديل بين اليد المفتوحة (0) والقبضة (1) والقبضة بإبهام (2): الطبقة اللي بتظهر بتظهر في أول الفترة، واللي بتختفي بتفضل لآخرها (من غير ما الإيد تبقى شفافة في النص) */
-    ["pa","pb","pc"].forEach(function(cl,k){
+    anims.push(hsvg.animate(ks(function(s){return {transform:"perspective(900px) rotateX("+s.rx+"deg) rotateY("+s.ry+"deg) rotate("+s.th+"deg)"}}),O));
+    /* التبديل بين اليد المفتوحة (0) والقبضة (1) والقبضة بإبهام (2) والصباع المشاور (3): الطبقة اللي بتظهر بتظهر في أول الفترة، واللي بتختفي بتفضل لآخرها (من غير ما الإيد تبقى شفافة في النص) */
+    ["pa","pb","pc","pd"].forEach(function(cl,k){
       var L=hsvg.querySelector(".akp-"+cl);
       anims.push(L.animate(S.map(function(s,i){var nx=S[i+1],e="linear";if(nx){var a=s.pose===k?1:0,b=nx.pose===k?1:0;if(b>a)e="steps(1,start)";else if(b<a)e="steps(1,end)"}return {offset:s.t/T,opacity:s.pose===k?1:0,easing:e}}),O))});
     anims.push(fold.animate(ks(function(s){return {transform:"translate("+s.gx+"px,"+(s.gy-fh)+"px)",opacity:s.fo}}),O));
