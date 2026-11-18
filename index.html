@@ -11357,7 +11357,7 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 #akFold,#akShd,#akHand{position:fixed;top:0;pointer-events:none;display:none;z-index:8}
 #akFold{left:50%;margin-left:-320px;width:640px;height:640px;mix-blend-mode:overlay;will-change:transform,opacity}
 #akShd{left:50%;margin-left:-120px;width:240px;height:150px;margin-top:-75px;mix-blend-mode:multiply;will-change:transform,opacity;
-  background:radial-gradient(closest-side at 50% 50%,rgba(10,4,32,.55),rgba(10,4,32,.22) 50%,transparent 100%)}
+  background:radial-gradient(closest-side at 50% 50%,rgba(10,4,32,.45),rgba(10,4,32,.18) 50%,transparent 100%)}
 #akFold .akp-fg{transform-origin:0 0;transform-box:view-box}
 #akHand{left:50%;width:0;height:0;will-change:transform}
 #akHand .akp-hsvg{position:absolute;top:0;overflow:visible;transform-origin:50% 0;will-change:transform}
@@ -11369,7 +11369,7 @@ html.akp-on #hd,html.akp-on #app{will-change:transform}
 /* ---- art: hand + folds generators (shared by test harness and app) ---- */
 function akRnd(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
-function akHandSVG(sh,uid){
+function akHandSVG(sh,uid,kx,ky){kx=kx||1;ky=ky||1;
   var u=uid||"h";
   /* pose A: relaxed paw (fingers hanging, thumb out) — pose B: closed fist */
   function shapesA(f,s){var a=(f?' fill="'+f+'"':' fill="none"')+(s?' '+s:'');return ''+
@@ -11387,7 +11387,7 @@ function akHandSVG(sh,uid){
     '<rect x="26" y="244" width="26" height="46" rx="13"'+a+'/>'+
     '<rect x="-72" y="216" width="26" height="56" rx="13" transform="rotate(-24 -59 220)"'+a+'/>'}
   var P=function(x){return x.replace(/@/g,u)};
-  var svg='<svg class="akp-hsvg" viewBox="-120 -300 240 700" width="'+(240*sh)+'" height="'+(700*sh)+'" xmlns="http://www.w3.org/2000/svg"><defs>'+
+  var svg='<svg class="akp-hsvg" viewBox="-120 -300 240 700" preserveAspectRatio="none" width="'+(240*sh*kx)+'" height="'+(700*sh*ky)+'" xmlns="http://www.w3.org/2000/svg"><defs>'+
   '<linearGradient id="@ga" gradientUnits="userSpaceOnUse" x1="-38" x2="38"><stop offset="0" stop-color="#E58A92"/><stop offset=".16" stop-color="#F6B0AB"/><stop offset=".4" stop-color="#FFD5CC"/><stop offset=".66" stop-color="#F4A9A7"/><stop offset=".9" stop-color="#E5909A"/><stop offset="1" stop-color="#F3A5A4"/></linearGradient>'+
   '<linearGradient id="@gf" x1="0" x2="1"><stop offset="0" stop-color="#EE9B9E"/><stop offset=".32" stop-color="#FFD0C8"/><stop offset=".72" stop-color="#F4A9A8"/><stop offset="1" stop-color="#DE8791"/></linearGradient>'+
   '<radialGradient id="@gp" cx=".36" cy=".26" r=".85"><stop offset="0" stop-color="#FFE0D9"/><stop offset=".5" stop-color="#F8B8B1"/><stop offset="1" stop-color="#DF8A94"/></radialGradient>'+
@@ -11505,7 +11505,7 @@ function akFoldSVG(seed,size){
     hand=document.createElement("div");hand.id="akHand";hand.setAttribute("aria-hidden","true");
     document.body.appendChild(fold);document.body.appendChild(shd);document.body.appendChild(hand);
   }
-  function fill(sh){ // نبني الرسم من جديد مع كل سحبة عشان شكل التجاعيد يتغير
+  function fill(sh,kx,ky){ // نبني الرسم من جديد مع كل سحبة عشان شكل التجاعيد يتغير
     var vw=Math.min(window.innerWidth,520);
     fold.innerHTML=akFoldSVG(seed,640);
     hand.innerHTML=akHandSVG(sh,"k"+seed);
@@ -11523,31 +11523,31 @@ function akFoldSVG(seed,size){
     busy=true;
     var n=cnt()+1;setCnt(n);var search=force!=null?force:(n%3===0);
     seed=(seed*1103515245+12345+n*977)>>>0;var R=akRnd(seed);
-    var vw=window.innerWidth,sh=Math.min(vw,520)/320,Rf=540*sh,h0=Math.max(H,off||0);
-    syncExt();build();fill(sh);
+    var vw=window.innerWidth,sh=Math.min(vw,520)/460,kx=.8,ky=1.12,Rf=540*sh*ky,u=sh*kx/1.22,h0=Math.max(H,off||0);
+    syncExt();build();fill(sh,kx,ky);
     var cs=getComputedStyle(root),EA=(cs.getPropertyValue("--v5-ease")||"").trim()||"cubic-bezier(.22,1,.36,1)",
         SP=(cs.getPropertyValue("--v5-spring")||"").trim()||"cubic-bezier(.3,1.45,.5,1)",
         EI="cubic-bezier(.64,0,.78,0)",ES="cubic-bezier(.45,0,.55,1)";
-    var fyH=-100*sh-40,S=[],cur=null;
+    var fyH=-100*sh*ky-40,S=[],cur=null;
     function st(t,p,e){cur=Object.assign({},cur||{fy:fyH,th:0,pose:0,fo:0,fx:1,fy2:1,so:0,ss:1.3,cy:off||0,cs:1,sx:1,sy:1},p||{});cur.t=t;cur.e=e||EA;S.push(cur);return cur}
     st(0,{},EA);
     st(240,{cy:h0},EA);
     var tg=640,thG=(R()-.5)*5;
     if(search){
-      var hy=.3*h0,D=1000+R()*1000,k=Math.max(3,Math.round(D/340)),t=620,dir=R()<.5?-1:1;
+      var hy=.5*h0,D=1000+R()*1000,k=Math.max(3,Math.round(D/340)),t=620,dir=R()<.5?-1:1;
       st(t,{fy:hy,th:0,so:.85,ss:1.5},EA);
       for(var j=0;j<k;j++){t+=D/k;var amp=(j===k-1?0:(11-j*2.2))*(j%2?-dir:dir);st(t,{fy:hy+(j%2?7:-5),th:amp,so:.85,ss:1.5},ES)}
-      t+=260;tg=t;st(tg-0,{fy:.55*h0,th:thG,so:.95,ss:1.3},EA);
+      t+=260;tg=t;st(tg-0,{fy:.78*h0,th:thG,so:.95,ss:1.3},EA);
     }else{
-      st(tg-130,{fy:.2*h0,th:-2,so:.7,ss:1.5},EA);
-      st(tg,{fy:.55*h0,th:thG,so:.95,ss:1.3},EA);
+      st(tg-130,{fy:.45*h0,th:-2,so:.7,ss:1.5},EA);
+      st(tg,{fy:.78*h0,th:thG,so:.95,ss:1.3},EA);
     }
     st(tg+80,{pose:1,sx:1.05,sy:.95,ss:.85,fo:.35,fx:.35,fy2:.35},EA);
     st(tg+170,{sx:.95,sy:1.05,fo:.8,fx:.75,fy2:.75,ss:.8},EA);
     st(tg+260,{sx:1,sy:1,fo:1,fx:1,fy2:1},EA);              // القماش اتشد وطياته ظهرت
     st(tg+440,{},SP);                                       // ثبات قصير وهي ماسكة، وبعدها الشد لفوق
     var pe=tg+440+620;
-    st(pe,{cy:0,fy:-.45*h0,th:thG*.3,fy2:1.45,ss:.6,so:0},EI);
+    st(pe,{cy:0,fy:-.22*h0,th:thG*.3,fy2:1.45,ss:.6,so:0},EI);
     st(pe+130,{fo:0},EA);
     st(pe+380,{fy:fyH,th:0},EA);
     T=pe+380;
@@ -11561,7 +11561,7 @@ function akFoldSVG(seed,size){
     anims.push(pb.animate(ks(function(s){return {opacity:s.pose}}),O));
     anims.push(fold.animate(ks(function(s){return {transform:"translate("+fx(s)+"px,"+(s.fy-320)+"px)",opacity:s.fo}}),O));
     anims.push(fold.querySelector(".akp-fg").animate(ks(function(s){return {transform:"scale("+s.fx+","+s.fy2+")"}}),O));
-    anims.push(shd.animate(ks(function(s){return {transform:"translate("+(fx(s)+16)+"px,"+(s.fy+30)+"px) scale("+s.ss+")",opacity:s.so}}),O));
+    anims.push(shd.animate(ks(function(s){return {transform:"translate("+(fx(s)+16*u)+"px,"+(s.fy+30*u)+"px) scale("+(s.ss*u)+")",opacity:s.so}}),O));
     var cont=ks(function(s){return {transform:"translate3d(0,"+s.cy+"px,0) scaleX("+s.cs+")"}});
     els().forEach(function(e){e.style.transition="";anims.push(e.animate(cont,O))});
     [fold,shd,hand].forEach(function(e){e.style.display="block"});root.classList.add("akp-on");
