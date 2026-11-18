@@ -11719,17 +11719,17 @@ function akFoldSVG(seed,size,P){
       enter(560,.5*h0);
       mq.forEach(function(q,i){t+=i?320:140;st(t,{pose:q,gy:.5*h0+(i%2?-3:3),ry:(i%2?-12:12),rx:(i%2?-4:6)},ES)});
       t+=280;st(t,{pose:0,ry:0,rx:0,gy:.5*h0},ES);tg=t+220;
-    }else if(scen==="somersault"){   // شقلبة لقدّام مرتين في 3D حوالين مركز الكف
+    }else if(scen==="somersault"){   // القفاز بيتشقلب مرتين حوالين محور الساعد (الساعد ثابت)
       enter(600,.5*h0);t+=120;st(t,{},ES);
-      t+=520;st(t,{rx:-360,gy:.36*h0,sc:1.22,so:.6},ES);t+=300;st(t,{rx:-720,gy:.5*h0,sc:1,so:.85},ES);
-      t+=2;st(t,{rx:0},ES);t+=90;tg=t+200;
+      t+=520;st(t,{rx:-42,ry:360,gy:.38*h0,sc:1.15,so:.6},ES);t+=320;st(t,{rx:34,ry:720,gy:.5*h0,sc:1,so:.85},ES);
+      t+=2;st(t,{rx:0,ry:0},ES);t+=90;tg=t+200;
     }else if(scen==="twirl"){        // بتلف حوالين نفسها زي عملة (3 لفّات)
       enter(600,.5*h0);t+=120;st(t,{},ES);
       t+=520;st(t,{ry:540,gy:.44*h0,sc:1.12},ES);t+=520;st(t,{ry:1080,gy:.5*h0,sc:1},ES);
       t+=2;st(t,{ry:0},ES);t+=90;tg=t+200;
     }else if(scen==="tumble"){       // تتشقلب على محورين مع بعض (لفّة + شقلبة)
       enter(600,.5*h0);t+=120;st(t,{},ES);
-      t+=520;st(t,{rx:360,ry:360,gy:.4*h0,sc:1.2,th:th0+5*side},ES);t+=520;st(t,{rx:720,ry:720,gy:.5*h0,sc:1,th:th0},ES);
+      t+=520;st(t,{rx:-30,ry:-360,gy:.4*h0,sc:1.18,th:th0+5*side},ES);t+=520;st(t,{rx:26,ry:-720,gy:.5*h0,sc:1,th:th0},ES);
       t+=2;st(t,{rx:0,ry:0},ES);t+=90;tg=t+200;
     }else if(scen==="showoff"){      // بتوري ضهر إيدها وبعدين كفها وتحرّك صوابعها
       enter(600,.5*h0);
@@ -11802,7 +11802,7 @@ function akFoldSVG(seed,size,P){
       }else if(scen==="backflip"){    // بعد الشد بتعمل شقلبة لورا في 3D وتطلع
         t=pe+110;st(t,{pose:0,fo:0,so:.6},EX);
         t+=240;st(t,{gy:.55*h0,sc:1.1},ES);
-        t+=760;st(t,{rx:-360,gy:.4*h0,sc:1.2},ES);t+=2;st(t,{rx:0},ES);
+        t+=760;st(t,{rx:-40,ry:-360,gy:.4*h0,sc:1.2},ES);t+=2;st(t,{rx:0,ry:0},ES);
         t+=360;st(t,{gy:fyH,th:0,so:0,sc:1},EX);T=t;
       }else if(scen==="spinout"){     // بعد الشد بتلف 3 لفّات حوالين نفسها وهي طالعة
         t=pe+110;st(t,{pose:0,fo:0,so:.6},EX);
