@@ -11361,8 +11361,8 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 #akShd{left:50%;margin-left:-130px;width:260px;height:400px;margin-top:-200px;mix-blend-mode:multiply;will-change:transform,opacity}
 #akHand{left:50%;width:0;height:0;will-change:transform}
 #akHand .akp-hsvg{position:absolute;top:0;overflow:visible;transform-origin:50% 0;will-change:transform;backface-visibility:visible}
-#akHand .akp-pa,#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi,#akHand .akp-pj{will-change:opacity}
-#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi,#akHand .akp-pj{opacity:0}
+#akHand .akp-pa,#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi,#akHand .akp-pj,#akHand .akp-pk,#akHand .akp-pl,#akHand .akp-pm{will-change:opacity}
+#akHand .akp-pb,#akHand .akp-pc,#akHand .akp-pd,#akHand .akp-pe,#akHand .akp-pf,#akHand .akp-pg,#akHand .akp-ph,#akHand .akp-pi,#akHand .akp-pj,#akHand .akp-pk,#akHand .akp-pl,#akHand .akp-pm{opacity:0}
 html.akp-on #hd,html.akp-on #app{will-change:transform}
 </style>
 <script id="akp-js">
@@ -11428,7 +11428,7 @@ function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   /* ---- الذراع (غامقة زي مرجع الأذرع السودا) ---- */
   var SHc='C39 148 52 164 52 196';
   var ARM='M-31 -340H31C31 -170 36 40 37 118'+SHc+'V206H-52V196C-52 164 -39 148 -37 118C-36 40 -31 -170 -31 -340Z';
-  var base='<path d="'+ARM+'" fill="'+OL+'"/>';
+  var base='<path d="'+ARM+'" fill="#050505"/>';
 
   /* ---- A: إيد مفتوحة: كف + 4 صوابع تخينة + إبهام ---- */
   var PA='<path d="M-37 100V118C-42 148 -54 164 -54 196C-54 203 -52 207 -48 208H48C52 207 54 203 54 196C54 164 42 148 37 118V100Z"/>';
@@ -11477,13 +11477,20 @@ function akHandSVG(sh,uid,kx,ky,P){kx=kx||1;ky=ky||1;
   var SJ=PA;FA.forEach(function(f){SJ+=fing(f[0],f[1]+12,f[2],f[3],f[4]*.52,f[5]*.5)});
   SJ+=fing(48,176,27,25,44,-46,184);
   var J=layer(SJ,line('M-27 222Q-14 230 -1 222')+line('M3 222Q16 230 29 222'));
+  /* ---- K: 3 صوابع (السبابة والوسطى والبنصر) / L: 4 صوابع والإبهام مطوي / M: روك (السبابة والخنصر) ---- */
+  var SK=PB+'<circle cx="-37" cy="250" r="18.5"/>'+fing(-13.5,194,23,23,74,3.5)+fing(13.5,194,23,23,78,-2)+fing(40,198,22,22,66,-8.5)+'<rect x="-22" y="228" width="44" height="22" rx="11"/>';
+  var K3=layer(SK,line('M-37 262L-37 248')+line('M-24 238Q0 247 24 238'));
+  var SL=PB+fing(-40,198,22,22,60,9)+fing(-13.5,194,23,23,74,3.5)+fing(13.5,194,23,23,78,-2)+fing(40,198,22,22,66,-8.5)+'<rect x="-22" y="228" width="44" height="22" rx="11"/>';
+  var L4=layer(SL,line('M-24 238Q0 247 24 238'));
+  var SM=PB+'<circle cx="-12.5" cy="256" r="18.5"/><circle cx="12.5" cy="256" r="18.5"/>'+fing(-40,198,22,22,70,9)+fing(40,198,22,22,70,-9)+'<rect x="-22" y="230" width="44" height="22" rx="11"/>';
+  var M5=layer(SM,line('M0 268L0 252')+line('M-24 240Q0 249 24 240'));
   return '<div class="akp-hsvg" style="width:'+W+'px;height:'+H+'px">'+
     wrap("akp-pbase",u+"e",base)+
     wrap("akp-pa",u+"a",A)+
     wrap("akp-pb",u+"b",B)+
     wrap("akp-pc",u+"d",C)+
     wrap("akp-pd",u+"f",D)+
-    wrap("akp-pe",u+"g",E)+wrap("akp-pf",u+"h",F)+wrap("akp-pg",u+"i",G)+wrap("akp-ph",u+"j",HG)+wrap("akp-pi",u+"k",I)+wrap("akp-pj",u+"l",J)+'</div>'}
+    wrap("akp-pe",u+"g",E)+wrap("akp-pf",u+"h",F)+wrap("akp-pg",u+"i",G)+wrap("akp-ph",u+"j",HG)+wrap("akp-pi",u+"k",I)+wrap("akp-pj",u+"l",J)+wrap("akp-pk",u+"m",K3)+wrap("akp-pl",u+"n",L4)+wrap("akp-pm",u+"o",M5)+'</div>'}
 
 /* ===== ظل ناعم تحت الإيد (طبقة منفصلة بـ multiply عشان تتفاعل مع القماش). المركز = مركز القبضة ===== */
 function akShadowSVG(P){
@@ -11599,11 +11606,12 @@ function akFoldSVG(seed,size,P){
      السيناريوهات بتتختار عشوائي، بس الأهدى بس في أول 3 سحبات، ومن السحبة الرابعة بتبدأ تظهر السيناريوهات الأعنف.
        هادية: wave (أول سحبة في اليوم: بتلوّح) / shy (بتتكسّف وتستخبّى) / twoTugs (شدّتين صغيرين) / blow (بتنفض إيدها قبل الشد)
               thumbs (بتقول برافو بإبهام) / shakeOff (بتنفض إيدها بعد الشد) / normal (شد عادي)
+       جديدة (إيماءات من صور المرجع): rock (روك 🤘) / count (عدّ 1-5) / mix (4 إيماءات عشوائية في حركة)
        جديدة: talk (بتكلّم بصوابعها) / beckon (تعالى) / reach (بتمدّ دراعها لفوق وتنزل 3D) / flip (بتقلب كفها 3D بعد الشد) / bye (باي بالصوابع) / scold (صباع لا-لا)
        عنيفة (من السحبة 4): strong (شدّة قوية والصفحة ترتد) / slip (القماش يفلت منها وتحاول تاني) / impatient (بتدق على الشاشة بصباعها بنفاد صبر)
        كل سحبة سادسة (6، 12، 18...): angry (بتتعصب وتخبط 3 مرات)
      لتجربة سيناريو من الكونسول: AKPull.play(0,"shy") (والأسماء فوق) أو AKPull.play(0,"angry") */
-  var SC_SOFT=["shy","twoTugs","blow","thumbs","shakeOff","normal","peace","ok","talk","beckon","reach","flip","bye"],SC_HARD=["strong","slip","impatient","gun","scold"],
+  var SC_SOFT=["shy","twoTugs","blow","thumbs","shakeOff","normal","peace","ok","talk","beckon","reach","flip","bye","rock","count","mix"],SC_HARD=["strong","slip","impatient","gun","scold"],
       KNOWN=["wave","angry","normal"].concat(SC_SOFT,SC_HARD);
   function lastSc(){try{return sessionStorage.getItem("akps")||""}catch(e){return window._akps||""}}
   function setLastSc(v){try{sessionStorage.setItem("akps",v)}catch(e){window._akps=v}}
@@ -11621,7 +11629,7 @@ function akFoldSVG(seed,size,P){
     var scen=(typeof force==="string"&&KNOWN.indexOf(force)>=0)?force:(n===1&&firstToday())?"wave":chooseScen(n,R);
     setLastSc(scen);
     var side=(force===1||force==="right")?1:(force===-1||force==="left")?-1:(R()<.5?-1:1);   // 1 = يمين، -1 = شمال
-    var vw=window.innerWidth,sh=Math.min(vw,520)/460,K=.62,Rf=540*sh*K,u=sh*K,fs=Math.round(Math.min(640,Math.max(360,vw*1.4))),fh=fs/2,h0=Math.max(H,off||0);
+    var vw=window.innerWidth,sh=Math.min(vw,520)/460,K=.56,Rf=540*sh*K,u=sh*K,fs=Math.round(Math.min(640,Math.max(360,vw*1.4))),fh=fs/2,h0=Math.max(H,off||0);
     syncExt();build();fill(sh,K,fs);
     var cs=getComputedStyle(root),EA=(cs.getPropertyValue("--v5-ease")||"").trim()||"cubic-bezier(.22,1,.36,1)",
         EP="cubic-bezier(.55,0,.2,1)",      // الشد: بداية هادية وبعدين يسرّع ويهدى في الآخر
@@ -11690,6 +11698,18 @@ function akFoldSVG(seed,size,P){
     }else if(scen==="scold"){   // بتحرّك صباعها يمين وشمال "لا لا لا" في 3D
       enter(600,.48*h0);t+=90;st(t,{pose:3},ES);
       osc([15,-15,15,-15,11,-11,0],92,.48*h0);t+=90;st(t,{pose:0,rx:0,ry:0},ES);tg=t+260;
+    }else if(scen==="rock"){    // روك: بتعمل القرون وتهزّ إيدها في 3D
+      enter(600,.5*h0);t+=90;st(t,{pose:12},ES);osc([10,-10,10,-10,7,-7,0],110,.5*h0);t+=90;st(t,{pose:0,rx:0,ry:0},ES);tg=t+260;
+    }else if(scen==="count"){   // بتعدّ على صوابعها: 1 ثم 2 ثم 3 ثم 4 ثم 5 (5 إيماءات في حركة واحدة)
+      enter(560,.5*h0);
+      [3,4,10,11,0].forEach(function(q,i){t+=i?300:140;st(t,{pose:q,gy:.5*h0+(i%2?-3:3),ry:(i%2?-8:8)},ES)});
+      t+=260;st(t,{ry:0,gy:.5*h0},ES);tg=t+220;
+    }else if(scen==="mix"){     // 4 إيماءات عشوائية ورا بعض في حركة واحدة (من غير تكرار)
+      var mp=[4,5,12,10,11,3],mq=[],mk;
+      while(mq.length<4){mk=mp.splice(Math.floor(R()*mp.length),1)[0];mq.push(mk)}
+      enter(560,.5*h0);
+      mq.forEach(function(q,i){t+=i?320:140;st(t,{pose:q,gy:.5*h0+(i%2?-3:3),ry:(i%2?-12:12),rx:(i%2?-4:6)},ES)});
+      t+=280;st(t,{pose:0,ry:0,rx:0,gy:.5*h0},ES);tg=t+220;
     }else tg=t+680;
 
     /* ---- المسك ---- */
@@ -11770,7 +11790,7 @@ function akFoldSVG(seed,size,P){
     var main=hand.animate(ks(function(s){var a=s.th*Rr;return {transform:"translate("+(s.gx+Rf*Math.sin(a)).toFixed(1)+"px,"+(s.gy-Rf*Math.cos(a)).toFixed(1)+"px)"}}),O);anims=[main];
     anims.push(hsvg.animate(ks(function(s){return {transform:"perspective(900px) rotateX("+s.rx+"deg) rotateY("+s.ry+"deg) rotate("+s.th+"deg) scale("+s.sc+")"}}),O));
     /* التبديل بين اليد المفتوحة (0) والقبضة (1) والقبضة بإبهام (2) والصباع المشاور (3): الطبقة اللي بتظهر بتظهر في أول الفترة، واللي بتختفي بتفضل لآخرها (من غير ما الإيد تبقى شفافة في النص) */
-    ["pa","pb","pc","pd","pe","pf","pg","ph","pi","pj"].forEach(function(cl,k){
+    ["pa","pb","pc","pd","pe","pf","pg","ph","pi","pj","pk","pl","pm"].forEach(function(cl,k){
       var L=hsvg.querySelector(".akp-"+cl);
       anims.push(L.animate(S.map(function(s,i){var nx=S[i+1],e="linear";if(nx){var a=s.pose===k?1:0,b=nx.pose===k?1:0;if(b>a)e="steps(1,start)";else if(b<a)e="steps(1,end)"}return {offset:s.t/T,opacity:s.pose===k?1:0,easing:e}}),O))});
     anims.push(fold.animate(ks(function(s){return {transform:"translate("+s.gx+"px,"+(s.gy-fh)+"px)",opacity:s.fo}}),O));
