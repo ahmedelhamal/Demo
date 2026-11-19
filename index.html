@@ -11341,8 +11341,9 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
       if(!R.classList.contains("cv-ready"))requestAnimationFrame(function(){requestAnimationFrame(function(){R.classList.add("cv-ready")})})
     }catch(e){}
   }
+  function isHome(){try{return window.tab==="home"||!!(window.ST&&ST.tab==="home")}catch(e){return false}}
   function go(dir){
-    if(rm.matches)return;
+    if(rm.matches||isHome())return;   /* الرئيسية: من غير انتقال متدرّج، عشان ما تهتزش */
     var rtl=document.documentElement.dir==="rtl";
     app.style.setProperty("--v5x",(rtl?-1:1)*dir*18+"px");
     var k=app.children;
@@ -11831,6 +11832,10 @@ html .thsw.au span{border:0}
 html .hn{text-align:center;width:100%}
 
 html .hn{text-align:center;width:100%}
+</style>
+<style id="home-calm-css">
+/* الرئيسية ثابتة ومتزنة: من غير حركات دخول بتتعاد مع كل إعادة رسم */
+html.hm #app>*,html.hm .sinfo.show:not(.out) span,html.hm .sinfo.show:not(.out) .avb,html.hm .hav,html.hm .gx.in>*,html.hm .cnt.pop button,html.hm .solL.pop .si{animation:none!important}
 </style>
 <style id="att-css">
 #app .chim{display:block;max-width:100%;max-height:260px;border-radius:12px;margin:2px 0 6px;cursor:zoom-in;object-fit:cover}
