@@ -48,6 +48,7 @@
 /* 4) تكبير الخط */
 :root{--fs:1}:root[data-fs="l"]{--fs:1.12}:root[data-fs="xl"]{--fs:1.25}
 /* 5) انتقال ناعم بين الثيمات */
+html{overflow-x:clip}
 html.thx *,html.thx *::before,html.thx *::after{transition-property:background-color,color,border-color,fill,stroke,box-shadow!important;transition-duration:.28s!important;transition-timing-function:ease!important}
 @media (prefers-reduced-motion:reduce){html.thx *,html.thx *::before,html.thx *::after{transition:none!important}}
 /* 6) قائمة اختيار الثيم في الإعدادات */
@@ -11796,7 +11797,7 @@ if(!hdE||!appE||!B64)return;
 const mk=(t,id)=>{const e=document.createElement(t);e.id=id;document.body.appendChild(e);return e};
 const fold=mk('div','fold'),cv=mk('canvas','pcv'),hbk=mk('div','hbk');
 /* الصفحة (الهيدر + المحتوى) بتتحرك مع بعض، والمساحة اللي بتتكشف فوقها بتتملّي بلون الهيدر */
-const scr={style:{set transform(v){hdE.style.transform=v;appE.style.transform=v;const m=/translate3d\([^,]*,\s*(-?[\d.]+)px/.exec(v||'');hbk.style.height=(m?Math.max(0,parseFloat(m[1])+3):0)+'px'},set transition(v){hdE.style.transition=v;appE.style.transition=v;hbk.style.transition=v?'height .3s cubic-bezier(.2,.8,.3,1)':''}}};
+const scr={style:{set transform(v){appE.style.transform=v;{const mx=/translate3d\(\s*(-?[\d.]+)px/.exec(v||''),ax=mx?Math.abs(parseFloat(mx[1])):0;hdE.style.transform=ax>0.05?v+' scaleX('+(1+2*(ax+2)/(window.innerWidth||360)).toFixed(4)+')':v}const m=/translate3d\([^,]*,\s*(-?[\d.]+)px/.exec(v||'');hbk.style.height=(m?Math.max(0,parseFloat(m[1])+3):0)+'px'},set transition(v){hdE.style.transition=v;appE.style.transition=v;hbk.style.transition=v?'height .3s cubic-bezier(.2,.8,.3,1)':''}}};
 let busy=false,ready=false,vw,vh,doPlay=()=>{},flip=()=>{};
 /* اليد بتظهر بس في الرئيسية: للمعلم (تاب الرئيسية) وللطالب (تاب الرئيسية) */
 function isTH(){try{return !!(window.AU&&AU.ready&&AU.user&&window.tab==='home'&&!(window.T3&&T3.v))}catch(e){return false}}
