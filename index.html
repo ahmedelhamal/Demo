@@ -542,19 +542,19 @@ select,input,textarea,.ph span,.dys label{border:0;border-radius:16px;box-shadow
 #a4log:empty{display:none}
 </style>
 <script>window.AIICO='<i><svg viewBox="0 0 24 24"><g class="ab"><path class="ad" pathLength="1" d="M7 8h10a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3z"/><path class="ad ae" pathLength="1" d="M2.5 12.5v2.5M21.5 12.5v2.5"/><circle class="ey" cx="9" cy="12.6" r="1.25" fill="currentColor" stroke="none"/><circle class="ey" cx="15" cy="12.6" r="1.25" fill="currentColor" stroke="none"/><path class="ad mo" pathLength="1" d="M9.5 16q2.5 1.7 5 0"/></g><path class="ad" pathLength="1" d="M12 8V5.2"/><circle class="al" cx="12" cy="3.6" r="1.6" fill="#F59E42" stroke="none"/><path class="sp" pathLength="1" d="M21.5 3v3M20 4.5h3" stroke="#F59E42" stroke-width="1.6" style="--sx:2px;--sy:-1px"/><path class="sp" pathLength="1" d="M2.5 3v3M1 4.5h3" stroke="#F59E42" stroke-width="1.6" style="--sx:-2px;--sy:-1px"/></svg></i>';
-(function(){var last=null,n=0;function play(){var i=document.querySelector(".aibtn i");if(!i)return;i.classList.remove("ani");void i.offsetWidth;i.classList.add("ani");clearTimeout(i._t);i._t=setTimeout(function(){i.classList.remove("ani")},2800)}
+(function(){var last=null,n=0,lp=0;function play(){var i=document.querySelector(".aibtn i");if(!i)return;lp=Date.now();i.classList.remove("ani");void i.offsetWidth;i.classList.add("ani");clearTimeout(i._t);i._t=setTimeout(function(){i.classList.remove("ani")},2800)}
 document.addEventListener("pointerdown",function(e){if(e.target.closest&&e.target.closest(".aibtn"))play()},true);
 setInterval(function(){var b=document.querySelector(".aibtn");if(!b||!b.offsetParent){last=null;return}
-if(b!==last){last=b;n=0;setTimeout(play,350);return}
-if(++n>=10){n=0;play()}},1000)})();</script>
+if(b!==last){last=b;if(Date.now()-lp>10000)setTimeout(play,350);return}
+if(Date.now()-lp>=10000)play()},1000)})();</script>
 <script>(function(){
 window.aiCardOpen=function(){var b=document.querySelector(".aibtn");if(b){b.click();return}if(window.aiOpen)window.aiOpen()};
-function play(){var i=document.querySelector(".aig i");if(!i)return;i.classList.remove("ani");void i.offsetWidth;i.classList.add("ani");clearTimeout(i._t);i._t=setTimeout(function(){i.classList.remove("ani")},2800)}
+var lp=0;function play(){var i=document.querySelector(".aig i");if(!i)return;lp=Date.now();i.classList.remove("ani");void i.offsetWidth;i.classList.add("ani");clearTimeout(i._t);i._t=setTimeout(function(){i.classList.remove("ani")},2800)}
 document.addEventListener("pointerdown",function(e){if(e.target.closest&&e.target.closest(".aig"))play()},true);
-var last=null,n=0;setInterval(function(){var b=document.querySelector(".aig");if(!b||!b.offsetParent){last=null;return}if(b!==last){last=b;n=0;setTimeout(play,350);return}if(++n>=10){n=0;play()}},1000);
-function playM(){var i=document.querySelector(".pmg i");if(!i)return;i.classList.remove("ani");void i.offsetWidth;i.classList.add("ani");clearTimeout(i._t);i._t=setTimeout(function(){i.classList.remove("ani")},2800)}
+var last=null,n=0;setInterval(function(){var b=document.querySelector(".aig");if(!b||!b.offsetParent){last=null;return}if(b!==last){last=b;if(Date.now()-lp>10000)setTimeout(play,350);return}if(Date.now()-lp>=10000)play()},1000);
+var lpM=0;function playM(){var i=document.querySelector(".pmg i");if(!i)return;lpM=Date.now();i.classList.remove("ani");void i.offsetWidth;i.classList.add("ani");clearTimeout(i._t);i._t=setTimeout(function(){i.classList.remove("ani")},2800)}
 document.addEventListener("pointerdown",function(e){if(e.target.closest&&e.target.closest(".pmg"))playM()},true);
-var lastM=null,nM=3;setInterval(function(){var b=document.querySelector(".pmg");if(!b||!b.offsetParent){lastM=null;return}if(b!==lastM){lastM=b;nM=3;setTimeout(playM,600);return}if(++nM>=10){nM=0;playM()}},1000);
+var lastM=null,nM=3;setInterval(function(){var b=document.querySelector(".pmg");if(!b||!b.offsetParent){lastM=null;return}if(b!==lastM){lastM=b;if(Date.now()-lpM>10000)setTimeout(playM,600);return}if(Date.now()-lpM>=10000)playM()},1000);
 })();</script>
 <style id="avcrop-css">
 #avc{position:fixed;inset:0;z-index:99997;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:14px;animation:avcin .2s ease-out}
@@ -9230,7 +9230,7 @@ document.addEventListener('click',function(e){var g=e.target.closest&&e.target.c
 function play(i){if(!i)return;i.classList.remove("ani");void i.offsetWidth;i.classList.add("ani");setTimeout(function(){i.classList.remove("ani")},2800)}
 document.addEventListener("pointerdown",function(e){var c=e.target.closest&&e.target.closest(".v3i,.v3nr");var i=c&&(c.classList.contains("v3i")?c:c.querySelector(".v3i"));if(i)play(i)},true);
 var od=window.draw,first=0;
-if(typeof od=="function")window.draw=function(){var r=od.apply(this,arguments);var n=document.querySelectorAll(".v3i");if(n.length&&!first){first=1;setTimeout(function(){[].forEach.call(n,function(x,k){setTimeout(function(){play(x)},k*250)})},350)}return r};
+if(typeof od=="function")window.draw=function(){var r=od.apply(this,arguments);var n=document.querySelectorAll(".v3i");if(n.length&&!first){first=1}return r};
 })();
 </script>
 <script id="ai-config">
