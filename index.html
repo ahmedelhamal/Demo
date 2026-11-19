@@ -49,6 +49,7 @@
 :root{--fs:1}:root[data-fs="l"]{--fs:1.12}:root[data-fs="xl"]{--fs:1.25}
 /* 5) انتقال ناعم بين الثيمات */
 html{overflow-x:clip;background-color:var(--k-bg,var(--bg))}
+html.hm,html.hm body{overscroll-behavior-y:none}
 html.thx *,html.thx *::before,html.thx *::after{transition-property:background-color,color,border-color,fill,stroke,box-shadow!important;transition-duration:.28s!important;transition-timing-function:ease!important}
 @media (prefers-reduced-motion:reduce){html.thx *,html.thx *::before,html.thx *::after{transition:none!important}}
 /* 6) قائمة اختيار الثيم في الإعدادات */
@@ -11949,6 +11950,13 @@ function up(){if(!sd||!sd.on){sd=null;return}const dy=sd.dy;sd=null;
  scr.style.transition='transform .3s cubic-bezier(.2,.8,.3,1)';scr.style.transform=''}
 document.addEventListener('touchstart',e=>{if(e.touches.length===1)down(e.touches[0].clientY,e.target)},{passive:true,capture:true});
 document.addEventListener('touchmove',e=>{if(busy){if(e.cancelable)e.preventDefault();return}move(e.touches[0].clientY,e)},{passive:false,capture:true});
+/* في الرئيسية بس: منع ريفريش المتصفح الأصلي (اللي بيعيد فتح التطبيق من الأول). اليد هي المسؤولة عن التحديث، وبيتحدّث محتوى الرئيسية نفسه من غير إعادة تشغيل */
+let g0=null,g0x=0;
+document.addEventListener('touchstart',e=>{if(e.touches.length===1){g0=e.touches[0].clientY;g0x=e.touches[0].clientX}else g0=null},{passive:true,capture:true});
+const onHome=()=>{try{return isTH()||isSH()}catch(x){return false}};
+setInterval(()=>root.classList.toggle('hm',onHome()),250);
+document.addEventListener('touchmove',e=>{if(g0==null||sd||!e.cancelable||!onHome())return;const t=e.touches[0],dy=t.clientY-g0,dx=Math.abs(t.clientX-g0x);
+ if(dy>8&&dy>dx&&sy()<=0&&!inScrolled(e.target)&&!(e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]')))e.preventDefault()},{passive:false,capture:true});
 document.addEventListener('touchend',up,{passive:true,capture:true});document.addEventListener('touchcancel',up,{passive:true,capture:true});
 document.addEventListener('mousedown',e=>down(e.clientY,e.target));document.addEventListener('mousemove',e=>move(e.clientY,e));document.addEventListener('mouseup',up);
 
