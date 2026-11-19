@@ -7451,7 +7451,13 @@ function dhHw(){var L=(window.cloudSubs?cloudSubs():[]).filter(function(x){retur
  else b='<div class="dse">'+L.slice().reverse().map(function(x){return '<div class="v3n"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><b style="font-size:calc(14px*var(--fs,1))">'+esc(x.w.title||t("hw"))+'</b><span class="pill">'+esc(gn(x.w.grade))+'</span><span class="pill ok">'+x.names.length+'</span></div>'+dhSubs(x)+'</div>'}).join("")+'</div>';
  b+='<div class="dsx">'+(L.length?'<button class="btn pr" onclick="dhTog(\'hw\')">'+(op?L2("عرض أقل","Show less"):L2("عرض التفاصيل","Show details"))+'</button>':'')+'</div>';
  return dhCard(DSI.hw,L2("الواجبات","Homework"),all.length?L2(all.length+" طالب سلّموا",all.length+" submitted"):"",b)}
-function dashHome(){if(!S.students.length)return "";return dhTop("t")+dhTop("k")+dhMm()+dhLs()+dhHw()}
+function dhGeo(){var M2=window.GEOMETA||{},b="",ic='<svg class="dsi" viewBox="0 0 24 24"><path d="M4 19L12 5l8 14z"/><path d="M7.4 19a5 5 0 0 1 1.1-3"/></svg>',
+ ic2='<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19L12 5l8 14z"/><path d="M7.4 19a5 5 0 0 1 1.1-3"/></svg>';
+ ["p1","p2"].forEach(function(k){if(!M2[k])return;
+  b+='<div class="gb2" role="button" tabindex="0" style="margin-bottom:10px" onclick="geoOpen(\''+k+'\',1)"><span class="gsym">'+ic2+'</span><b>'+esc(M2[k].n)+'</b><span class="gchev">'+L2("\u2039","\u203a")+'</span></div>'});
+ if(!b)b='<div class="mu" style="text-align:center">'+L2("مش متاح دلوقتي","Not available right now")+'</div>';
+ return dhCard(ic,L2("تعلّم","Learn"),L2("كل الدروس والمسائل مفتوحة","All lessons and problems are open"),b)}
+function dashHome(){if(!S.students.length)return "";return dhTop("t")+dhTop("k")+dhMm()+dhLs()+dhHw()+dhGeo()}
 
 var _hv=window.homeView;
 window.homeView=function(){if(!T3.v)return _hv()+dashHome();
@@ -11460,7 +11466,7 @@ function gmInner(){
  var $=function(i){return document.getElementById(i)};
  var B={},V={};try{var P=JSON.parse(localStorage.getItem(K))||{},D=P.done||{};for(var k in D)if(D[k])S.done[k]=1;B=P.bad||{};V=P.seen||{};S.pts=Object.keys(S.done).length}catch(e){}
  function sv(){try{localStorage.setItem(K,JSON.stringify({done:S.done,bad:B,seen:V}))}catch(e){}
-  try{var o={};PROBLEMS.forEach(function(q){var a=o[q.les]=o[q.les]||{n:0,d:0,b:0,s:0};a.n++;if(S.done[q.id])a.d++;a.b+=B[q.id]||0;if(V[q.id])a.s++});parent.geoSend(window.GMG,{les:o})}catch(e){}}
+  try{var o={};PROBLEMS.forEach(function(q){var a=o[q.les]=o[q.les]||{n:0,d:0,b:0,s:0};a.n++;if(S.done[q.id])a.d++;a.b+=B[q.id]||0;if(V[q.id])a.s++});if(!window.GMT)parent.geoSend(window.GMG,{les:o})}catch(e){}}
  function cnt(l){var n=0,d=0;PROBLEMS.forEach(function(q){if(q.les==l){n++;if(S.done[q.id])d++}});return {n:n,d:d}}
  /* o = مفتوح ، c = المعلم قافله ، s = بالتتابع وبيستنى الدرس اللي قبله */
  function st(l){var m=LKM[l]||"c";if(m=="o"||m=="c")return m;
@@ -11493,12 +11499,12 @@ function gmInner(){
 
 var GMCSS='<style id="gm-extra">header{position:relative}#gmx{position:absolute;top:14px;left:14px;width:44px;height:44px;border:0;border-radius:14px;background:rgba(255,255,255,.18);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}#gmx:active{transform:scale(.92)}#gmx svg{width:22px;height:22px}.dlr,.dl,.lpdf{display:none!important}.lc.lk{opacity:.6}</style>';
 
-window.geoOpen=function(g){
- if(document.getElementById("gm-ov")||!GS[g]||gkey()!=g)return;
- var d=stu(),k=String(d.phone||"")+"_"+String(window.ST.pc||""),lk=lkOf(g),modes={},i;
- for(i=1;i<=META[g].l.length;i++)modes[i]=mode(g,i);
+window.geoOpen=function(g,T){
+ if(document.getElementById("gm-ov")||!GS[g]||(!T&&gkey()!=g))return;
+ var d=stu(),k=T?"teacher":String(d.phone||"")+"_"+String(window.ST.pc||""),lk=T?{}:lkOf(g),modes={},i;
+ for(i=1;i<=META[g].l.length;i++)modes[i]=T?"o":mode(g,i);
  var pal=document.documentElement.getAttribute("data-theme")||"";
- var inj='<script>window.GMK='+JSON.stringify(k)+';window.GMG='+JSON.stringify(g)+';window.GML='+JSON.stringify(modes)+'<\/script>'+themeCss()+GMCSS;
+ var inj='<script>window.GMK='+JSON.stringify(k)+';window.GMG='+JSON.stringify(g)+';window.GML='+JSON.stringify(modes)+(T?';window.GMT=1':'')+'<\/script>'+themeCss()+GMCSS;
  var html=GS[g].replace("</head>",function(){return inj+"</head>"});
  var tail='<script>('+gmInner.toString()+')()<\/script>',bi=html.lastIndexOf("</body>");
  html=html.slice(0,bi)+tail+html.slice(bi);
