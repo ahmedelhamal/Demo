@@ -11310,6 +11310,34 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
     nav.style.setProperty("--ni-x",b.offsetLeft+"px");
     nav.style.setProperty("--ni-w",b.offsetWidth+"px");
     nav.style.setProperty("--ni-o","1");
+    curveSync(b);
+  }
+  /* الحرف S بتاع اللوح: بنحسب ارتفاع المنحنى تحت كل تاب، والأيقونة تقعد على الخط نفسه والإطار يلف تحتها */
+  var CV=[[0,20,13,20,22,3,42,4],[42,4,62,5,68,22,84,21],[84,21,92,21,97,15,100,11]],probe=null;
+  function curveY(xp){
+    var last=CV[2][7];
+    for(var s=0;s<3;s++){var c=CV[s],px=c[0],py=c[1];
+      for(var k=1;k<=60;k++){var t=k/60,u=1-t,
+        x=u*u*u*c[0]+3*u*u*t*c[2]+3*u*t*t*c[4]+t*t*t*c[6],
+        y=u*u*u*c[1]+3*u*u*t*c[3]+3*u*t*t*c[5]+t*t*t*c[7];
+        if(x>=xp)return x===px?y:py+(y-py)*(xp-px)/(x-px);
+        px=x;py=y}}
+    return last}
+  function curveSync(act){
+    try{
+      if(!probe){probe=document.createElement("div");probe.style.cssText="position:fixed;left:0;bottom:0;width:0;height:var(--k-plate);visibility:hidden;pointer-events:none";document.body.appendChild(probe)}
+      var W=nav.offsetWidth,H=nav.offsetHeight,i=act&&act.querySelector("i");
+      if(!W||!i||!act.offsetWidth)return;
+      var xc=act.offsetLeft+act.offsetWidth/2,
+          n0=H-(act.offsetTop+i.offsetTop+i.offsetHeight/2),   /* مركز الأيقونة من تحت (ثابت، الأيقونة ما بتتحركش) */
+          y=curveY(xc/W*100),R=document.documentElement,st=R.style;
+      st.setProperty("--pl",(n0+y).toFixed(1)+"px");          /* اللوح بينزل/يطلع عشان الخط يعدّي على نص الأيقونة */
+      st.setProperty("--hx",xc.toFixed(1)+"px");
+      st.setProperty("--hy1",y.toFixed(1)+"px");
+      st.setProperty("--hy2",(28+y).toFixed(1)+"px");
+      nav.style.setProperty("--ni-cb",n0.toFixed(1)+"px");
+      if(!R.classList.contains("cv-ready"))requestAnimationFrame(function(){requestAnimationFrame(function(){R.classList.add("cv-ready")})})
+    }catch(e){}
   }
   function go(dir){
     if(rm.matches)return;
@@ -11773,6 +11801,22 @@ html nav::before{top:-6px;bottom:auto;height:58px;width:58px;margin-left:calc((v
   background:linear-gradient(150deg,color-mix(in srgb,var(--k-hd1) 78%,#fff),var(--k-hd2));
   box-shadow:0 0 0 1px rgba(255,255,255,.14),0 12px 22px -8px rgba(0,0,0,.65),inset 0 2px 0 rgba(255,255,255,.16),inset 0 -6px 10px rgba(0,0,0,.3),0 0 26px -6px var(--k-glow)}
 html main{padding-bottom:calc(var(--k-plate) + 24px)}
+/* ---- الشريط السفلي: الأيقونات ثابتة في مكانها، واللوح بينزل/يطلع والحرف S معدّي على نص الأيقونة النشطة، وحواليها فراغ دايري فاضي (قطع حقيقي في اللوح والخط) ---- */
+@property --pl{syntax:"<length>";inherits:true;initial-value:130px}
+@property --hx{syntax:"<length>";inherits:true;initial-value:-999px}
+@property --hy1{syntax:"<length>";inherits:true;initial-value:0px}
+@property --hy2{syntax:"<length>";inherits:true;initial-value:0px}
+html.cv-ready{transition:--pl .55s var(--v5-spring),--hx .55s var(--v5-spring),--hy1 .55s var(--v5-spring),--hy2 .55s var(--v5-spring)}
+html nav{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 2px)}
+html nav::after{display:none}
+html nav::before{top:auto;height:58px;bottom:calc(var(--ni-cb,calc(var(--k-plate) - 60px)) - 29px);transition:transform .55s var(--v5-spring),width .45s var(--v5-spring),opacity .25s}
+html body::after{height:var(--pl);
+  -webkit-mask:radial-gradient(circle at var(--hx,-999px) var(--hy1,0px),transparent 36.5px,#000 37.5px) 0 0/100% 100% no-repeat,linear-gradient(#000,#000) bottom/100% calc(100% - var(--k-curve) + 1px) no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 26' preserveAspectRatio='none'%3E%3Cpath d='M0 20C13 20 22 3 42 4C62 5 68 22 84 21C92 21 97 15 100 11V26H0Z'/%3E%3C/svg%3E") top/100% var(--k-curve) no-repeat;
+  -webkit-mask-composite:source-in,source-over;
+          mask:radial-gradient(circle at var(--hx,-999px) var(--hy1,0px),transparent 36.5px,#000 37.5px) 0 0/100% 100% no-repeat,linear-gradient(#000,#000) bottom/100% calc(100% - var(--k-curve) + 1px) no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 26' preserveAspectRatio='none'%3E%3Cpath d='M0 20C13 20 22 3 42 4C62 5 68 22 84 21C92 21 97 15 100 11V26H0Z'/%3E%3C/svg%3E") top/100% var(--k-curve) no-repeat;
+          mask-composite:intersect,add}
+html::after{bottom:calc(var(--pl) - var(--k-curve));
+  -webkit-mask:radial-gradient(circle at var(--hx,-999px) var(--hy2,0px),transparent 36.5px,#000 37.5px) 0 0/100% 100% no-repeat;mask:radial-gradient(circle at var(--hx,-999px) var(--hy2,0px),transparent 36.5px,#000 37.5px) 0 0/100% 100% no-repeat}
 
 /* ---- معاينة السمة في الإعدادات: طبقتين (خلفية + وجه) ---- */
 html .thsw,html .thsw.au span{background:linear-gradient(160deg,var(--k-hd1),var(--k-hd2)) top/100% 50% no-repeat,var(--k-bg);border:1px solid color-mix(in srgb,var(--tx) 14%,transparent)}
