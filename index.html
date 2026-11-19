@@ -11779,7 +11779,7 @@ html .hn{text-align:center;width:100%}
 </style>
 <style id="hand-css">
 /* ===== اليد (سحب للتحديث): طبقات الرسم فوق التطبيق ===== */
-#hbk{position:fixed;left:0;right:0;top:0;height:0;z-index:0;pointer-events:none;background:var(--k-hd1,var(--h1,#37356E))}
+#hbk{position:fixed;left:0;right:0;top:0;height:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 900px at 88% 100%,color-mix(in srgb,var(--k-acc,#7E79F0) 30%,transparent),transparent 65%),linear-gradient(90deg,var(--k-hd1,#37356E),color-mix(in srgb,var(--k-hd1,#37356E) 55%,var(--k-hd2,#110F2A)))}
 #fold{position:fixed;left:0;top:0;z-index:5;display:none;pointer-events:none;mix-blend-mode:overlay;-webkit-mask-image:radial-gradient(closest-side,#000 60%,transparent);mask-image:radial-gradient(closest-side,#000 60%,transparent)}
 #pcv{position:fixed;inset:0;width:100%;height:100%;z-index:8;pointer-events:none}
 </style>
@@ -11966,5 +11966,14 @@ setTimeout(start,2500);addEventListener('online',start);
 window.__handBoot=start;
 })();
 </script>
+<style id="skin-v6b">
+/* الترس: مكانه الأصلي يمين، من غير دايرة ولا حدود */
+html .gear{position:absolute;left:auto;right:16px;top:calc(env(safe-area-inset-top,0px) + 16px);transform:none;width:44px;height:44px;border-radius:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;color:#fff}
+html .gear:active{transform:scale(.9)}
+html .gear.on{background:none;border:0;box-shadow:none;color:var(--k-acc2);filter:drop-shadow(0 0 8px var(--k-glow))}
+html header::after{display:none}
+html header{padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
+html .hav{top:calc(env(safe-area-inset-top,0px) + 14px)}
+</style>
 </body>
 </html>
