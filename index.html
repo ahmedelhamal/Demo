@@ -12190,9 +12190,13 @@ angry:{n:'معصّبة',d:'تتضم وتثبت وتدق على الشاشة ثم
 /* ترتيب السحبات؛ من السادسة وطالع اليد بتفضل معصّبة. فيه احتمال 25% تظهر الخجولة بدل أي سحبة عادية */
 const SEQ=['gentle','normal','fast','wave','annoyed','angry'];let cnt=0,lastT=0;
 const upd=()=>{};
-/* ترتيب ثابت مؤقت: كل سحبة بتظهر مشهد بالترتيب. عشان ترجع العشوائي والتصاعد (متضايقة/معصّبة) غيّر السطر ده لـ const TEST_ORDER=null */
-const TEST_ORDER=['tea','coffee','read','laptop','study'];
-function nextId(){if(TEST_ORDER){const id=TEST_ORDER[cnt%TEST_ORDER.length];cnt++;return id}const n=Date.now();if(n-lastT>90000)cnt=0;lastT=n;let id=SEQ[Math.min(cnt,SEQ.length-1)];if(cnt>0&&id!=='angry'){const q=Math.random();if(q<.25)id='shy';else if(q<.55)id=['coffee','study','tea','laptop','read'][Math.floor(Math.random()*5)]}cnt++;upd();return id}
+/* ترتيب السحبات: كل جلسة = مشهد صغير (مرتين ورا بعض) ← عادي ← بسرعة ← خجولة ← باي باي ← متضايقة ← معصّبة (وتفضل معصّبة).
+   لو عدّى IDLE من غير سحب، العداد بيتصفّر والجلسة اللي بعدها بتبدأ بمشهد صغير جديد (بالدور: شاي، قراية، لابتوب، قهوة، مذاكرة) */
+const MINIS=['tea','read','laptop','coffee','study'],AFTER=['normal','fast','shy','wave','annoyed','angry'],IDLE=90000;
+let sess=0;try{sess=(+localStorage.getItem('hp:sess')||0)}catch(e){}
+function nextId(){const n=Date.now();
+ if(n-lastT>IDLE){if(cnt>0){sess++;try{localStorage.setItem('hp:sess',sess)}catch(e){}}cnt=0}
+ lastT=n;const id=cnt<2?MINIS[sess%MINIS.length]:AFTER[Math.min(cnt-2,AFTER.length-1)];cnt++;return id}
 doPlay=function(off,id){
  if(busy||rm.matches||!ready)return;if(!id)id=nextId();busy=true;const r=rnd(Date.now());
  const side=r()<.5?-1:1;
