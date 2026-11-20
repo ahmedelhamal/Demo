@@ -12069,7 +12069,7 @@ const R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});R.setPixe
 const S0=new THREE.Scene(),C=new THREE.OrthographicCamera(-1,1,1,-1,.1,5000);C.position.z=1500;
 function size(){vw=innerWidth;vh=innerHeight;R.setSize(vw,vh,false);C.left=-vw/2;C.right=vw/2;C.top=vh/2;C.bottom=-vh/2;C.updateProjectionMatrix()}
 addEventListener('resize',size);size();
-S0.add(new THREE.HemisphereLight(0xffffff,0x555566,1.1));
+const hL=new THREE.HemisphereLight(0xffffff,0x555566,1.1);S0.add(hL);
 const l1=new THREE.DirectionalLight(0xffffff,1.6);l1.position.set(3,5,4);S0.add(l1);
 const bin=Uint8Array.from(atob(B64),c=>c.charCodeAt(0));
 new THREE.GLTFLoader().parse(bin.buffer,'',g=>{try{
@@ -12101,7 +12101,7 @@ const W3=new THREE.Vector3(),WQ=new THREE.Quaternion(),ZA=new THREE.Vector3(0,0,
 let fl=true,k=1;flipG.rotation.y=Math.PI;flip=()=>{fl=!fl;flipG.rotation.y=fl?Math.PI:0};   /* المعصم لفوق والصوابع لتحت */
 /* ===== الحركة ===== */
 const EF={o:t=>1-Math.pow(1-t,3),io:t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,i:t=>t*t*t},EA='o',EP='io',EX='i',ES='io';
-const KEYS=['gx','gy','th','rx','ry','z','fo','fx','fy2','cy','g','fm','pu','sk','wv'],PG=[0,1,.45,.7];
+const KEYS=['gx','gy','th','rx','ry','z','fo','fx','fy2','cy','g','fm','pu','sk','wv','hv','li'],PG=[0,1,.45,.7];
 let S=[],T=0,run=null,CB=[];
 let FP=[],FE=[],FC=null;
 const cl=(x,a,b)=>Math.min(b,Math.max(a,x)),sm=q=>q*q*(3-2*q);
@@ -12125,12 +12125,12 @@ function foldAnim(p){
  if(FC)FC.setAttribute('transform',`scale(${(.4+.6*p.fm-.45*p.pu).toFixed(3)})`)}
 function ev(tm){let i=0;while(i<S.length-2&&S[i+1].t<=tm)i++;const a=S[i],b=S[i+1],f=Math.min(1,Math.max(0,(tm-a.t)/Math.max(1,b.t-a.t))),e=EF[a.e](f),o={};
  for(const q of KEYS)o[q]=a[q]+(b[q]-a[q])*e;return o}
-function apply(p){MS.cy=p.cy;holder.position.set(p.gx,vh/2-p.gy,0);holder.rotation.set(p.rx*D,p.ry*D,-p.th*D);holder.scale.setScalar(k*(1+.3*p.z));pose(p.g);
+function apply(p){MS.cy=p.cy;hL.intensity=1.1*p.li;l1.intensity=1.6*p.li;holder.visible=p.hv>.5;holder.position.set(p.gx,vh/2-p.gy,0);holder.rotation.set(p.rx*D,p.ry*D,-p.th*D);holder.scale.setScalar(k*(1+.3*p.z));pose(p.g);
  if(p.wv&&ba){holder.updateMatrixWorld(true);const w=ba.getWorldPosition(W3).sub(holder.position);   /* تلويح: لفّ حوالين الرسغ وهو ثابت مكانه */
   WQ.setFromAxisAngle(ZA,-p.wv*D);holder.quaternion.premultiply(WQ);holder.position.add(w).sub(w.applyQuaternion(WQ))}
  {const n=performance.now(),sx=0,sy=p.sk?p.sk*.7*Math.cos(n/16):0;scr.style.transform=`translate3d(${sx.toFixed(1)}px,${(p.cy+sy).toFixed(1)}px,0)`}
  fold.style.transform=`translate(${vw/2+p.gx}px,${p.gy}px)`;fold.style.opacity=p.fo;fold.firstChild.style.transform=`scale(${p.fx},${p.fy2})`;foldAnim(p)}
-function finish(){run=null;try{MS.hide()}catch(e){}holder.visible=false;RA();scr.style.transform='';scr.style.transition='';fold.style.display='none';busy=false}
+function finish(){run=null;try{MS.hide()}catch(e){}holder.visible=false;hL.intensity=1.1;l1.intensity=1.6;RA();scr.style.transform='';scr.style.transition='';fold.style.display='none';busy=false}
 /* ===== السيناريوهات: كل سيناريو لوحده، عدّل أي واحد من غير ما تلمس الباقي =====
    أجزاء مشتركة: c.drop (الشاشة تنزل) / c.reach (اليد توصل) / c.grip (تمسك طية) / c.pull (تسحب) / c.out (تخرج)
    كل جزء بياخد (الوقت، k) و k هو السرعة: أقل = أسرع، وبيرجّع وقت نهايته. c.st(وقت،{خصائص},ease) لأي حركة مخصوصة */
@@ -12146,26 +12146,26 @@ wave:{n:'باي باي',d:'الرسغ ثابت وتلوّح شمال ويمين 
  for(let i=0;i<5;i++){t+=200;c.st(t,{wv:i%2?-22:22},EP)}                            /* تلوّح شمال ويمين حوالين الرسغ */
  t+=200;c.st(t,{wv:0},EP);t+=250;
  t=c.reach(t,.9);t=c.grip(t,1);t=c.pull(t,1);c.out(t,1)}},
-coffee:{n:'قهوة',d:'يدين صغيرين بعيد في الخلفية بيشربوا قهوة، وفجأة اليد الكبيرة تطلع وتشد الشاشة',b(c){
- let t=c.drop(0,1);c.at(120,()=>MS.show('coffee'));
- t+=3400;c.st(t,{},ES);c.at(t,()=>MS.dim());
- const tr=t;t=c.reach(t,.7);c.at(tr+120,()=>MS.react());
- t=c.grip(t,.8);t=c.pull(t,.85);c.out(t,.8)}},
-study:{n:'مذاكرة',d:'يد صغيرة بعيد بتذاكر على مكتبها، وفجأة اليد الكبيرة تطلع وتشد الشاشة',b(c){
- let t=c.drop(0,1);c.at(120,()=>MS.show('study'));
- t+=3400;c.st(t,{},ES);c.at(t,()=>MS.dim());
- const tr=t;t=c.reach(t,.7);c.at(tr+120,()=>MS.react());
- t=c.grip(t,.8);t=c.pull(t,.85);c.out(t,.8)}},
-tea:{n:'شاي',d:'يدين صغيرين بعيد بيشربوا شاي زجاج ومعاهم بسكوت، وفجأة اليد الكبيرة تطلع وتشد الشاشة',b(c){
- let t=c.drop(0,1);c.at(120,()=>MS.show('tea'));
- t+=3400;c.st(t,{},ES);c.at(t,()=>MS.dim());
- const tr=t;t=c.reach(t,.7);c.at(tr+120,()=>MS.react());
- t=c.grip(t,.8);t=c.pull(t,.85);c.out(t,.8)}},
-laptop:{n:'لابتوب',d:'يد صغيرة بعيد بتكتب على لابتوب، وفجأة اليد الكبيرة تطلع وتشد الشاشة',b(c){
- let t=c.drop(0,1);c.at(120,()=>MS.show('laptop'));
- t+=3400;c.st(t,{},ES);c.at(t,()=>MS.dim());
- const tr=t;t=c.reach(t,.7);c.at(tr+120,()=>MS.react());
- t=c.grip(t,.8);t=c.pull(t,.85);c.out(t,.8)}},
+coffee:{n:'قهوة',d:'يدين صغيرين بعيد بيشربوا قهوة، وفجأة واحدة منهم تكبر وتشد الشاشة',b(c){
+ c.hid();let t=c.drop(0,1);c.at(120,()=>MS.show('coffee'));
+ t+=3400;c.st(t,{},ES);c.at(t,()=>MS.react());t+=300;
+ t=c.take(t,0);t=c.reach(t,1.1);t=c.grip(t,.8);t=c.pull(t,.85);c.out(t,.8)}},
+study:{n:'مذاكرة',d:'يد صغيرة بتذاكر على مكتبها، وفجأة تكبر وتشد الشاشة',b(c){
+ c.hid();let t=c.drop(0,1);c.at(120,()=>MS.show('study'));
+ t+=3400;c.st(t,{},ES);c.at(t,()=>MS.react());t+=300;
+ t=c.take(t,0);t=c.reach(t,1.1);t=c.grip(t,.8);t=c.pull(t,.85);c.out(t,.8)}},
+tea:{n:'شاي',d:'يدين صغيرين بيشربوا شاي، وفجأة واحدة منهم تكبر وتشد الشاشة',b(c){
+ c.hid();let t=c.drop(0,1);c.at(120,()=>MS.show('tea'));
+ t+=3400;c.st(t,{},ES);c.at(t,()=>MS.react());t+=300;
+ t=c.take(t,0);t=c.reach(t,1.1);t=c.grip(t,.8);t=c.pull(t,.85);c.out(t,.8)}},
+laptop:{n:'لابتوب',d:'يد صغيرة بتكتب على لابتوب، وفجأة تكبر وتشد الشاشة',b(c){
+ c.hid();let t=c.drop(0,1);c.at(120,()=>MS.show('laptop'));
+ t+=3400;c.st(t,{},ES);c.at(t,()=>MS.react());t+=300;
+ t=c.take(t,0);t=c.reach(t,1.1);t=c.grip(t,.8);t=c.pull(t,.85);c.out(t,.8)}},
+read:{n:'قراءة',d:'يد قاعدة في كرسي معلّق بتقرا كتاب، تركّن الكتاب على الكرسي وتكبر وتشد الشاشة',b(c){
+ c.hid();let t=c.drop(0,1);c.at(120,()=>MS.show('read'));
+ t+=3400;c.st(t,{},ES);c.at(t,()=>MS.react());t+=800;
+ t=c.take(t,0);t=c.reach(t,1.1);t=c.grip(t,.8);t=c.pull(t,.85);c.out(t,.8)}},
 shy:{n:'خجولة',d:'تطل من فوق، تتراجع، ثم ترجع بسرعة وتشد',b(c){
  const gx=c.side*vw*.26,gy=.05*c.hpx;
  c.st(0,{gx,gy:c.fyH,th:0,rx:6,ry:0,z:.5,pose:0},EA);
@@ -12190,7 +12190,7 @@ angry:{n:'معصّبة',d:'تتضم وتثبت وتدق على الشاشة ثم
 /* ترتيب السحبات؛ من السادسة وطالع اليد بتفضل معصّبة. فيه احتمال 25% تظهر الخجولة بدل أي سحبة عادية */
 const SEQ=['gentle','normal','fast','wave','annoyed','angry'];let cnt=0,lastT=0;
 const upd=()=>{};
-function nextId(){const n=Date.now();if(n-lastT>90000)cnt=0;lastT=n;let id=SEQ[Math.min(cnt,SEQ.length-1)];if(cnt>0&&id!=='angry'){const q=Math.random();if(q<.25)id='shy';else if(q<.55)id=['coffee','study','tea','laptop'][Math.floor(Math.random()*4)]}cnt++;upd();return id}
+function nextId(){const n=Date.now();if(n-lastT>90000)cnt=0;lastT=n;let id=SEQ[Math.min(cnt,SEQ.length-1)];if(cnt>0&&id!=='angry'){const q=Math.random();if(q<.25)id='shy';else if(q<.55)id=['coffee','study','tea','laptop','read'][Math.floor(Math.random()*5)]}cnt++;upd();return id}
 doPlay=function(off,id){
  if(busy||rm.matches||!ready)return;if(!id)id=nextId();busy=true;const r=rnd(Date.now());
  const side=r()<.5?-1:1;
@@ -12199,11 +12199,13 @@ doPlay=function(off,id){
  fold.style.width=fold.style.height=fs+'px';fold.style.margin=`${-fs/2}px 0 0 ${-fs/2}px`;fold.innerHTML=mkFold(fs,(Math.random()*4294967296)>>>0);FE=[...fold.querySelectorAll('g.f')];FC=fold.querySelector('circle');
  const h0=Math.max(130,off||0),gxS=side*(vw/2+hpx),fyH=-hpx,th0=side*4;
  let cur=null;S=[];CB=[];
- const D0={gx:gxS,gy:.35*h0,th:side*38,rx:-22,ry:side*58,g:0,z:1,fo:0,fx:1,fy2:1,fm:0,pu:0,sk:0,wv:0,cy:off||0};
- function st(tm,p,e){p=p||{};if('pose'in p)p.g=PG[p.pose];cur=Object.assign({},cur||D0,p);cur.t=tm;cur.e=e||EA;S.push(cur)}
+ const D0={gx:gxS,gy:.35*h0,th:side*38,rx:-22,ry:side*58,g:0,z:1,fo:0,fx:1,fy2:1,fm:0,pu:0,sk:0,wv:0,hv:1,li:1,cy:off||0};
+ function st(tm,p,e){p=p||{};if('pose'in p)p.g=PG[p.pose];cur=Object.assign({},cur||D0,p);cur.t=tm;cur.e=e||EA;S.push(cur);return cur}
  const c={h0,side,hpx,fyH,th0,st,at:(tm,f)=>CB.push([tm,f,0]),
+  hid:()=>{cur.hv=0},                                                                /* اليد الكبيرة مخفية في البداية: اللي هتشد الشاشة هي اليد الصغيرة نفسها وهي بتكبر */
+  take:(T,hi)=>{st(T-2,{});cur.hv=0;const A=st(T,{hv:1,pose:0,li:ML});c.at(T,()=>MS.take(A,hi));return T},   /* اليد الصغيرة تتحوّل لليد الكبيرة من نفس المكان والحجم */
   drop:(T,k)=>{st(T+220*k,{cy:h0},EA);return T+220*k},
-  reach:(T,k)=>{st(T+680*k,{gx:0,gy:.78*h0,th:th0,rx:16,ry:0,z:.5,pose:0},EA);return T+680*k},
+  reach:(T,k)=>{st(T+680*k,{gx:0,gy:.78*h0,th:th0,rx:16,ry:0,z:.5,pose:0,li:1},EA);return T+680*k},
   grip:(T,k)=>{st(T+80*k,{pose:2,z:.25,rx:8,fo:.25,fm:.25},EA);st(T+170*k,{pose:1,z:.1,fo:.6,fm:.5},EA);st(T+250*k,{z:0,fo:.9,fm:.8},EA);st(T+330*k,{fo:1,fm:1,rx:-6},EA);st(T+430*k,{},ES);return T+430*k},
   pull:(T,k)=>{st(T+90*k,{},EP);st(T+810*k,{cy:0,gx:0,gy:-.22*h0,th:th0,rx:-18,z:.04,pu:1},EA);return T+810*k},
   out:(T,k)=>{st(T+90*k,{fo:.35,cy:-5,z:.25,rx:-10},ES);st(T+200*k,{fo:0,cy:0,z:.55,pose:0},ES);st(T+320*k,{z:.85,pose:0},EX);st(T+760*k,{gx:0,gy:fyH,th:0,z:1},EA);return T+760*k}};
@@ -12212,6 +12214,7 @@ doPlay=function(off,id){
 window.__handPlay=id=>doPlay(130,id);
 function loop(){if(!run)return;requestAnimationFrame(loop);const tm=performance.now()-run.t0;for(const q of CB)if(!q[2]&&tm>=q[0]){q[2]=1;try{q[1]()}catch(e){console.error(e)}}apply(ev(Math.min(tm,T)));try{MS.tick()}catch(e){}if(tm>=T+60)finish();else RA()}
 /* ===== مشاهد 3D صغيرة وبعيدة (نفس مجسم اليد بالظبط): بتتكشف تحت الشاشة وقت السحب، وبعدين اليد الكبيرة تطلع وتشد ===== */
+const ML=.42;   /* إضاءة المشهد الصغير: ثابتة من أول فريم (غيّر الرقم ده بس لو عايزها أفتح/أغمق) */
 const MS={vis:false,cy:0,rt:-1,dmT:0,l:1,hs:[],G:null,show(){},dim(){},react(){},hide(){},tick(){}};
 let RA=()=>R.render(S0,C);
 try{
@@ -12343,13 +12346,41 @@ function sceneLaptop(){const g=new THREE.Group(),M=furn(g),DT=M.top,hx=M.cx,hz=M
    h.pose(rr>=0?0:.3+.12*Math.sin(t*13));
    keys.forEach((k,i)=>{k.position.y=DT+1.8-(rr<0&&Math.sin(t*13+i*1.7)>.85?.5:0)});
    gl.material.opacity=.1+Math.sin(t*3)*.015;cu.up(t)}}}
-const SCN={coffee:sceneCoffee,study:sceneStudy,tea:sceneTea,laptop:sceneLaptop};
-function setRoot(k){const u=Math.min(1.35,Math.max(.85,vw/380));root.scale.setScalar(u);root.position.set(0,vh/2-FLR,0);root.rotation.set(.32,(k==='study'||k==='laptop')?-.5:0,0)}
+/* ---- مشهد الكرسي المعلّق: اليد قاعدة بتقرا كتاب، وبتركّنه على الكرسي قبل ما تكبر ---- */
+function sceneRead(){const g=new THREE.Group(),PY=150,RT=0xe9c995,RT2=0xd9b27a,CU=0xf4eddc,HX=-3,HYr=38.2+.6*HH+1;
+ bx(260,2,86,0x4a477f,0,-1,0,g);cy(46,46,.8,0xb58fd0,0,.4,0,g);
+ const cg=new THREE.Group();cg.position.set(0,PY,0);g.add(cg);
+ const T4=(geo,c,x,y,z,par)=>{const m=new THREE.Mesh(geo,tone(c));m.add(new THREE.Mesh(geo,BM2));m.position.set(x,y,z);par.add(m);return m};
+ const rod=(a,b,r,c)=>{const A=new THREE.Vector3(a[0],a[1]-PY,a[2]),B=new THREE.Vector3(b[0],b[1]-PY,b[2]),d=B.clone().sub(A),L=d.length();
+  const m=T4(new THREE.CylinderGeometry(r,r,L,8),c,(A.x+B.x)/2,(A.y+B.y)/2,(A.z+B.z)/2,cg);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());return m};
+ const ring=(x,R,yc,tube,c)=>{const m=T4(new THREE.TorusGeometry(R,tube,8,40),c,x,yc-PY,0,cg);m.rotation.y=Math.PI/2;return m};
+ ring(6,34,62,1.4,RT);ring(-14,24,58,1.2,RT2);                                        /* حلقة قدّامية كبيرة وحلقة ورا أصغر */
+ for(let i=0;i<18;i++){const a=i/18*Math.PI*2,cs=Math.cos(a),sn=Math.sin(a);rod([6,62+34*cs,34*sn],[-14,58+24*cs,24*sn],.9,RT2)}
+ rod([6,96,0],[6,PY+160,0],1.1,0xe9dcc0);                                              /* الحبل لفوق برّه الشاشة */
+ T4(new THREE.SphereGeometry(18,16,10),CU,-4,31-PY,0,cg).scale.set(1,.4,1);            /* مخدة القعدة */
+ T4(new THREE.SphereGeometry(20,16,10),CU,-13,52-PY,0,cg).scale.set(.35,1.15,.95);     /* مخدة الضهر */
+ cy(12,12,2,0xd6a672,34,22,40,g);cy(1.8,1.8,22,0xb98450,34,11,40,g);const cu=cup(g,34,23,40,0x7a4a2a);   /* ترابيزة جنب فيها كوباية */
+ const bk=new THREE.Group();cg.add(bk);                                                /* الكتاب */
+ T4(new THREE.BoxGeometry(1.2,12,17.4),0xc0504d,.9,0,0,bk);
+ T4(new THREE.BoxGeometry(1.4,11,8),0xfff8e8,-.1,0,-4.2,bk);T4(new THREE.BoxGeometry(1.4,11,8),0xfff8e8,-.1,0,4.2,bk);
+ const pg=new THREE.Group();pg.position.set(-.8,0,0);bk.add(pg);T4(new THREE.BoxGeometry(.6,10.4,7.4),0xfff1d0,0,0,3.8,pg);
+ return{g,init(hs){const h=hs[0];h.holder.position.set(HX,HYr-PY,0);cg.add(h.holder);h.pose(0)},
+  upd(t,rr,hs){const h=hs[0],u=rr>=0?SM(Math.min(1,rr/.7)):0;
+   cg.rotation.z=Math.sin(t*1.2)*.045*(1-.5*u);
+   h.holder.position.set(HX,HYr-PY+Math.sin(t*2)*.4,0);
+   h.holder.rotation.set(-.2-.12*u,(165+30)*Math.PI/180,Math.PI+Math.sin(t*1.5)*.03);h.pose(.4*(1-u));
+   const px=11+(10-11)*u,py=62.5+(39.4-62.5)*u-PY;bk.position.set(px,py,0);bk.rotation.z=-.3+(-Math.PI/2+.3)*u;   /* الكتاب بينزل من إيدها على المخدة */
+   const f=(t%4.6)/.55;pg.rotation.y=(rr<0&&f<1)?-Math.PI*SM(f):0;cu.up(t)}}}
+const SCN={coffee:sceneCoffee,study:sceneStudy,tea:sceneTea,laptop:sceneLaptop,read:sceneRead};
+function setRoot(k){const u=Math.min(1.35,Math.max(.85,vw/380));root.scale.setScalar(u);root.position.set(0,vh/2-FLR,0);root.rotation.set(.32,({study:.2,laptop:.2,read:-.8})[k]||0,0)}
 Object.assign(MS,{
- show(k){const need=(k==='coffee'||k==='tea')?2:1;if(!SCN[k]||POOL.length<need)return;MS.hide();setRoot(k);const sc=SCN[k]();MS.G=sc;root.add(sc.g);MS.hs=POOL.slice(0,need);sc.init(MS.hs);MS.t0=performance.now();MS.rt=-1;MS.dmT=0;MS.l=1;hm.intensity=1.1;dl.intensity=1.6;MS.vis=true},
- dim(){MS.dmT=1},react(){if(MS.vis)MS.rt=performance.now()},
+ show(k){const need=(k==='coffee'||k==='tea')?2:1;if(!SCN[k]||POOL.length<need)return;MS.hide();setRoot(k);const sc=SCN[k]();MS.G=sc;root.add(sc.g);MS.hs=POOL.slice(0,need);MS.hs.forEach(h=>{h.holder.visible=true});sc.init(MS.hs);MS.t0=performance.now();MS.rt=-1;MS.dmT=0;MS.l=1;hm.intensity=1.1*ML;dl.intensity=1.6*ML;MS.vis=true},
+ take(A,hi){const h=MS.hs[hi||0];if(!h)return;root.updateMatrixWorld(true);const hd=h.holder,wp=new THREE.Vector3(),wq=new THREE.Quaternion(),ws=new THREE.Vector3();
+  hd.getWorldPosition(wp);hd.getWorldQuaternion(wq);hd.getWorldScale(ws);const e=new THREE.Euler().setFromQuaternion(wq,'ZXY');
+  A.gx=wp.x;A.gy=vh/2-wp.y;A.rx=e.x/D;A.ry=e.y/D;A.th=-e.z/D;A.z=(ws.x/k-1)/.3;hd.visible=false},
+ dim(){},react(){if(MS.vis)MS.rt=performance.now()},
  hide(){if(MS.G){root.remove(MS.G.g);MS.hs.forEach(h=>{if(h.holder.parent)h.holder.parent.remove(h.holder)});MS.G=null;MS.hs=[]}MS.vis=false;MS.rt=-1},
- tick(){if(!MS.vis||!MS.G)return;const n=performance.now(),t=(n-MS.t0)/1e3;MS.l+=((MS.dmT?.42:1)-MS.l)*.18;hm.intensity=1.1*MS.l;dl.intensity=1.6*MS.l;MS.G.upd(t,MS.rt>=0?(n-MS.rt)/1e3:-1,MS.hs)}});
+ tick(){if(!MS.vis||!MS.G)return;const n=performance.now(),t=(n-MS.t0)/1e3;hm.intensity=1.1*ML;dl.intensity=1.6*ML;MS.G.upd(t,MS.rt>=0?(n-MS.rt)/1e3:-1,MS.hs)}});
 RA=()=>{if(MS.vis&&MS.G){const cyv=Math.max(0,MS.cy);R.autoClear=false;R.setScissorTest(false);R.clear();R.setScissorTest(true);R.setScissor(0,vh-cyv,vw,cyv);R.render(S1,C);R.setScissorTest(false);R.clearDepth();R.render(S0,C);R.autoClear=true}else{R.autoClear=true;R.render(S0,C)}};
 }catch(e){console.error(e)}
 ready=true;
