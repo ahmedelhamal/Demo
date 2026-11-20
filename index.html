@@ -12190,14 +12190,16 @@ angry:{n:'معصّبة',d:'تتضم وتثبت وتدق على الشاشة ثم
 /* ترتيب السحبات؛ من السادسة وطالع اليد بتفضل معصّبة. فيه احتمال 25% تظهر الخجولة بدل أي سحبة عادية */
 const SEQ=['gentle','normal','fast','wave','annoyed','angry'];let cnt=0,lastT=0;
 const upd=()=>{};
-function nextId(){const n=Date.now();if(n-lastT>90000)cnt=0;lastT=n;let id=SEQ[Math.min(cnt,SEQ.length-1)];if(cnt>0&&id!=='angry'){const q=Math.random();if(q<.25)id='shy';else if(q<.55)id=['coffee','study','tea','laptop','read'][Math.floor(Math.random()*5)]}cnt++;upd();return id}
+/* ترتيب ثابت مؤقت: كل سحبة بتظهر مشهد بالترتيب. عشان ترجع العشوائي والتصاعد (متضايقة/معصّبة) غيّر السطر ده لـ const TEST_ORDER=null */
+const TEST_ORDER=['tea','coffee','read','laptop','study'];
+function nextId(){if(TEST_ORDER){const id=TEST_ORDER[cnt%TEST_ORDER.length];cnt++;return id}const n=Date.now();if(n-lastT>90000)cnt=0;lastT=n;let id=SEQ[Math.min(cnt,SEQ.length-1)];if(cnt>0&&id!=='angry'){const q=Math.random();if(q<.25)id='shy';else if(q<.55)id=['coffee','study','tea','laptop','read'][Math.floor(Math.random()*5)]}cnt++;upd();return id}
 doPlay=function(off,id){
  if(busy||rm.matches||!ready)return;if(!id)id=nextId();busy=true;const r=rnd(Date.now());
  const side=r()<.5?-1:1;
  const u=Math.min(vw,520)/460*.56,hpx=175*u;k=hpx/big;
  const fs=Math.round(Math.min(640,Math.max(360,vw*1.4)));
  fold.style.width=fold.style.height=fs+'px';fold.style.margin=`${-fs/2}px 0 0 ${-fs/2}px`;fold.innerHTML=mkFold(fs,(Math.random()*4294967296)>>>0);FE=[...fold.querySelectorAll('g.f')];FC=fold.querySelector('circle');
- const h0=Math.max(130,off||0),gxS=side*(vw/2+hpx),fyH=-hpx,th0=side*4;
+ const h0=Math.max(130,off||0);MS.h0=h0;const gxS=side*(vw/2+hpx),fyH=-hpx,th0=side*4;
  let cur=null;S=[];CB=[];
  const D0={gx:gxS,gy:.35*h0,th:side*38,rx:-22,ry:side*58,g:0,z:1,fo:0,fx:1,fy2:1,fm:0,pu:0,sk:0,wv:0,hv:1,li:1,cy:off||0};
  function st(tm,p,e){p=p||{};if('pose'in p)p.g=PG[p.pose];cur=Object.assign({},cur||D0,p);cur.t=tm;cur.e=e||EA;S.push(cur);return cur}
@@ -12372,7 +12374,8 @@ function sceneRead(){const g=new THREE.Group(),PY=150,RT=0xe9c995,RT2=0xd9b27a,C
    const px=11+(10-11)*u,py=62.5+(39.4-62.5)*u-PY;bk.position.set(px,py,0);bk.rotation.z=-.3+(-Math.PI/2+.3)*u;   /* الكتاب بينزل من إيدها على المخدة */
    const f=(t%4.6)/.55;pg.rotation.y=(rr<0&&f<1)?-Math.PI*SM(f):0;cu.up(t)}}}
 const SCN={coffee:sceneCoffee,study:sceneStudy,tea:sceneTea,laptop:sceneLaptop,read:sceneRead};
-function setRoot(k){const u=Math.min(1.35,Math.max(.85,vw/380));root.scale.setScalar(u);root.position.set(0,vh/2-FLR,0);root.rotation.set(.32,({study:.2,laptop:.2,read:-.8})[k]||0,0)}
+const FAR=.58,FLB=84;   /* المشهد أصغر وأبعد وأعلى عشان طيات القماش تيجي تحته: FAR = الحجم، FLB = بُعد الأرضية عن أول الشاشة */
+function setRoot(k){const u=Math.min(1.35,Math.max(.85,vw/380))*FAR;MS.u=u;MS.by=vh/2-FLB;root.scale.setScalar(u);root.position.set(0,MS.by,0);root.rotation.set(.32,({study:.2,laptop:.2,read:-.8})[k]||0,0)}
 Object.assign(MS,{
  show(k){const need=(k==='coffee'||k==='tea')?2:1;if(!SCN[k]||POOL.length<need)return;MS.hide();setRoot(k);const sc=SCN[k]();MS.G=sc;root.add(sc.g);MS.hs=POOL.slice(0,need);MS.hs.forEach(h=>{h.holder.visible=true});sc.init(MS.hs);MS.t0=performance.now();MS.rt=-1;MS.dmT=0;MS.l=1;hm.intensity=1.1*ML;dl.intensity=1.6*ML;MS.vis=true},
  take(A,hi){const h=MS.hs[hi||0];if(!h)return;root.updateMatrixWorld(true);const hd=h.holder,wp=new THREE.Vector3(),wq=new THREE.Quaternion(),ws=new THREE.Vector3();
@@ -12381,7 +12384,8 @@ Object.assign(MS,{
  dim(){},react(){if(MS.vis)MS.rt=performance.now()},
  hide(){if(MS.G){root.remove(MS.G.g);MS.hs.forEach(h=>{if(h.holder.parent)h.holder.parent.remove(h.holder)});MS.G=null;MS.hs=[]}MS.vis=false;MS.rt=-1},
  tick(){if(!MS.vis||!MS.G)return;const n=performance.now(),t=(n-MS.t0)/1e3;hm.intensity=1.1*ML;dl.intensity=1.6*ML;MS.G.upd(t,MS.rt>=0?(n-MS.rt)/1e3:-1,MS.hs)}});
-RA=()=>{if(MS.vis&&MS.G){const cyv=Math.max(0,MS.cy);R.autoClear=false;R.setScissorTest(false);R.clear();R.setScissorTest(true);R.setScissor(0,vh-cyv,vw,cyv);R.render(S1,C);R.setScissorTest(false);R.clearDepth();R.render(S0,C);R.autoClear=true}else{R.autoClear=true;R.render(S0,C)}};
+RA=()=>{if(MS.vis&&MS.G){const cyv=Math.max(0,MS.cy);{const H=MS.h0||130,f=Math.min(1,cyv/H);root.position.y=MS.by+(1-f)*H*1.15;root.scale.setScalar(MS.u*(.72+.28*f))}   /* f=1 المشهد في مكانه، وكل ما الشاشة تتسحب لفوق المشهد يطلع لورا ويصغر */
+R.autoClear=false;R.setScissorTest(false);R.clear();R.setScissorTest(true);R.setScissor(0,vh-cyv,vw,cyv);R.render(S1,C);R.setScissorTest(false);R.clearDepth();R.render(S0,C);R.autoClear=true}else{R.autoClear=true;R.render(S0,C)}};
 }catch(e){console.error(e)}
 ready=true;
 }catch(e){console.error(e)}},e=>console.error(e));
