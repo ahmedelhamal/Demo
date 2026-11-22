@@ -8849,6 +8849,7 @@ window.attSwap=function(){var tmp=document.createElement("div");tmp.innerHTML=at
 var GS=null,GSN=0,GSB=0,_att0=att;
 window.cgSel=function(id){if(GSB)return;if(GS!=null)delete CX[GS];GS=(GS==id)?null:id;if(GS!=null){CX[GS]=1;GSN=1}draw()};
 window.cgClose=function(){if(GS==null||GSB)return;GSB=1;var fin=function(){if(GS!=null)delete CX[GS];GS=null;GSB=0;adj=null;cd=null;draw()},e=document.getElementById('cso');if(e){e.classList.remove('in');e.classList.add('out');setTimeout(fin,380)}else fin()};
+window.cgFile=function(id){if(GS!=null)delete CX[GS];GS=null;GSB=0;adj=null;cd=null;APR=false;CHG=false;LGD=false;STS=true;SDT=false;LG2.open="";LG2.anim="";LG2.busy=0;go("set");if(window.dupFile)dupFile(id)};
 window.csBg=function(e){if(e.target&&e.target.id=='cso')cgClose()};
 document.addEventListener('keydown',function(e){if(e.key=='Escape'&&GS!=null)cgClose()});
 att=function(){
@@ -8864,7 +8865,7 @@ att=function(){
   +'<button class="mb'+(r.a===0?' no':'')+'" aria-label="'+t("ab")+'" onclick="setRec('+s.id+',\'a\',0)">✕</button>'
   +'<button class="mb'+(r.p===0&&r.a!==0?' no':'')+'"'+(r.a===0?' disabled style="opacity:.35;pointer-events:none"':'')+' aria-label="'+t("np")+'" onclick="setRec('+s.id+',\'p\',0)">$</button></div></div>'});
  g='<div class="cgrid">'+g+'</div>';
- var sh=sel?'<div class="gmo'+(GSN?' in':'')+'" id="cso" onclick="csBg(event)"><div class="gmd csd"><div class="gmh"><span class="gmsym">'+esc(Array.from(String(sel.name).trim())[0]||'?')+'</span><div class="gmt"><b>'+esc(sel.name)+'</b><small>'+esc(gd(sel.group))+' \u00b7 '+dayName(fdate)+' <bdi>'+fdate+'</bdi></small></div><button class="gmx" type="button" aria-label="Close" onclick="cgClose()">\u2715</button></div><div class="gmb csb">'+cx(sel,fdate.slice(0,7))+'</div></div></div>':'';GSN=0;
+ var sh=sel?'<div class="gmo'+(GSN?' in':'')+'" id="cso" onclick="csBg(event)"><div class="gmd csd"><div class="gmh"><span class="gmsym">'+esc(Array.from(String(sel.name).trim())[0]||'?')+'</span><div class="gmt"><b>'+esc(sel.name)+'</b><small>'+esc(gd(sel.group))+' \u00b7 '+dayName(fdate)+' <bdi>'+fdate+'</bdi></small></div><div class="dnav">'+uArrows(sel)+'</div><button type="button" class="csp" aria-label="'+L2("العرض التفصيلي للطالب","Student details")+'" onclick="cgFile('+sel.id+')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;pointer-events:none"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></button><button class="gmx" type="button" aria-label="Close" onclick="cgClose()">\u2715</button></div><div class="gmb csb">'+cx(sel,fdate.slice(0,7))+'</div></div></div>':'';GSN=0;
  return '<div class="attw">'+head+'<div class="attbox"'+(LA.length?' style="min-height:min('+(LA.length*26+12)+'px,calc(100vh - 176px))"':'')+'><div class="attcol">'+attRail(LA)+'</div><div id="attchip">'+lg+'</div>'+g+'</div>'+sh+'</div>'};
 })();
 </script>
@@ -9094,6 +9095,7 @@ window.calcKey=function(el){var a=el.getAttribute("data-a"),x;
  function addBacks(){
   $$('.gmh .gmx:not(.nbk), button[onclick="cgClose()"]:not(.nbk)').forEach(function(x){
    if(x.getAttribute("data-nbk"))return;
+   if(x.closest&&x.closest(".csd"))return;
    x.setAttribute("data-nbk","1");
    var b=document.createElement("button");b.type="button";
    b.className=(x.className?x.className+" ":"")+"nbk";b.setAttribute("data-nbk","1");
@@ -12226,7 +12228,11 @@ doPlay=function(off,id){
  st(0,{},EA);SC[id].b(c);
  T=S[S.length-1].t;scr.style.transition='';fold.style.display='block';holder.visible=true;run={t0:performance.now()};loop()};
 window.__handPlay=id=>doPlay(130,id);
-function loop(){if(!run)return;requestAnimationFrame(loop);const tm=performance.now()-run.t0;for(const q of CB)if(!q[2]&&tm>=q[0]){q[2]=1;try{q[1]()}catch(e){console.error(e)}}apply(ev(Math.min(tm,T)));try{MS.tick()}catch(e){}if(tm>=T+60)finish();else RA()}
+function loop(){if(!run)return;requestAnimationFrame(loop);try{const tm=performance.now()-run.t0;for(const q of CB)if(!q[2]&&tm>=q[0]){q[2]=1;try{q[1]()}catch(e){console.error(e)}}apply(ev(Math.min(tm,T)));try{MS.tick()}catch(e){}if(tm>=T+60)finish();else RA()}catch(e){console.error(e);hardReset()}}
+/* حماية من التعليق: لو حصل أي خطأ أثناء الأنيميشن أو ما بدأش أصلاً، نفك القفل ونرجّع الشاشة فوراً (قبل كده busy كانت بتفضل true وكل اللمس يتمنع) */
+function hardReset(){run=null;busy=false;try{scr.style.transition='';scr.style.transform='';fold.style.display='none';holder.visible=false;MS.hide();RA()}catch(e){}}
+const _dp0=doPlay;doPlay=function(off,id){try{_dp0(off,id)}catch(e){console.error(e);hardReset()}};
+setInterval(()=>{if(busy&&(!run||performance.now()-run.t0>(T||0)+4000))hardReset()},1000);
 /* ===== مشاهد 3D صغيرة وبعيدة (نفس مجسم اليد بالظبط): بتتكشف تحت الشاشة وقت السحب، وبعدين اليد الكبيرة تطلع وتشد ===== */
 const ML=.42;   /* إضاءة المشهد الصغير: ثابتة من أول فريم (غيّر الرقم ده بس لو عايزها أفتح/أغمق) */
 const MS={vis:false,cy:0,rt:-1,dmT:0,l:1,hs:[],G:null,show(){},dim(){},react(){},hide(){},tick(){}};
@@ -12502,7 +12508,7 @@ function down(y,t){if(busy||!ready||sy()>0||!canPull()||(t.closest&&t.closest('i
 function move(y,e){if(!sd)return;const dy=y-sd.y;if(!sd.on){if(dy<-6){sd=null;return}if(dy<8)return;sd.on=true;scr.style.transition=''}
  sd.dy=Math.max(0,dy);if(e.cancelable)e.preventDefault();scr.style.transform=`translate3d(0,${rub(sd.dy)}px,0)`}
 function up(){if(!sd||!sd.on){sd=null;return}const dy=sd.dy;sd=null;
- if(dy>=TRIG&&ready){doRefresh();doPlay(rub(dy));return}
+ if(dy>=TRIG&&ready){doRefresh();doPlay(rub(dy));if(!busy){scr.style.transition='transform .3s cubic-bezier(.2,.8,.3,1)';scr.style.transform=''}return}
  scr.style.transition='transform .3s cubic-bezier(.2,.8,.3,1)';scr.style.transform=''}
 document.addEventListener('touchstart',e=>{if(e.touches.length===1)down(e.touches[0].clientY,e.target)},{passive:true,capture:true});
 document.addEventListener('touchmove',e=>{if(busy){if(e.cancelable)e.preventDefault();return}move(e.touches[0].clientY,e)},{passive:false,capture:true});
@@ -12544,7 +12550,11 @@ html .hav{top:calc(env(safe-area-inset-top,0px) + 14px)}
 </style>
 <style id="csd-css">
 .csd .csb{padding:16px}
-.csd .cnt{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0}
+.csd .cnt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0}
+.csd .gmh .dnav{flex:none;height:38px;border-radius:13px;border:0;background:color-mix(in srgb,var(--oh) 16%,transparent)}
+.csd .gmh .dnav button{width:36px!important;flex:none!important;height:38px;min-height:38px;color:var(--oh)}
+.csd .gmh .dnav button+button{border-inline-start:1px solid color-mix(in srgb,var(--oh) 25%,transparent)}
+.csd .csp{position:relative;flex:none;width:38px;height:38px;border:0;border-radius:13px;background:color-mix(in srgb,var(--oh) 16%,transparent);color:var(--oh);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .csd .cnt>button{aspect-ratio:1;min-height:0;height:auto;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px 2px;border-radius:20px;border:1px solid var(--bd);background:var(--soft);color:var(--mu);font:inherit;font-size:calc(12px*var(--fs,1));font-weight:600;line-height:1.2;text-align:center}
 .csd .cnt>button b{margin:0;font-size:calc(26px*var(--fs,1));line-height:1;color:var(--tx)}
 .csd .cnt>button:nth-child(1) b{color:var(--gn)}
@@ -12773,7 +12783,7 @@ var _att=window.att;
 if(typeof _att=="function")window.att=function(){var h=_att.apply(this,arguments);return '<div class="ukbar" id="ukbar">'+barIn()+'</div>'+(h||'')};
 /* ===== زرار الدفع في شاشة الطالب: زيادة/نقصان "لم يدفع" بدل تحريك الأيام ===== */
 var _cx=window.cx;
-if(typeof _cx=="function")window.cx=function(s,mon){var h=_cx.apply(this,arguments);if(!h)return h;try{return h.replace(/<div class="dnav">[\s\S]*?<\/div>/,uArrows(s))}catch(e){return h}};
+if(typeof _cx=="function")window.cx=function(s,mon){var h=_cx.apply(this,arguments);if(!h)return h;try{return h.replace(/<div class="dnav">[\s\S]*?<\/div>/,'')}catch(e){return h}};
 /* ===== آخر 3 عمليات بحث في الرئيسية ===== */
 var RK="ssRecent3";
 function rl(){try{var a=JSON.parse(localStorage.getItem(RK)||"[]");return Array.isArray(a)?a:[]}catch(e){return[]}}
@@ -12790,8 +12800,10 @@ if(typeof _sb=="function")window.ssBar=function(){return _sb.apply(this,argument
 var _ss=window.ssShow;
 if(typeof _ss=="function")window.ssShow=function(id){try{add(id);paint()}catch(e){}return _ss.apply(this,arguments)};
 var _sf=window.ssFilter;
-if(typeof _sf=="function")window.ssFilter=function(q){var r=_sf.apply(this,arguments);try{var L=document.getElementById("ssL"),c=chips();
- if(L&&c&&!String(q||"").trim())L.insertAdjacentHTML("afterbegin",'<div class="mu" style="margin-top:10px">'+L2("آخر عمليات البحث","Recent searches")+'</div><div class="ssrec" style="margin:6px 0 0">'+c+'</div>')}catch(e){}return r};
+window.ssRecClear=function(){rs([]);paint();var q=document.getElementById("ssQ");if(window.ssFilter)ssFilter(q?q.value:"")};
+if(typeof _sf=="function")window.ssFilter=function(q){var r=_sf.apply(this,arguments);try{var L=document.getElementById("ssL");
+ if(L&&!String(q||"").trim()){var c=chips();
+  L.innerHTML=c?'<div class="row" style="justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:nowrap"><span class="mu">'+L2("آخر عمليات البحث","Recent searches")+'</span><button type="button" class="ssrd" style="width:auto;padding:0 8px;font-size:calc(13px*var(--fs,1))" onclick="ssRecClear()">'+L2("مسح الكل","Clear all")+'</button></div><div class="ssrec" style="margin:6px 0 0">'+c+'</div>':'<div class="mu" style="margin-top:12px;text-align:center">'+L2("اكتب اسم الطالب للبحث","Type a student name to search")+'</div>'}}catch(e){}return r};
 try{UK.S=S;UK.base=snap()}catch(e){}
 })();
 </script>
